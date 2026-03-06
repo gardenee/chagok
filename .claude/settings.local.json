@@ -11,7 +11,10 @@
       "Bash(npx tailwindcss:*)",
       "Bash(./node_modules/.bin/tailwindcss init:*)",
       "Bash(npx jest:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(npx supabase:*)",
+      "Bash(git:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

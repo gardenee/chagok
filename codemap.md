@@ -17,6 +17,7 @@
 | 서버 상태 | TanStack React Query | |
 | 클라이언트 상태 | Zustand | |
 | 빌드 | EAS Build | |
+| DB 마이그레이션 | Supabase CLI | |
 | 테스트 | Jest + jest-expo + RNTL | |
 
 ---
@@ -44,6 +45,15 @@ chagok/
 ├── __tests__/
 │   └── store/
 │       └── auth.test.ts     # auth store 단위 테스트
+├── types/
+│   └── database.ts          # Supabase DB 타입 전체 (Row/Insert/Update + alias)
+├── supabase/
+│   └── migrations/          # DB 마이그레이션 파일 (Supabase CLI)
+│       ├── 20260306000001_init_tables.sql
+│       ├── 20260306000002_rls.sql
+│       ├── 20260306000003_functions.sql
+│       ├── 20260306000004_indexes.sql
+│       └── 20260306000005_realtime.sql
 ├── docs/
 │   └── plans/               # 기획 문서 (설계서, 세팅 플랜)
 ├── assets/                  # 앱 아이콘, 스플래시
@@ -86,9 +96,16 @@ chagok/
 - `useSegments` + `useRouter`로 인증 분기
 
 ### `lib/supabase.ts`
+- `createClient<Database>` — TypeScript 타입 완전 연결
 - `AsyncStorage` 기반 세션 지속
 - `autoRefreshToken: true`, `detectSessionInUrl: false`
 - 환경변수: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+
+### `types/database.ts`
+- 7개 테이블 × Row/Insert/Update 타입
+- DB 함수 타입: `create_couple`, `join_couple`, `get_my_couple_id`
+- 편의 alias: `Couple`, `UserProfile`, `Category`, `Transaction`, `Comment`, `Schedule`, `FixedExpense`, `Tag`, `TransactionType`
+- `User` 대신 `UserProfile` 사용 (Supabase Auth `User` 타입과 충돌 방지)
 
 ### `store/auth.ts`
 ```typescript
@@ -148,6 +165,20 @@ fixed_expenses id, couple_id(FK), category_id(FK), name, amount,
 
 **Realtime 구독 대상**: `transactions`, `comments`, `schedules`
 
+**고정지출 연동 정책 (MVP)**: `fixed_expenses`는 알림 전용 기록. 실제 지출은 수동으로 `transactions`에 입력.
+
+---
+
+## DB 마이그레이션 (Supabase CLI)
+
+```bash
+npx supabase migration list        # 적용 현황 확인
+npx supabase db push               # 미적용 마이그레이션 원격 적용
+npx supabase migration new <name>  # 새 마이그레이션 파일 생성
+```
+
+마이그레이션 파일 위치: `supabase/migrations/YYYYMMDDHHMMSS_<name>.sql`
+
 ---
 
 ## 알려진 이슈 & 해결책
@@ -169,6 +200,8 @@ npx expo start --ios --clear  # 캐시 초기화 후 실행
 npx jest                      # 테스트 전체 실행
 npx jest --watch              # watch 모드
 eas build --platform ios      # 프로덕션 빌드
+npx supabase db push          # DB 마이그레이션 적용
+npx supabase migration list   # 마이그레이션 상태 확인
 ```
 
 ---
