@@ -33,7 +33,8 @@ create table if not exists categories (
   color text not null default '#6B7C3A',
   budget_amount integer not null default 0,
   sort_order integer not null default 0,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  unique (couple_id, name)
 );
 
 -- ───────────────────────────────
