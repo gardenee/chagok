@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(npm install:*)",
+      "Bash(expo:*)",
+      "Bash(npx create-expo-app@latest:*)",
+      "Bash(mv:*)",
+      "Bash(npx expo:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(./node_modules/.bin/tailwindcss init:*)",
+      "Bash(npx jest:*)",
+      "Bash(git init:*)"
+    ]
+  }
+}
