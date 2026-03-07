@@ -94,7 +94,9 @@
 ### 코드 원칙
 
 - **단순하게**: 과도한 추상화 금지. 지금 필요한 것만 만든다.
-- **NativeWind 우선**: 인라인 스타일 대신 className 사용
+- **NativeWind 우선**: `StyleSheet.create` 금지. 모든 스타일은 `className`으로. 예외적으로 NativeWind가 지원하지 않는 속성(textShadow 등)만 인라인 스타일 허용
+- **폰트**: `StyleSheet`에 `fontFamily` 하드코딩 금지. `tailwind.config.js`에 등록된 `font-ibm-bold` / `font-ibm-semibold` / `font-ibm-regular` 클래스 사용
+- **컬러**: `tailwind.config.js`에 등록된 팔레트(butter, brown, cream, peach, lavender) 외 임의 색상 className 사용 금지
 - **TypeScript 엄격하게**: `any` 금지, 타입 명시
 - **컴포넌트 분리 기준**: 같은 UI가 2곳 이상 쓰일 때만 분리
 - **상태관리**: 서버 상태는 React Query, 클라이언트 전역 상태는 Zustand, 로컬 상태는 useState

@@ -133,16 +133,16 @@ Colors.black     // #1A1A1A
 
 ### `constants/typography.ts`
 ```typescript
-// butter 배경 위 (흰색)
-Typography.display      // font-dodum text-5xl text-white
-Typography.titleWhite   // font-dodum text-3xl text-white
-Typography.captionWhite // text-sm text-white/70
-
-// cream 배경 위 (brown 계열)
-Typography.title   // font-dodum text-3xl text-brown
-Typography.heading // text-lg font-bold text-brown
-Typography.body    // text-base text-brown/80
-Typography.caption // text-sm text-brown/50
+// 폰트: IBMPlexSansKR (font-ibm-bold / font-ibm-semibold / font-ibm-regular)
+Typography.display   // font-ibm-bold text-[80px] text-brown tracking-tight
+Typography.titleLg   // font-ibm-bold text-[48px] text-brown tracking-tight
+Typography.title     // font-ibm-bold text-3xl text-brown
+Typography.subtitle  // font-ibm-semibold text-xl text-brown
+Typography.heading   // font-ibm-semibold text-lg text-brown
+Typography.body      // font-ibm-regular text-base text-brown/80
+Typography.caption   // font-ibm-regular text-[13px] text-brown/50
+Typography.btnLabel  // font-ibm-bold text-[17px] text-brown
+Typography.btnSocial // font-ibm-semibold text-base text-brown
 ```
 
 ---
@@ -158,7 +158,7 @@ Typography.caption // text-sm text-brown/50
 - content: `app/**`, `components/**`
 - presets: `nativewind/preset`
 - 커스텀 colors: butter, brown, cream, peach, lavender
-- 커스텀 fontFamily: dodum (GowunDodum)
+- 커스텀 fontFamily: `font-ibm-bold` / `font-ibm-semibold` / `font-ibm-regular` (IBMPlexSansKR)
 
 ### `metro.config.js`
 - `withNativeWind(config, { input: './global.css' })`

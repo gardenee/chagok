@@ -1,76 +1,33 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { ArrowRight } from "lucide-react-native";
 import { Colors } from "../../constants/colors";
 
-const BOLD = "IBMPlexSansKR-Bold";
-const SEMIBOLD = "IBMPlexSansKR-SemiBold";
-
-export default function IntroScreen() {
+export default function OnboardingScreen() {
 	const router = useRouter();
 
 	return (
-		<View style={s.container}>
-			<View style={s.content}>
-				<Text style={s.badge}>공유 가계부</Text>
-				<Text style={s.title}>차곡</Text>
-				<Text style={s.tagline}>우리 둘이 차곡차곡</Text>
+		<View className="flex-1 bg-butter px-8 justify-center pb-[60px]">
+			<View className="items-start px-[10%]">
+				<Text className="font-ibm-semibold text-[13px] text-white bg-black/30 px-3 py-[5px] rounded-[20px] self-start overflow-hidden">
+					공유 가계부
+				</Text>
+				<Text className="font-ibm-bold text-[80px] text-brown tracking-tight">
+					차곡
+				</Text>
+				<Text className="font-ibm-semibold text-xl text-brown">
+					우리 둘이 차곡차곡
+				</Text>
 
 				<TouchableOpacity
 					onPress={() => router.push("/(auth)/login")}
-					style={s.textButton}
+					className="flex-row items-center gap-1.5 mt-12"
 					activeOpacity={0.6}
 				>
-					<Text style={s.textButtonLabel}>시작하기</Text>
+					<Text className="font-ibm-bold text-[17px] text-brown">시작하기</Text>
 					<ArrowRight size={18} color={Colors.brown} strokeWidth={2.5} />
 				</TouchableOpacity>
 			</View>
 		</View>
 	);
 }
-
-const s = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: Colors.butter,
-		paddingHorizontal: 32,
-		justifyContent: "center",
-		paddingBottom: 60,
-	},
-	content: {
-		alignItems: "flex-start",
-		paddingHorizontal: "10%",
-	},
-	badge: {
-		fontFamily: SEMIBOLD,
-		fontSize: 13,
-		color: Colors.white,
-		backgroundColor: "rgba(0,0,0,0.3)",
-		paddingHorizontal: 12,
-		paddingVertical: 5,
-		borderRadius: 20,
-		alignSelf: "flex-start",
-	},
-	title: {
-		fontFamily: BOLD,
-		fontSize: 80,
-		color: Colors.brown,
-		letterSpacing: -1.5,
-	},
-	tagline: {
-		fontFamily: SEMIBOLD,
-		fontSize: 20,
-		color: Colors.brown,
-	},
-	textButton: {
-		flexDirection: "row",
-		alignItems: "center",
-		gap: 6,
-		marginTop: 48,
-	},
-	textButtonLabel: {
-		fontFamily: BOLD,
-		fontSize: 17,
-		color: Colors.brown,
-	},
-});

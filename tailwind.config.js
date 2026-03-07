@@ -12,7 +12,9 @@ module.exports = {
         lavender: '#D4C5F0',
       },
       fontFamily: {
-        dodum: ['GowunDodum'],
+        'ibm-bold': ['IBMPlexSansKR-Bold'],
+        'ibm-semibold': ['IBMPlexSansKR-SemiBold'],
+        'ibm-regular': ['IBMPlexSansKR-Regular'],
       },
     },
   },
