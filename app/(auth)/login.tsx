@@ -79,7 +79,9 @@ export default function LoginScreen() {
 				) : (
 					<>
 						{icon}
-						<Text className="font-ibm-semibold text-base text-brown">{label}</Text>
+						<Text className="font-ibm-semibold text-base text-brown">
+							{label}
+						</Text>
 					</>
 				)}
 			</TouchableOpacity>
@@ -87,15 +89,12 @@ export default function LoginScreen() {
 	}
 
 	return (
-		<View className="flex-1 bg-butter px-8">
+		<View className="flex-1 bg-cream px-8">
 			<View className="flex-1" />
 
 			<View className="mb-8">
 				<Text className="font-ibm-bold text-[48px] text-brown tracking-tight">
-					로그인
-				</Text>
-				<Text className="font-ibm-regular text-base text-brown mt-[6px]">
-					소셜 계정으로 시작하기
+					시작하기
 				</Text>
 			</View>
 
@@ -103,21 +102,23 @@ export default function LoginScreen() {
 				<SocialButton
 					onPress={handleKakao}
 					isLoading={loading === "kakao"}
-					icon={<MessageCircle size={20} color={Colors.brown} strokeWidth={2.5} />}
-					label="카카오로 계속하기"
+					icon={
+						<MessageCircle size={20} color={Colors.brown} strokeWidth={2.5} />
+					}
+					label="카카오로 시작하기"
 				/>
 				<SocialButton
 					onPress={handleGoogle}
 					isLoading={loading === "google"}
 					icon={<Chrome size={20} color={Colors.brown} strokeWidth={2.5} />}
-					label="구글로 계속하기"
+					label="구글로 시작하기"
 				/>
 				{Platform.OS === "ios" && (
 					<SocialButton
 						onPress={handleApple}
 						isLoading={loading === "apple"}
 						icon={<Apple size={20} color={Colors.brown} strokeWidth={2.5} />}
-						label="Apple로 계속하기"
+						label="Apple로 시작하기"
 					/>
 				)}
 			</View>
