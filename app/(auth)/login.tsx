@@ -71,7 +71,7 @@ export default function LoginScreen() {
 			<TouchableOpacity
 				onPress={onPress}
 				disabled={loading !== null}
-				className="w-full bg-black/[0.08] rounded-[20px] py-[15px] flex-row items-center justify-center gap-2.5"
+				className={`w-full py-[15px] flex-row items-center justify-center gap-2.5 shadow-primary-darker/15 shadow-md rounded-[20px]`}
 				activeOpacity={0.75}
 			>
 				{isLoading ? (
@@ -79,7 +79,7 @@ export default function LoginScreen() {
 				) : (
 					<>
 						{icon}
-						<Text className="font-ibm-semibold text-base text-brown">
+						<Text className="font-ibm-semibold text-base text-brown-dark">
 							{label}
 						</Text>
 					</>
@@ -93,11 +93,8 @@ export default function LoginScreen() {
 			<View className="flex-1" />
 
 			<View className="mb-8">
-				<Text className="font-ibm-bold text-[48px] text-brown tracking-tight">
-					로그인
-				</Text>
-				<Text className="font-ibm-regular text-base text-brown mt-[6px]">
-					소셜 계정으로 시작하기
+				<Text className="font-ibm-bold text-[48px] text-brown-dark tracking-tight">
+					시작하기
 				</Text>
 			</View>
 
@@ -106,22 +103,28 @@ export default function LoginScreen() {
 					onPress={handleKakao}
 					isLoading={loading === "kakao"}
 					icon={
-						<MessageCircle color={Colors.brown} size={20} strokeWidth={2.5} />
+						<MessageCircle
+							size={20}
+							color={Colors.brownDark}
+							strokeWidth={2.5}
+						/>
 					}
-					label="카카오로 계속하기"
+					label="카카오로 시작하기"
 				/>
 				<SocialButton
 					onPress={handleGoogle}
 					isLoading={loading === "google"}
-					icon={<Chrome color={Colors.brown} size={20} strokeWidth={2.5} />}
-					label="구글로 계속하기"
+					icon={<Chrome size={20} color={Colors.brownDark} strokeWidth={2.5} />}
+					label="구글로 시작하기"
 				/>
 				{Platform.OS === "ios" && (
 					<SocialButton
 						onPress={handleApple}
 						isLoading={loading === "apple"}
-						icon={<Apple color={Colors.brown} size={20} strokeWidth={2.5} />}
-						label="Apple로 계속하기"
+						icon={
+							<Apple size={20} color={Colors.brownDark} strokeWidth={2.5} />
+						}
+						label="Apple로 시작하기"
 					/>
 				)}
 			</View>

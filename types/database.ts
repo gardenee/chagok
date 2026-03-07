@@ -8,6 +8,7 @@ export type Json =
 
 export interface Database {
   public: {
+    Views: Record<string, never>;
     Tables: {
       couples: {
         Row: {

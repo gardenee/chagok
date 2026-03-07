@@ -14,7 +14,9 @@
       "Bash(git init:*)",
       "Bash(npx supabase:*)",
       "Bash(git:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm list:*)"
     ]
   }
 }
