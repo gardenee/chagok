@@ -31,13 +31,15 @@ chagok/
 │   ├── index.tsx            # 진입점 (루트 리다이렉트용)
 │   ├── (auth)/
 │   │   ├── _layout.tsx      # 인증 스택 (headerShown: false)
-│   │   └── login.tsx        # 로그인 화면
+│   │   ├── index.tsx        # 인트로 화면 (butter 배경)
+│   │   └── login.tsx        # 로그인 화면 (butter 배경)
 │   └── (tabs)/
 │       ├── _layout.tsx      # 메인 탭 바
 │       └── index.tsx        # 홈 탭
 ├── components/              # 공유 컴포넌트
 ├── constants/
-│   └── colors.ts            # 컬러 팔레트 상수
+│   ├── colors.ts            # 컬러 팔레트 상수
+│   └── typography.ts        # 타이포그래피 토큰 (NativeWind className)
 ├── lib/
 │   └── supabase.ts          # Supabase 클라이언트 인스턴스
 ├── store/
@@ -73,7 +75,8 @@ chagok/
 
 ```
 (auth) 그룹 — 비로그인 상태
-  └── /login           로그인 화면
+  ├── /                인트로 화면 (butter 배경 + cream 버튼)
+  └── /login           로그인 화면 (butter 배경 + cream 소셜 버튼)
 
 (tabs) 그룹 — 로그인 상태
   ├── /               홈 (대시보드)
@@ -119,12 +122,27 @@ interface User {
 
 ### `constants/colors.ts`
 ```typescript
-Colors.butter    // #F5E642
-Colors.olive     // #6B7C3A
-Colors.cream     // #FAFAF5
-Colors.peach     // #FFB5A0
-Colors.lavender  // #C9B8E8
-Colors.gray      // { 100, 200, 400, 600 }
+Colors.butter    // #FAD97A — 메인 배경 (인트로/로그인)
+Colors.brown     // #7B5E3A — 텍스트, 강조
+Colors.cream     // #FEFCF5 — 일반 화면 배경
+Colors.peach     // #F7B8A0 — 보조 포인트
+Colors.lavender  // #D4C5F0 — 보조 포인트
+Colors.white     // #FFFFFF
+Colors.black     // #1A1A1A
+```
+
+### `constants/typography.ts`
+```typescript
+// butter 배경 위 (흰색)
+Typography.display      // font-dodum text-5xl text-white
+Typography.titleWhite   // font-dodum text-3xl text-white
+Typography.captionWhite // text-sm text-white/70
+
+// cream 배경 위 (brown 계열)
+Typography.title   // font-dodum text-3xl text-brown
+Typography.heading // text-lg font-bold text-brown
+Typography.body    // text-base text-brown/80
+Typography.caption // text-sm text-brown/50
 ```
 
 ---
@@ -139,7 +157,8 @@ Colors.gray      // { 100, 200, 400, 600 }
 ### `tailwind.config.js`
 - content: `app/**`, `components/**`
 - presets: `nativewind/preset`
-- 커스텀 colors: butter, olive, cream, peach, lavender
+- 커스텀 colors: butter, brown, cream, peach, lavender
+- 커스텀 fontFamily: dodum (GowunDodum)
 
 ### `metro.config.js`
 - `withNativeWind(config, { input: './global.css' })`

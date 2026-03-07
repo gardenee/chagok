@@ -1,17 +1,17 @@
 import { create } from 'zustand';
-
-interface User {
-  id: string;
-  nickname: string;
-  coupleId: string | null;
-}
+import type { Session } from '@supabase/supabase-js';
+import type { UserProfile } from '../types/database';
 
 interface AuthState {
-  user: User | null;
-  setUser: (user: User | null) => void;
+  session: Session | null;
+  userProfile: UserProfile | null;
+  setSession: (session: Session | null) => void;
+  setUserProfile: (profile: UserProfile | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
+  session: null,
+  userProfile: null,
+  setSession: (session) => set({ session }),
+  setUserProfile: (userProfile) => set({ userProfile }),
 }));

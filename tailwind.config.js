@@ -5,11 +5,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        butter: '#F5E642',
-        olive: '#6B7C3A',
-        cream: '#FAFAF5',
-        peach: '#FFB5A0',
-        lavender: '#C9B8E8',
+        butter: '#FAD97A',
+        brown: '#7B5E3A',
+        cream: '#FEFCF5',
+        peach: '#F7B8A0',
+        lavender: '#D4C5F0',
+      },
+      fontFamily: {
+        dodum: ['GowunDodum'],
       },
     },
   },
