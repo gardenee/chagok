@@ -1,5 +1,6 @@
 import '../global.css';
 import { useEffect, useState } from 'react';
+import { View, Text } from 'react-native';
 import { Slot, useRouter, useSegments, SplashScreen } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -106,9 +107,25 @@ function RootLayoutNav() {
     }
   }, [fontsLoaded, isProfileLoading, session, userProfile, segments]);
 
-  if (!fontsLoaded) return null;
+  const isLoading = !fontsLoaded || isProfileLoading;
 
-  return <Slot />;
+  return (
+    <>
+      <Slot />
+      {isLoading && (
+        <View
+          className="absolute bg-cream-dark items-center justify-center"
+          style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+          {fontsLoaded && (
+            <Text className="text-4xl font-ibm-bold text-brown px-2 py-1">
+              차곡
+            </Text>
+          )}
+        </View>
+      )}
+    </>
+  );
 }
 
 export default function RootLayout() {
