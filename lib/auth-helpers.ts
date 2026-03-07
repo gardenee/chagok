@@ -22,8 +22,18 @@ export async function signInWithOAuth(provider: OAuthProvider): Promise<void> {
 
   if (result.type !== 'success') return;
 
-  // exchangeCodeForSession — PKCE/implicit 양쪽 호환
-  const { error: sessionError } = await supabase.auth.exchangeCodeForSession(result.url);
+  // implicit flow — 해시에서 토큰 파싱
+  const hashPart = result.url.split('#')[1] ?? '';
+  const params = new URLSearchParams(hashPart);
+  const accessToken = params.get('access_token');
+  const refreshToken = params.get('refresh_token');
+
+  if (!accessToken || !refreshToken) throw new Error('토큰을 받지 못했습니다');
+
+  const { error: sessionError } = await supabase.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
   if (sessionError) throw sessionError;
 }
 
