@@ -60,6 +60,7 @@ import {
   useCreateFixedExpense,
   useUpdateFixedExpense,
 } from '../../hooks/use-fixed-expenses';
+import { EmptyState } from '../../components/ui/empty-state';
 import type { Schedule, FixedExpense } from '../../types/database';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -735,16 +736,7 @@ export default function CalendarTab() {
             </View>
           ) : selectedTransactions.length === 0 &&
             selectedFixedExpenses.length === 0 ? (
-            <View className='bg-cream-dark/40 rounded-3xl py-8 items-center gap-2'>
-              <CalendarX
-                size={24}
-                color={Colors.brown + '40'}
-                strokeWidth={2}
-              />
-              <Text className='font-ibm-regular text-sm text-neutral-400'>
-                거래 내역이 없어요
-              </Text>
-            </View>
+            <EmptyState icon={CalendarX} title='거래 내역이 없어요' />
           ) : (
             <View className='gap-2.5'>
               {selectedTransactions.map(t => (
@@ -909,16 +901,7 @@ export default function CalendarTab() {
               <ActivityIndicator color={Colors.lavender} />
             </View>
           ) : selectedSchedules.length === 0 ? (
-            <View className='bg-cream-dark/40 rounded-3xl py-8 items-center gap-2'>
-              <CalendarDays
-                size={24}
-                color={Colors.brown + '40'}
-                strokeWidth={2}
-              />
-              <Text className='font-ibm-regular text-sm text-neutral-400'>
-                등록된 일정이 없어요
-              </Text>
-            </View>
+            <EmptyState icon={CalendarDays} title='등록된 일정이 없어요' />
           ) : (
             <View className='gap-2.5'>
               {selectedSchedules.map(s => (

@@ -33,6 +33,7 @@ import {
   useUpdateAsset,
   useDeleteAsset,
 } from '../../hooks/use-assets';
+import { EmptyState } from '../../components/ui/empty-state';
 import type { Asset } from '../../types/database';
 
 type AssetType = {
@@ -211,15 +212,12 @@ export default function AssetsTab() {
             <ActivityIndicator color={Colors.butter} />
           </View>
         ) : assets.length === 0 ? (
-          <View className='mx-4 mt-5 bg-cream-dark/40 rounded-3xl py-14 items-center'>
-            <Landmark size={32} color={Colors.brownDark} strokeWidth={1.5} />
-            <Text className='font-ibm-semibold text-sm text-brown-darker mt-3 mb-1'>
-              등록된 자산이 없어요
-            </Text>
-            <Text className='font-ibm-regular text-xs text-brown-darker/90'>
-              + 버튼으로 추가해보세요
-            </Text>
-          </View>
+          <EmptyState
+            icon={Landmark}
+            title='등록된 자산이 없어요'
+            description='+ 버튼으로 추가해보세요'
+            containerClassName='mx-4 mt-5'
+          />
         ) : (
           <View className='mx-4 mt-5 gap-5'>
             {grouped.map(group => {

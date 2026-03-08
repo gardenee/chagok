@@ -30,6 +30,7 @@ import {
   useUpdateFixedExpense,
   useDeleteFixedExpense,
 } from '../../hooks/use-fixed-expenses';
+import { EmptyState } from '../../components/ui/empty-state';
 import type { FixedExpense } from '../../types/database';
 
 type FormData = {
@@ -188,15 +189,11 @@ export default function FixedScreen() {
               <ActivityIndicator color={Colors.butter} />
             </View>
           ) : fixedExpenses.length === 0 ? (
-            <View className='bg-cream-dark/40 rounded-3xl py-12 items-center'>
-              <Repeat size={28} color={Colors.brownDark} strokeWidth={2} />
-              <Text className='font-ibm-semibold text-sm text-brown-darker mt-3 mb-1'>
-                등록된 고정지출이 없어요
-              </Text>
-              <Text className='font-ibm-regular text-xs text-brown-darker/90'>
-                월세, 구독, 보험 등을 등록해보세요
-              </Text>
-            </View>
+            <EmptyState
+              icon={Repeat}
+              title='등록된 고정지출이 없어요'
+              description='월세, 구독, 보험 등을 등록해보세요'
+            />
           ) : (
             <View className='gap-2.5'>
               {fixedExpenses.map(item => (
