@@ -247,7 +247,8 @@ export type Category = Database['public']['Tables']['categories']['Row'];
 export type Transaction = Database['public']['Tables']['transactions']['Row'];
 export type Comment = Database['public']['Tables']['comments']['Row'];
 export type Schedule = Database['public']['Tables']['schedules']['Row'];
-export type FixedExpense = Database['public']['Tables']['fixed_expenses']['Row'];
+export type FixedExpense =
+  Database['public']['Tables']['fixed_expenses']['Row'];
 export type Asset = Database['public']['Tables']['assets']['Row'];
 
 export type TransactionType = Transaction['type'];

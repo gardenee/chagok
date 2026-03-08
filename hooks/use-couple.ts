@@ -1,47 +1,47 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-	createCouple,
-	joinCouple,
-	getCoupleInfo,
-	updateBookName,
-} from "../services/couple";
-import { useAuthStore } from "../store/auth";
+  createCouple,
+  joinCouple,
+  getCoupleInfo,
+  updateBookName,
+} from '../services/couple';
+import { useAuthStore } from '../store/auth';
 
 export function useCreateCouple() {
-	return useMutation({
-		mutationFn: (bookName: string) => createCouple(bookName),
-	});
+  return useMutation({
+    mutationFn: (bookName: string) => createCouple(bookName),
+  });
 }
 
 export function useJoinCouple() {
-	return useMutation({
-		mutationFn: (inviteCode: string) => joinCouple(inviteCode),
-	});
+  return useMutation({
+    mutationFn: (inviteCode: string) => joinCouple(inviteCode),
+  });
 }
 
 export function useCouple() {
-	const { userProfile } = useAuthStore();
-	const coupleId = userProfile?.couple_id;
+  const { userProfile } = useAuthStore();
+  const coupleId = userProfile?.couple_id;
 
-	return useQuery({
-		queryKey: ["couple", coupleId],
-		queryFn: () => getCoupleInfo(coupleId!),
-		enabled: !!coupleId,
-	});
+  return useQuery({
+    queryKey: ['couple', coupleId],
+    queryFn: () => getCoupleInfo(coupleId!),
+    enabled: !!coupleId,
+  });
 }
 
 export function useUpdateBookName() {
-	const queryClient = useQueryClient();
-	const { userProfile } = useAuthStore();
-	const coupleId = userProfile?.couple_id;
+  const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
+  const coupleId = userProfile?.couple_id;
 
-	return useMutation({
-		mutationFn: (bookName: string) => {
-			if (!coupleId) throw new Error('커플 연동이 필요합니다');
-			return updateBookName(coupleId, bookName);
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["couple", coupleId] });
-		},
-	});
+  return useMutation({
+    mutationFn: (bookName: string) => {
+      if (!coupleId) throw new Error('커플 연동이 필요합니다');
+      return updateBookName(coupleId, bookName);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['couple', coupleId] });
+    },
+  });
 }

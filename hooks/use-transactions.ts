@@ -30,17 +30,23 @@ export function useMonthTransactions(year: number, month: number) {
     if (!coupleId) return;
     const channel = supabase
       .channel(`transactions-${coupleId}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'transactions',
-        filter: `couple_id=eq.${coupleId}`,
-      }, () => {
-        queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'transactions',
+          filter: `couple_id=eq.${coupleId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['transactions'] });
+        },
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [coupleId, queryClient]);
 
   return useQuery<TransactionRow[]>({
@@ -89,7 +95,10 @@ export function useUpdateTransaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...update }: { id: string } & TransactionInput) => {
+    mutationFn: async ({
+      id,
+      ...update
+    }: { id: string } & TransactionInput) => {
       const { data, error } = await supabase
         .from('transactions')
         .update(update)
@@ -110,7 +119,10 @@ export function useDeleteTransaction() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('transactions').delete().eq('id', id);
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {

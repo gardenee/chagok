@@ -1,7 +1,10 @@
 import { supabase } from '../lib/supabase';
 import type { UserProfile } from '../types/database';
 
-export async function createUserProfile(userId: string, nickname: string): Promise<UserProfile> {
+export async function createUserProfile(
+  userId: string,
+  nickname: string,
+): Promise<UserProfile> {
   const { data, error } = await supabase
     .from('users')
     .insert({ id: userId, nickname })
@@ -21,7 +24,10 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
   return data;
 }
 
-export async function updateNickname(userId: string, nickname: string): Promise<UserProfile> {
+export async function updateNickname(
+  userId: string,
+  nickname: string,
+): Promise<UserProfile> {
   const { data, error } = await supabase
     .from('users')
     .update({ nickname })

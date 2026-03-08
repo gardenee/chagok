@@ -57,7 +57,10 @@ export function useUpdateFixedExpense() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...update }: { id: string } & FixedExpenseInput) => {
+    mutationFn: async ({
+      id,
+      ...update
+    }: { id: string } & FixedExpenseInput) => {
       const { data, error } = await supabase
         .from('fixed_expenses')
         .update(update)
@@ -78,7 +81,10 @@ export function useDeleteFixedExpense() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('fixed_expenses').delete().eq('id', id);
+      const { error } = await supabase
+        .from('fixed_expenses')
+        .delete()
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {

@@ -6,7 +6,9 @@
 		"start": "expo start",
 		"android": "expo run:android",
 		"ios": "expo run:ios",
-		"web": "expo start --web"
+		"web": "expo start --web",
+		"format": "prettier \"**/*.{ts,tsx}\" --write",
+		"format:check": "prettier \"**/*.{ts,tsx}\" --check"
 	},
 	"dependencies": {
 		"@expo-google-fonts/ibm-plex-sans-kr": "^0.4.1",
@@ -43,6 +45,7 @@
 		"@types/react": "~19.2.2",
 		"babel-plugin-module-resolver": "^5.0.2",
 		"babel-preset-expo": "^55.0.10",
+		"prettier": "^3.8.1",
 		"supabase": "^2.76.17",
 		"typescript": "~5.9.2"
 	},

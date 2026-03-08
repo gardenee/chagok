@@ -15,17 +15,25 @@ export function useTransactionComments(transactionId: string) {
     if (!transactionId) return;
     const channel = supabase
       .channel(`comments-${transactionId}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'comments',
-        filter: `transaction_id=eq.${transactionId}`,
-      }, () => {
-        queryClient.invalidateQueries({ queryKey: ['comments', transactionId] });
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comments',
+          filter: `transaction_id=eq.${transactionId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({
+            queryKey: ['comments', transactionId],
+          });
+        },
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [transactionId, queryClient]);
 
   return useQuery<CommentRow[]>({
@@ -48,7 +56,13 @@ export function useCreateComment() {
   const { session } = useAuthStore();
 
   return useMutation({
-    mutationFn: async ({ transactionId, content }: { transactionId: string; content: string }) => {
+    mutationFn: async ({
+      transactionId,
+      content,
+    }: {
+      transactionId: string;
+      content: string;
+    }) => {
       const userId = session?.user.id;
       if (!userId) throw new Error('로그인이 필요합니다');
 
@@ -60,8 +74,10 @@ export function useCreateComment() {
       if (error) throw error;
       return data as CommentRow;
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['comments', data.transaction_id] });
+    onSuccess: data => {
+      queryClient.invalidateQueries({
+        queryKey: ['comments', data.transaction_id],
+      });
     },
   });
 }
@@ -70,7 +86,13 @@ export function useDeleteComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, transactionId }: { id: string; transactionId: string }) => {
+    mutationFn: async ({
+      id,
+      transactionId,
+    }: {
+      id: string;
+      transactionId: string;
+    }) => {
       const { error } = await supabase.from('comments').delete().eq('id', id);
       if (error) throw error;
       return { transactionId };

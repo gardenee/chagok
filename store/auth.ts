@@ -11,11 +11,11 @@ interface AuthState {
   setPendingInviteCode: (code: string | null) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>(set => ({
   session: null,
   userProfile: null,
   pendingInviteCode: null,
-  setSession: (session) => set({ session }),
-  setUserProfile: (userProfile) => set({ userProfile }),
-  setPendingInviteCode: (pendingInviteCode) => set({ pendingInviteCode }),
+  setSession: session => set({ session }),
+  setUserProfile: userProfile => set({ userProfile }),
+  setPendingInviteCode: pendingInviteCode => set({ pendingInviteCode }),
 }));

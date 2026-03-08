@@ -58,7 +58,10 @@ export function useUpdateAsset() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...update }: { id: string } & Partial<AssetInput>) => {
+    mutationFn: async ({
+      id,
+      ...update
+    }: { id: string } & Partial<AssetInput>) => {
       const { data, error } = await supabase
         .from('assets')
         .update(update)

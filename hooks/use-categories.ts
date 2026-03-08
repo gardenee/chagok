@@ -57,7 +57,10 @@ export function useUpdateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...update }: { id: string } & Partial<CategoryInput>) => {
+    mutationFn: async ({
+      id,
+      ...update
+    }: { id: string } & Partial<CategoryInput>) => {
       const { data, error } = await supabase
         .from('categories')
         .update(update)

@@ -1,6 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../store/auth';
-import { createUserProfile, getUserProfile, updateNickname } from '../services/user';
+import {
+  createUserProfile,
+  getUserProfile,
+  updateNickname,
+} from '../services/user';
 
 export function useCreateUserProfile() {
   return useMutation({
@@ -23,7 +27,7 @@ export function useUpdateNickname() {
       if (!userProfile) throw new Error('로그인이 필요합니다');
       return updateNickname(userProfile.id, nickname);
     },
-    onSuccess: (updated) => {
+    onSuccess: updated => {
       setUserProfile(updated);
     },
   });

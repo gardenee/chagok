@@ -1,0 +1,8 @@
+supabase/migrations/**
+
+.expo/**
+dist/**
+web-build/**
+
+ios/**
+android/**

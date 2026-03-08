@@ -23,17 +23,23 @@ export function useMonthSchedules(year: number, month: number) {
     if (!coupleId) return;
     const channel = supabase
       .channel(`schedules-${coupleId}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'schedules',
-        filter: `couple_id=eq.${coupleId}`,
-      }, () => {
-        queryClient.invalidateQueries({ queryKey: ['schedules'] });
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'schedules',
+          filter: `couple_id=eq.${coupleId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['schedules'] });
+        },
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [coupleId, queryClient]);
 
   return useQuery<Schedule[]>({

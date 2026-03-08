@@ -19,6 +19,18 @@ npx expo start
 
 ---
 
+## 코드 포맷팅 (Prettier)
+
+```bash
+# ts/tsx 파일 자동 포맷
+npm run format
+
+# ts/tsx 파일 포맷 적용 여부만 검사 (CI 용도)
+npm run format:check
+```
+
+---
+
 ## Supabase
 
 ```bash
