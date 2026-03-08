@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import type { Couple } from "../types/database";
 
 const INVITE_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ1234567890";
 
@@ -50,4 +51,25 @@ export async function joinCouple(inviteCode: string): Promise<void> {
 		if (msg.includes("이미 두 명")) throw new Error("COUPLE_FULL");
 	}
 	throw error;
+}
+
+export async function getCoupleInfo(coupleId: string): Promise<Couple> {
+	const { data, error } = await supabase
+		.from("couples")
+		.select("*")
+		.eq("id", coupleId)
+		.single();
+	if (error) throw error;
+	return data;
+}
+
+export async function updateBookName(
+	coupleId: string,
+	bookName: string
+): Promise<void> {
+	const { error } = await supabase
+		.from("couples")
+		.update({ book_name: bookName })
+		.eq("id", coupleId);
+	if (error) throw error;
 }
