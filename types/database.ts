@@ -182,6 +182,38 @@ export interface Database {
           due_day?: number;
         };
       };
+      assets: {
+        Row: {
+          id: string;
+          couple_id: string;
+          name: string;
+          amount: number;
+          type: string;
+          icon: string;
+          color: string;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          couple_id: string;
+          name: string;
+          amount: number;
+          type?: string;
+          icon?: string;
+          color?: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          name?: string;
+          amount?: number;
+          type?: string;
+          icon?: string;
+          color?: string;
+          sort_order?: number;
+        };
+      };
     };
     Functions: {
       create_couple: {
@@ -208,6 +240,7 @@ export type Transaction = Database['public']['Tables']['transactions']['Row'];
 export type Comment = Database['public']['Tables']['comments']['Row'];
 export type Schedule = Database['public']['Tables']['schedules']['Row'];
 export type FixedExpense = Database['public']['Tables']['fixed_expenses']['Row'];
+export type Asset = Database['public']['Tables']['assets']['Row'];
 
 export type TransactionType = Transaction['type'];
 export type Tag = Transaction['tag'];

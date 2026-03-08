@@ -30,6 +30,7 @@ import {
   MessageCircle,
   Send,
   CalendarDays,
+  Repeat,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '../../constants/colors';
@@ -54,7 +55,8 @@ import {
   type CommentRow,
 } from '../../hooks/use-comments';
 import { useCoupleMembers } from '../../hooks/use-couple-members';
-import type { Schedule } from '../../types/database';
+import { useFixedExpenses, useCreateFixedExpense, useUpdateFixedExpense } from '../../hooks/use-fixed-expenses';
+import type { Schedule, FixedExpense } from '../../types/database';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -124,6 +126,11 @@ export default function CalendarTab() {
   });
   const [detailTx, setDetailTx] = useState<TransactionRow | null>(null);
   const [commentText, setCommentText] = useState('');
+  const [fixedModal, setFixedModal] = useState<{ visible: boolean; editingId: string | null; form: { name: string; amount: string; due_day: number } }>({
+    visible: false, editingId: null, form: { name: '', amount: '', due_day: 1 },
+  });
+  const [yearMonthModal, setYearMonthModal] = useState(false);
+  const [pickerYear, setPickerYear] = useState(todayDate.getFullYear());
   const commentScrollRef = useRef<ScrollView>(null);
 
   const detailPanResponder = useRef(
@@ -138,6 +145,7 @@ export default function CalendarTab() {
 
   const { data: transactions = [], isLoading: txLoading } = useMonthTransactions(currentYear, currentMonth);
   const { data: schedules = [], isLoading: scheduleLoading } = useMonthSchedules(currentYear, currentMonth);
+  const { data: fixedExpenses = [] } = useFixedExpenses();
   const { data: comments = [], isLoading: commentsLoading } = useTransactionComments(detailTx?.id ?? '');
   const { data: members = [] } = useCoupleMembers();
 
@@ -159,6 +167,9 @@ export default function CalendarTab() {
     { value: 'partner' as const, label: partnerNickname },
     { value: 'together' as const, label: '함께' },
   ];
+
+  const createFixedExpense = useCreateFixedExpense();
+  const updateFixedExpense = useUpdateFixedExpense();
 
   const createTx = useCreateTransaction();
   const updateTx = useUpdateTransaction();
@@ -225,6 +236,8 @@ export default function CalendarTab() {
 
   const selectedTransactions = transactionsByDate[selectedDate] ?? [];
   const selectedSchedules = schedulesByDate[selectedDate] ?? [];
+  const selectedDay = parseInt(selectedDate.split('-')[2], 10);
+  const selectedFixedExpenses = fixedExpenses.filter(fe => fe.due_day === selectedDay);
   const totalExpense = selectedTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
   const totalIncome = selectedTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
 
@@ -255,6 +268,29 @@ export default function CalendarTab() {
         catch { Alert.alert('오류', '삭제 중 문제가 발생했어요'); }
       }},
     ]);
+  }
+
+  function openFixedCreate() {
+    setFixedModal({ visible: true, editingId: null, form: { name: '', amount: '', due_day: selectedDay } });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+  function openFixedEdit(fe: FixedExpense) {
+    setFixedModal({ visible: true, editingId: fe.id, form: { name: fe.name, amount: String(fe.amount), due_day: fe.due_day } });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+  async function handleFixedSave() {
+    const amount = parseInt(fixedModal.form.amount.replace(/[^0-9]/g, ''), 10);
+    if (!fixedModal.form.name.trim()) { Alert.alert('입력 오류', '이름을 입력해주세요'); return; }
+    if (!amount || amount <= 0) { Alert.alert('입력 오류', '금액을 올바르게 입력해주세요'); return; }
+    try {
+      if (fixedModal.editingId) {
+        await updateFixedExpense.mutateAsync({ id: fixedModal.editingId, name: fixedModal.form.name.trim(), amount, due_day: fixedModal.form.due_day });
+      } else {
+        await createFixedExpense.mutateAsync({ name: fixedModal.form.name.trim(), amount, due_day: fixedModal.form.due_day });
+      }
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setFixedModal(s => ({ ...s, visible: false }));
+    } catch { Alert.alert('오류', '저장 중 문제가 발생했어요'); }
   }
 
   function openScheduleCreate() {
@@ -322,7 +358,9 @@ export default function CalendarTab() {
           <TouchableOpacity onPress={prevMonth} className="w-10 h-10 items-center justify-center rounded-2xl bg-butter/70" activeOpacity={0.7}>
             <ChevronLeft size={20} color={Colors.brown} strokeWidth={2.5} />
           </TouchableOpacity>
-          <Text className="font-ibm-bold text-2xl text-brown">{currentYear}년 {currentMonth + 1}월</Text>
+          <TouchableOpacity onPress={() => { setPickerYear(currentYear); setYearMonthModal(true); }} activeOpacity={0.7}>
+            <Text className="font-ibm-bold text-2xl text-brown">{currentYear}년 {currentMonth + 1}월</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={nextMonth} className="w-10 h-10 items-center justify-center rounded-2xl bg-butter/70" activeOpacity={0.7}>
             <ChevronRight size={20} color={Colors.brown} strokeWidth={2.5} />
           </TouchableOpacity>
@@ -345,11 +383,20 @@ export default function CalendarTab() {
               const hasExpense = txDots.some(t => t.type === 'expense');
               const hasIncome = txDots.some(t => t.type === 'income');
               const hasSchedule = (schedulesByDate[item.date] ?? []).length > 0;
+              const hasFixed = fixedExpenses.some(fe => fe.due_day === item.day);
               const col = index % 7;
               return (
                 <TouchableOpacity
                   key={`${item.date}-${index}`}
-                  onPress={() => { if (item.isCurrentMonth) { setSelectedDate(item.date); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } }}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (!item.isCurrentMonth) {
+                      const d = new Date(item.date);
+                      setCurrentYear(d.getFullYear());
+                      setCurrentMonth(d.getMonth());
+                    }
+                    setSelectedDate(item.date);
+                  }}
                   className="w-[14.28%] items-center py-1"
                   activeOpacity={0.7}
                 >
@@ -368,6 +415,7 @@ export default function CalendarTab() {
                     {hasExpense && item.isCurrentMonth && <View className="w-1 h-1 rounded-full bg-peach" />}
                     {hasIncome && item.isCurrentMonth && <View className="w-1 h-1 rounded-full bg-lavender-dark" />}
                     {hasSchedule && item.isCurrentMonth && <View className="w-1 h-1 rounded-full bg-brown/40" />}
+                    {hasFixed && <View className="w-1 h-1 rounded-full bg-butter" style={{ borderWidth: 0.5, borderColor: Colors.brown + '40' }} />}
                   </View>
                 </TouchableOpacity>
               );
@@ -386,6 +434,10 @@ export default function CalendarTab() {
             <View className="flex-row items-center gap-1">
               <View className="w-2 h-2 rounded-full bg-brown/40" />
               <Text className="font-ibm-regular text-[10px] text-brown/50">일정</Text>
+            </View>
+            <View className="flex-row items-center gap-1">
+              <View className="w-2 h-2 rounded-full bg-butter" style={{ borderWidth: 0.5, borderColor: Colors.brown + '40' }} />
+              <Text className="font-ibm-regular text-[10px] text-brown/50">고정</Text>
             </View>
           </View>
         </View>
@@ -406,14 +458,19 @@ export default function CalendarTab() {
         <View className="mx-4 mt-5">
           <View className="flex-row items-center justify-between mb-3">
             <Text className="font-ibm-bold text-base text-brown">{getSelectedDateLabel(selectedDate)} 거래</Text>
-            <TouchableOpacity onPress={openTxCreate} className="w-8 h-8 rounded-full bg-butter items-center justify-center" activeOpacity={0.7} style={{ shadowColor: Colors.butter, shadowOpacity: 0.7, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
-              <Plus size={16} color={Colors.brown} strokeWidth={2.5} />
-            </TouchableOpacity>
+            <View className="flex-row gap-2">
+              <TouchableOpacity onPress={openFixedCreate} className="w-8 h-8 rounded-full bg-butter/60 items-center justify-center" activeOpacity={0.7} style={{ shadowColor: Colors.butter, shadowOpacity: 0.5, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
+                <Repeat size={14} color={Colors.brown} strokeWidth={2.5} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={openTxCreate} className="w-8 h-8 rounded-full bg-butter items-center justify-center" activeOpacity={0.7} style={{ shadowColor: Colors.butter, shadowOpacity: 0.7, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
+                <Plus size={16} color={Colors.brown} strokeWidth={2.5} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {txLoading ? (
             <View className="py-8 items-center"><ActivityIndicator color={Colors.butter} /></View>
-          ) : selectedTransactions.length === 0 ? (
+          ) : selectedTransactions.length === 0 && selectedFixedExpenses.length === 0 ? (
             <View className="bg-cream-dark/40 rounded-3xl py-8 items-center gap-2">
               <CalendarX size={24} color={Colors.brown + '40'} strokeWidth={2} />
               <Text className="font-ibm-regular text-sm text-brown/40">거래 내역이 없어요</Text>
@@ -447,6 +504,28 @@ export default function CalendarTab() {
                           <Trash2 size={13} color={Colors.brown + '50'} strokeWidth={2} />
                         </TouchableOpacity>
                       </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+              {selectedFixedExpenses.map(fe => (
+                <TouchableOpacity key={fe.id} onPress={() => openFixedEdit(fe)} activeOpacity={0.8}>
+                  <View className="bg-butter/20 rounded-3xl px-4 py-4 flex-row items-center gap-3" style={{ shadowColor: Colors.butter, shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}>
+                    <View className="w-10 h-10 rounded-2xl items-center justify-center bg-butter/60">
+                      <Repeat size={18} color={Colors.brown} strokeWidth={2.5} />
+                    </View>
+                    <View className="flex-1">
+                      <View className="flex-row items-center gap-1.5">
+                        <View className="px-2 py-0.5 rounded-full bg-butter">
+                          <Text className="font-ibm-semibold text-[10px] text-brown">고정지출</Text>
+                        </View>
+                        <Text className="font-ibm-regular text-xs text-brown/60">매월 {fe.due_day}일</Text>
+                      </View>
+                      <Text className="font-ibm-semibold text-sm text-brown mt-1">{fe.name}</Text>
+                    </View>
+                    <View className="items-end gap-1.5">
+                      <Text className="font-ibm-bold text-sm text-brown">-{formatAmount(fe.amount)}원</Text>
+                      <Text className="font-ibm-regular text-[10px] text-brown/40">탭하여 수정</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -589,6 +668,120 @@ export default function CalendarTab() {
 
             <TouchableOpacity onPress={handleScheduleSave} disabled={isScheduleSaving} className="bg-lavender rounded-2xl py-4 items-center flex-row justify-center gap-2" activeOpacity={0.8} style={{ shadowColor: Colors.lavender, shadowOpacity: 0.8, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } }}>
               {isScheduleSaving ? <ActivityIndicator color={Colors.brown} /> : <><Check size={18} color={Colors.brown} strokeWidth={2.5} /><Text className="font-ibm-bold text-base text-brown">{scheduleModal.editingId ? '수정 완료' : '저장'}</Text></>}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* ── 년월 선택 모달 ── */}
+      <Modal visible={yearMonthModal} animationType="slide" transparent onRequestClose={() => setYearMonthModal(false)}>
+        <TouchableOpacity className="flex-1" activeOpacity={1} onPress={() => setYearMonthModal(false)} />
+        <View className="bg-cream rounded-t-3xl px-6 pt-5 pb-10" style={{ shadowColor: Colors.brown, shadowOpacity: 0.15, shadowRadius: 20, shadowOffset: { width: 0, height: -4 } }}>
+          <View className="flex-row items-center justify-between mb-6">
+            <Text className="font-ibm-bold text-lg text-brown">날짜 선택</Text>
+            <View className="flex-row items-center gap-3">
+              <TouchableOpacity
+                onPress={() => {
+                  setPickerYear(todayDate.getFullYear());
+                  setCurrentYear(todayDate.getFullYear());
+                  setCurrentMonth(todayDate.getMonth());
+                  setSelectedDate(todayStr);
+                  setYearMonthModal(false);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+                className="px-3 py-1.5 rounded-xl bg-butter"
+                activeOpacity={0.7}
+              >
+                <Text className="font-ibm-semibold text-xs text-brown">오늘</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setYearMonthModal(false)}><X size={22} color={Colors.brown} strokeWidth={2} /></TouchableOpacity>
+            </View>
+          </View>
+
+          {/* 년도 선택 */}
+          <View className="flex-row items-center justify-center gap-6 mb-6">
+            <TouchableOpacity onPress={() => setPickerYear(y => y - 1)} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <ChevronLeft size={22} color={Colors.brown} strokeWidth={2.5} />
+            </TouchableOpacity>
+            <Text className="font-ibm-bold text-2xl text-brown w-24 text-center">{pickerYear}년</Text>
+            <TouchableOpacity onPress={() => setPickerYear(y => y + 1)} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <ChevronRight size={22} color={Colors.brown} strokeWidth={2.5} />
+            </TouchableOpacity>
+          </View>
+
+          {/* 월 선택 그리드 */}
+          <View className="flex-row flex-wrap gap-2">
+            {Array.from({ length: 12 }, (_, i) => i + 1).map(month => {
+              const isSelected = pickerYear === currentYear && month === currentMonth + 1;
+              return (
+                <TouchableOpacity
+                  key={month}
+                  onPress={() => {
+                    setCurrentYear(pickerYear);
+                    setCurrentMonth(month - 1);
+                    setYearMonthModal(false);
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                  className={`rounded-2xl py-3 items-center ${isSelected ? 'bg-butter' : 'bg-white'}`}
+                  style={{ width: '23%', shadowColor: Colors.brown, shadowOpacity: 0.06, shadowRadius: 6, shadowOffset: { width: 0, height: 1 } }}
+                  activeOpacity={0.7}
+                >
+                  <Text className={`font-ibm-semibold text-sm ${isSelected ? 'text-brown' : 'text-brown/50'}`}>{month}월</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── 고정지출 수정 모달 ── */}
+      <Modal visible={fixedModal.visible} animationType="slide" transparent onRequestClose={() => setFixedModal(s => ({ ...s, visible: false }))}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 justify-end">
+          <TouchableOpacity className="flex-1" activeOpacity={1} onPress={() => setFixedModal(s => ({ ...s, visible: false }))} />
+          <View className="bg-cream rounded-t-3xl px-6 pt-5 pb-10" style={{ shadowColor: Colors.brown, shadowOpacity: 0.15, shadowRadius: 20, shadowOffset: { width: 0, height: -4 } }}>
+            <View className="flex-row items-center justify-between mb-6">
+              <Text className="font-ibm-bold text-lg text-brown">{fixedModal.editingId ? '고정지출 수정' : '고정지출 추가'}</Text>
+              <TouchableOpacity onPress={() => setFixedModal(s => ({ ...s, visible: false }))}><X size={22} color={Colors.brown} strokeWidth={2} /></TouchableOpacity>
+            </View>
+
+            <View className="bg-white rounded-2xl px-4 py-3.5 mb-4" style={{ shadowColor: Colors.brown, shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
+              <TextInput
+                className="font-ibm-regular text-sm text-brown"
+                placeholder="고정지출 이름"
+                placeholderTextColor={Colors.brown + '40'}
+                value={fixedModal.form.name}
+                onChangeText={v => setFixedModal(s => ({ ...s, form: { ...s.form, name: v } }))}
+                maxLength={20}
+              />
+            </View>
+
+            <View className="bg-white rounded-2xl px-4 py-3.5 mb-4 flex-row items-center" style={{ shadowColor: Colors.brown, shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
+              <Text className="font-ibm-semibold text-brown text-base mr-2">₩</Text>
+              <TextInput
+                className="flex-1 font-ibm-semibold text-base text-brown"
+                placeholder="금액 입력"
+                placeholderTextColor={Colors.brown + '40'}
+                keyboardType="numeric"
+                value={fixedModal.form.amount}
+                onChangeText={v => setFixedModal(s => ({ ...s, form: { ...s.form, amount: v.replace(/[^0-9]/g, '') } }))}
+              />
+            </View>
+
+            <View className="bg-white rounded-2xl px-4 py-3 mb-6 flex-row items-center justify-between" style={{ shadowColor: Colors.brown, shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } }}>
+              <Text className="font-ibm-regular text-sm text-brown/60">매월 결제일</Text>
+              <View className="flex-row items-center gap-3">
+                <TouchableOpacity onPress={() => setFixedModal(s => ({ ...s, form: { ...s.form, due_day: Math.max(1, s.form.due_day - 1) } }))} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <ChevronLeft size={18} color={Colors.brown} strokeWidth={2} />
+                </TouchableOpacity>
+                <Text className="font-ibm-bold text-base text-brown w-10 text-center">{fixedModal.form.due_day}일</Text>
+                <TouchableOpacity onPress={() => setFixedModal(s => ({ ...s, form: { ...s.form, due_day: Math.min(31, s.form.due_day + 1) } }))} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <ChevronRight size={18} color={Colors.brown} strokeWidth={2} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity onPress={handleFixedSave} disabled={createFixedExpense.isPending || updateFixedExpense.isPending} className="bg-butter rounded-2xl py-4 items-center flex-row justify-center gap-2" activeOpacity={0.8} style={{ shadowColor: Colors.butter, shadowOpacity: 0.8, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } }}>
+              {(createFixedExpense.isPending || updateFixedExpense.isPending) ? <ActivityIndicator color={Colors.brown} /> : <><Check size={18} color={Colors.brown} strokeWidth={2.5} /><Text className="font-ibm-bold text-base text-brown">{fixedModal.editingId ? '수정 완료' : '저장'}</Text></>}
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
