@@ -5,40 +5,11 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Modal,
-  TextInput,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { useState, useMemo } from 'react';
-import {
-  Plus,
-  X,
-  Check,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  ShoppingCart,
-  Utensils,
-  Car,
-  Home,
-  Heart,
-  BookOpen,
-  Coffee,
-  Plane,
-  Shirt,
-  Zap,
-  Gift,
-  Wallet,
-  Dumbbell,
-  Music,
-  Baby,
-  Scissors,
-  PawPrint,
-  Smartphone,
-  type LucideIcon,
-} from 'lucide-react-native';
+import { Plus, ChevronLeft, ChevronRight, Wallet } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '../../constants/colors';
 import {
@@ -49,60 +20,16 @@ import {
 } from '../../hooks/use-categories';
 import { useMonthTransactions } from '../../hooks/use-transactions';
 import type { Category } from '../../types/database';
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  shopping: ShoppingCart,
-  food: Utensils,
-  transport: Car,
-  home: Home,
-  health: Heart,
-  education: BookOpen,
-  cafe: Coffee,
-  travel: Plane,
-  fashion: Shirt,
-  telecom: Zap,
-  gift: Gift,
-  wallet: Wallet,
-  fitness: Dumbbell,
-  music: Music,
-  baby: Baby,
-  beauty: Scissors,
-  pet: PawPrint,
-  digital: Smartphone,
-};
-
-const COLOR_OPTIONS = [
-  '#F7B8A0',
-  '#D4C5F0',
-  '#FAD97A',
-  '#A8D8B0',
-  '#F0C5D5',
-  '#B5D5F0',
-  '#F5D0A0',
-  '#C5E8D5',
-  '#E0B5D5',
-  '#B5C8E8',
-  '#E8D8B0',
-  '#D0E8B5',
-];
+import {
+  CategoryFormScreen,
+  ICON_MAP,
+  CategoryFormData,
+  INITIAL_CATEGORY_FORM,
+} from '../../components/ui/category-form-screen';
 
 function formatAmount(n: number): string {
   return n.toLocaleString('ko-KR');
 }
-
-type FormData = {
-  name: string;
-  icon: string;
-  color: string;
-  budget_amount: string;
-};
-
-const INITIAL_FORM: FormData = {
-  name: '',
-  icon: 'shopping',
-  color: COLOR_OPTIONS[0],
-  budget_amount: '',
-};
 
 function CategoryIcon({
   iconKey,
@@ -132,11 +59,11 @@ export default function BudgetTab() {
   const [modal, setModal] = useState<{
     visible: boolean;
     editingId: string | null;
-    form: FormData;
+    form: CategoryFormData;
   }>({
     visible: false,
     editingId: null,
-    form: INITIAL_FORM,
+    form: INITIAL_CATEGORY_FORM,
   });
 
   // 카테고리별 이번달 지출 합산
@@ -178,7 +105,7 @@ export default function BudgetTab() {
   }
 
   function openCreate() {
-    setModal({ visible: true, editingId: null, form: INITIAL_FORM });
+    setModal({ visible: true, editingId: null, form: INITIAL_CATEGORY_FORM });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   function openEdit(c: Category) {
@@ -432,181 +359,23 @@ export default function BudgetTab() {
         </View>
       </ScrollView>
 
-      {/* ── 카테고리 추가/수정 모달 ── */}
+      {/* ── 카테고리 추가/수정 모달 (풀스크린) ── */}
       <Modal
         visible={modal.visible}
         animationType='slide'
-        transparent
         onRequestClose={() => setModal(s => ({ ...s, visible: false }))}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className='flex-1 justify-end'
-        >
-          <TouchableOpacity
-            className='flex-1'
-            activeOpacity={1}
-            onPress={() => setModal(s => ({ ...s, visible: false }))}
-          />
-          <View
-            className='bg-white rounded-t-3xl px-6 pt-5 pb-10'
-            style={{
-              shadowColor: '#000',
-              shadowOpacity: 0.1,
-              shadowRadius: 20,
-              shadowOffset: { width: 0, height: -4 },
-            }}
-          >
-            <View className='flex-row items-center justify-between mb-5'>
-              <Text className='font-ibm-bold text-lg text-neutral-800'>
-                {modal.editingId ? '카테고리 수정' : '카테고리 추가'}
-              </Text>
-              <View className='flex-row items-center gap-3'>
-                {modal.editingId && (
-                  <TouchableOpacity
-                    onPress={() => handleDelete(modal.editingId!)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Trash2
-                      size={18}
-                      color={Colors.brown + '60'}
-                      strokeWidth={2}
-                    />
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  onPress={() => setModal(s => ({ ...s, visible: false }))}
-                >
-                  <X size={22} color={Colors.brown} strokeWidth={2} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View className='bg-neutral-100 rounded-2xl px-4 py-3.5 mb-4'>
-              <TextInput
-                className='font-ibm-regular text-sm text-neutral-800'
-                placeholder='카테고리 이름 (예: 식비, 교통비)'
-                placeholderTextColor='#A3A3A3'
-                value={modal.form.name}
-                onChangeText={v =>
-                  setModal(s => ({ ...s, form: { ...s.form, name: v } }))
-                }
-                maxLength={10}
-              />
-            </View>
-
-            <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-              아이콘
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              className='mb-4'
-            >
-              <View className='flex-row gap-2 pr-2'>
-                {Object.entries(ICON_MAP).map(([key, Icon]) => {
-                  const isSelected = modal.form.icon === key;
-                  return (
-                    <TouchableOpacity
-                      key={key}
-                      onPress={() =>
-                        setModal(s => ({
-                          ...s,
-                          form: { ...s.form, icon: key },
-                        }))
-                      }
-                      className={`w-12 h-12 rounded-2xl items-center justify-center ${isSelected ? 'bg-butter' : 'bg-neutral-100'}`}
-                      activeOpacity={0.7}
-                    >
-                      <Icon
-                        size={20}
-                        color={isSelected ? Colors.brown : '#A3A3A3'}
-                        strokeWidth={2.5}
-                      />
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </ScrollView>
-
-            <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-              색상
-            </Text>
-            <View className='flex-row flex-wrap gap-2 mb-4'>
-              {COLOR_OPTIONS.map(color => {
-                const isSelected = modal.form.color === color;
-                return (
-                  <TouchableOpacity
-                    key={color}
-                    onPress={() =>
-                      setModal(s => ({ ...s, form: { ...s.form, color } }))
-                    }
-                    className='w-9 h-9 rounded-full items-center justify-center'
-                    style={{
-                      backgroundColor: color,
-                      borderWidth: isSelected ? 2.5 : 0,
-                      borderColor: Colors.brown,
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    {isSelected && (
-                      <Check size={14} color={Colors.brown} strokeWidth={3} />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            <View className='bg-neutral-100 rounded-2xl px-4 py-3.5 mb-5 flex-row items-center'>
-              <Text className='font-ibm-semibold text-neutral-500 text-base mr-2'>
-                ₩
-              </Text>
-              <TextInput
-                className='flex-1 font-ibm-semibold text-base text-neutral-800'
-                placeholder='월 예산 금액'
-                placeholderTextColor='#A3A3A3'
-                keyboardType='numeric'
-                value={modal.form.budget_amount}
-                onChangeText={v =>
-                  setModal(s => ({
-                    ...s,
-                    form: {
-                      ...s.form,
-                      budget_amount: v.replace(/[^0-9]/g, ''),
-                    },
-                  }))
-                }
-              />
-              <Text className='font-ibm-regular text-sm text-neutral-400'>
-                원
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              onPress={handleSave}
-              disabled={isSaving}
-              className='bg-butter rounded-2xl py-4 items-center flex-row justify-center gap-2'
-              activeOpacity={0.8}
-              style={{
-                shadowColor: Colors.butter,
-                shadowOpacity: 0.25,
-                shadowRadius: 6,
-                shadowOffset: { width: 0, height: 3 },
-              }}
-            >
-              {isSaving ? (
-                <ActivityIndicator color={Colors.brown} />
-              ) : (
-                <>
-                  <Check size={18} color={Colors.brown} strokeWidth={2.5} />
-                  <Text className='font-ibm-bold text-base text-brown'>
-                    {modal.editingId ? '수정 완료' : '저장'}
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
+        <CategoryFormScreen
+          editingId={modal.editingId}
+          form={modal.form}
+          isSaving={isSaving}
+          onBack={() => setModal(s => ({ ...s, visible: false }))}
+          onChange={form => setModal(s => ({ ...s, form }))}
+          onSave={handleSave}
+          onDelete={
+            modal.editingId ? () => handleDelete(modal.editingId!) : undefined
+          }
+        />
       </Modal>
     </SafeAreaView>
   );
