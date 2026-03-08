@@ -20,7 +20,6 @@ import {
   User,
   Bell,
   LogOut,
-  Trash2,
   ChevronRight,
   X,
   Check,
@@ -69,7 +68,7 @@ function SettingsRow({
         {label}
       </Text>
       {value ? (
-        <Text className="font-ibm-regular text-sm text-neutral-400 mr-1.5">{value}</Text>
+        <Text className="font-ibm-regular text-sm text-neutral-500 mr-1.5">{value}</Text>
       ) : null}
       {rightElement ?? null}
       {showChevron && onPress && !disabled ? (
@@ -262,20 +261,6 @@ export default function SettingsScreen() {
     ]);
   }
 
-  function handleDeleteAccount() {
-    Alert.alert(
-      '계정 탈퇴',
-      '탈퇴하면 모든 데이터가 삭제되고 복구할 수 없어요.\n정말 탈퇴할까요?',
-      [
-        { text: '취소', style: 'cancel' },
-        {
-          text: '탈퇴',
-          style: 'destructive',
-          onPress: () => Alert.alert('준비 중', '계정 탈퇴 기능은 준비 중이에요'),
-        },
-      ],
-    );
-  }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -336,7 +321,7 @@ export default function SettingsScreen() {
         <View className="mt-3">
           <SettingsCard>
             {[
-              { label: '파트너 지출 알림' },
+              { label: '짝꿍 지출 알림' },
               { label: '댓글 알림' },
               { label: '고정지출 리마인더' },
             ].map((item, i) => (
@@ -352,7 +337,7 @@ export default function SettingsScreen() {
               </View>
             ))}
             <View className="px-4 pb-3">
-              <Text className="font-ibm-regular text-xs text-neutral-300 text-center">
+              <Text className="font-ibm-regular text-xs text-neutral-400 text-center">
                 알림 설정은 준비 중이에요
               </Text>
             </View>
@@ -366,12 +351,6 @@ export default function SettingsScreen() {
               icon={<LogOut size={16} color="#737373" strokeWidth={2} />}
               label="로그아웃"
               onPress={handleLogout}
-            />
-            <Divider />
-            <SettingsRow
-              icon={<Trash2 size={16} color="#737373" strokeWidth={2} />}
-              label="계정 탈퇴"
-              onPress={handleDeleteAccount}
             />
           </SettingsCard>
         </View>
