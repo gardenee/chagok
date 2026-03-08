@@ -322,12 +322,11 @@ export default function SettingsScreen() {
                     : (couple?.invite_code ?? '-')
               }
               onPress={isLinked ? undefined : handleShareInviteCode}
-              disabled={isLinked}
               rightElement={
                 isLinked ? (
-                  <View className='flex-row items-center gap-1 bg-lavender/40 rounded-full px-2.5 py-1'>
-                    <Link size={11} color={Colors.lavender} strokeWidth={2.5} />
-                    <Text className='font-ibm-semibold text-xs text-lavender-dark'>
+                  <View className='flex-row items-center gap-1 bg-butter rounded-full px-2.5 py-1'>
+                    <Link size={11} color={Colors.brown} strokeWidth={2.5} />
+                    <Text className='font-ibm-semibold text-xs text-brown-dark'>
                       연동 완료
                     </Text>
                   </View>
