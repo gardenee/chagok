@@ -158,7 +158,7 @@ function RootLayoutNav() {
 		} else {
 			// 모두 완료 → 메인
 			const inTabs = segments[0] === "(tabs)";
-			if (!inTabs) router.replace("/(tabs)");
+			if (!inTabs) router.replace("/(tabs)/fixed");
 		}
 	}, [fontsLoaded, isProfileLoading, session, userProfile, segments]);
 
