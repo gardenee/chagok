@@ -19,7 +19,10 @@ export function useUpdateNickname() {
   const { userProfile, setUserProfile } = useAuthStore();
 
   return useMutation({
-    mutationFn: (nickname: string) => updateNickname(userProfile!.id, nickname),
+    mutationFn: (nickname: string) => {
+      if (!userProfile) throw new Error('로그인이 필요합니다');
+      return updateNickname(userProfile.id, nickname);
+    },
     onSuccess: (updated) => {
       setUserProfile(updated);
     },
