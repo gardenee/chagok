@@ -52,7 +52,7 @@ export default function JoinCoupleScreen() {
 				<Text className="font-ibm-bold text-[40px] text-neutral-700 tracking-tight leading-[52px]">
 					초대 코드를{"\n"}입력해요
 				</Text>
-				<Text className="font-ibm-regular text-base text-neutral-500 mt-2 pl-1">
+				<Text className="font-ibm-regular text-base text-neutral-500 mt-2">
 					파트너에게 받은 6자리 코드를 입력하세요
 				</Text>
 				<View className="mt-8">
@@ -75,7 +75,7 @@ export default function JoinCoupleScreen() {
 			<View style={{ height: 96 }} className="justify-end pb-10">
 				<FadeInButton visible={isReady}>
 					<ClayButton
-						label="합류하기"
+						label="함께하기"
 						onPress={handleJoin}
 						loading={isPending}
 					/>

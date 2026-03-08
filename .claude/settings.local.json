@@ -29,7 +29,9 @@
       "Bash(git checkout:*)",
       "Bash(npm list:*)",
       "Bash(ls:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(python3:*)"
     ]
   }
 }

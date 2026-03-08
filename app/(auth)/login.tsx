@@ -71,7 +71,7 @@ export default function LoginScreen() {
 			<TouchableOpacity
 				onPress={onPress}
 				disabled={loading !== null}
-				className={`w-full py-[15px] flex-row items-center justify-center gap-2.5 shadow-primary-darker/15 shadow-md rounded-[20px]`}
+				className="w-full py-[15px] flex-row items-center justify-center gap-2.5 shadow-primary-light/10 rounded-[20px] bg-cream-dark"
 				activeOpacity={0.75}
 			>
 				{isLoading ? (
@@ -79,7 +79,7 @@ export default function LoginScreen() {
 				) : (
 					<>
 						{icon}
-						<Text className="font-ibm-semibold text-base text-brown-dark">
+						<Text className="font-ibm-semibold text-base text-brown-darker">
 							{label}
 						</Text>
 					</>
@@ -93,7 +93,7 @@ export default function LoginScreen() {
 			<View className="flex-1" />
 
 			<View className="mb-8">
-				<Text className="font-ibm-bold text-[48px] text-brown-dark tracking-tight">
+				<Text className="font-ibm-bold text-[48px] text-neutral-700 tracking-tight">
 					시작하기
 				</Text>
 			</View>

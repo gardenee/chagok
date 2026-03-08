@@ -39,11 +39,11 @@ export default function NicknameScreen() {
 
 	return (
 		<View className="flex-1 bg-cream px-8">
-			<View className="pt-16">
-				<Text className="font-ibm-bold text-[40px] text-neutral-700 tracking-tight">
+			<View className="pt-32">
+				<Text className="font-ibm-bold text-[40px] text-neutral-700 tracking-tight leading-[52px]">
 					이름을 알려주세요
 				</Text>
-				<Text className="font-ibm-regular text-base text-neutral-500 mt-2 pl-1">
+				<Text className="font-ibm-regular text-base text-neutral-500 mt-2">
 					짝꿍에게 표시되는 이름이에요
 				</Text>
 				<View className="mt-8">
@@ -62,12 +62,13 @@ export default function NicknameScreen() {
 
 			<View className="flex-1" />
 
-			<View style={{ height: 96 }} className="justify-end pb-10">
+			<View className="justify-end pb-10 h-24">
 				<FadeInButton visible={hasInput}>
 					<ClayButton
 						label="다음"
 						onPress={handleComplete}
 						loading={isPending}
+						size="md"
 					/>
 				</FadeInButton>
 			</View>

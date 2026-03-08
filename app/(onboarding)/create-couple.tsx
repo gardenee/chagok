@@ -77,11 +77,11 @@ export default function CreateCoupleScreen() {
 	if (step === "invite") {
 		return (
 			<View className="flex-1 bg-cream px-8">
-				<View className="pt-16 mb-4">
+				<View className="pt-32 mb-4">
 					<Text className="font-ibm-bold text-[40px] text-neutral-700 tracking-tight leading-[52px]">
 						초대코드를{"\n"}짝꿍에게 보내요
 					</Text>
-					<Text className="font-ibm-regular text-base text-neutral-500 mt-2 pl-1">
+					<Text className="font-ibm-regular text-base text-neutral-500 mt-2">
 						짝꿍이 코드를 입력하면 연동 완료!
 					</Text>
 				</View>
@@ -99,27 +99,43 @@ export default function CreateCoupleScreen() {
 
 				<View className="pb-12 gap-3">
 					<View className="flex-row items-center gap-3">
-						<ClayButton
-							label="공유하기"
-							onPress={handleShare}
-							icon={
-								<Share2 size={20} color={Colors.brownDark} strokeWidth={2.5} />
-							}
-							size="md"
-						/>
-						<ClayButton
-							label={copied ? "복사됨!" : "코드 복사"}
-							onPress={handleCopy}
-							variant="secondary"
-							icon={
-								copied ? (
-									<Check size={20} color={Colors.brownDark} strokeWidth={2.5} />
-								) : (
-									<Copy size={20} color={Colors.brownDark} strokeWidth={2.5} />
-								)
-							}
-							size="md"
-						/>
+						<View className="flex-1">
+							<ClayButton
+								label="공유하기"
+								onPress={handleShare}
+								icon={
+									<Share2
+										size={20}
+										color={Colors.brownDark}
+										strokeWidth={2.5}
+									/>
+								}
+								size="md"
+							/>
+						</View>
+						<View className="flex-1">
+							<ClayButton
+								label={copied ? "복사됨!" : "코드 복사"}
+								onPress={handleCopy}
+								variant="secondary"
+								icon={
+									copied ? (
+										<Check
+											size={20}
+											color={Colors.brownDark}
+											strokeWidth={2.5}
+										/>
+									) : (
+										<Copy
+											size={20}
+											color={Colors.brownDark}
+											strokeWidth={2.5}
+										/>
+									)
+								}
+								size="md"
+							/>
+						</View>
 					</View>
 					<ClayButton
 						label="나중에 연동할게요"
@@ -139,7 +155,7 @@ export default function CreateCoupleScreen() {
 				<Text className="font-ibm-bold text-[40px] text-neutral-700 tracking-tight leading-[52px]">
 					가계부 이름을{"\n"}뭐라고 부를까요?
 				</Text>
-				<Text className="font-ibm-regular text-base text-neutral-500 mt-2 pl-1">
+				<Text className="font-ibm-regular text-base text-neutral-500 mt-2">
 					나중에 바꿀 수 있어요
 				</Text>
 				<View className="mt-8">

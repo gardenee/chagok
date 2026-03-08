@@ -49,14 +49,14 @@ export function ClayButton({
 			className="flex-row items-center gap-2.5"
 			style={{
 				borderBottomWidth: 1.5,
-				borderBottomColor: Colors.brown,
+				borderBottomColor: Colors.brownDark,
 				paddingBottom: 3,
 				paddingHorizontal: 6,
 			}}
 		>
 			{icon}
 			<Text
-				className={`font-ibm-regular ${textSizeStyles[size]} text-brown-dark`}
+				className={`font-ibm-semibold ${textSizeStyles[size]} text-brown-darker`}
 			>
 				{label}
 			</Text>
@@ -65,7 +65,7 @@ export function ClayButton({
 		<View className="flex-row items-center gap-2.5">
 			{icon}
 			<Text
-				className={`font-ibm-regular ${textSizeStyles[size]} text-brown-dark`}
+				className={`font-ibm-semibold ${textSizeStyles[size]} text-brown-darker`}
 			>
 				{label}
 			</Text>
@@ -76,7 +76,7 @@ export function ClayButton({
 		<TouchableOpacity
 			onPress={onPress}
 			disabled={disabled || loading}
-			className={`flex-1 ${variantStyles[variant]} rounded-[20px] py-4 flex-row items-center justify-center gap-2.5`}
+			className={`w-full ${variantStyles[variant]} rounded-[20px] py-4 flex-row items-center justify-center gap-2.5`}
 			activeOpacity={0.85}
 			style={
 				isGhost
@@ -92,15 +92,11 @@ export function ClayButton({
 						]
 			}
 		>
-			<View className="relative flex-row items-center justify-center">
-				<View style={{ opacity: loading ? 0 : 1 }}>{innerContent}</View>
-				{loading && (
-					<ActivityIndicator
-						color={Colors.brown}
-						style={{ position: "absolute" }}
-					/>
-				)}
-			</View>
+			{loading ? (
+				<ActivityIndicator color={Colors.brown} size="small" />
+			) : (
+				innerContent
+			)}
 		</TouchableOpacity>
 	);
 }

@@ -18,10 +18,10 @@ export function TopBar({ title, onBack }: TopBarProps) {
 				className="-ml-1 w-10 h-10 items-center justify-center"
 				hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
 			>
-				<ChevronLeft size={28} color={Colors.brown} strokeWidth={2.5} />
+				<ChevronLeft size={28} color={Colors.brownDarker} strokeWidth={2.5} />
 			</TouchableOpacity>
 			{title ? (
-				<Text className="font-ibm-semibold text-base text-brown ml-2">
+				<Text className="font-ibm-semibold text-base text-brown-darker ml-2">
 					{title}
 				</Text>
 			) : null}

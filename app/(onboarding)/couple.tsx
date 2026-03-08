@@ -11,11 +11,11 @@ export default function CoupleScreen() {
 
 	return (
 		<View className="flex-1 bg-cream px-8">
-			<View className="pt-16 mb-4">
+			<View className="pt-32 mb-4">
 				<Text className="font-ibm-bold text-[40px] text-neutral-700 tracking-tight leading-[52px]">
 					{nickname}님,{"\n"}둘이서 함께해요
 				</Text>
-				<Text className="font-ibm-regular text-base text-brown/60 mt-2">
+				<Text className="font-ibm-regular text-base text-neutral-500 mt-2">
 					하루하루 차곡차곡
 				</Text>
 			</View>
@@ -26,13 +26,13 @@ export default function CoupleScreen() {
 				<ClayButton
 					label="우리의 가계부 만들기"
 					onPress={() => router.push("/(onboarding)/create-couple")}
-					icon={<Plus size={22} color={Colors.brown} strokeWidth={2.5} />}
+					icon={<Plus size={22} color={Colors.brownDarker} strokeWidth={2.5} />}
 				/>
 				<ClayButton
 					label="초대코드로 함께하기"
 					onPress={() => router.push("/(onboarding)/join-couple")}
 					variant="ghost"
-					icon={<Key size={22} color={Colors.brown} strokeWidth={2.5} />}
+					icon={<Key size={22} color={Colors.brownDarker} strokeWidth={2.5} />}
 				/>
 			</View>
 		</View>

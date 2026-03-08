@@ -141,7 +141,10 @@ function RootLayoutNav() {
 		const inNicknameScreen =
 			segments[0] === "(onboarding)" && segments[1] === "nickname";
 		const inCoupleScreen =
-			segments[0] === "(onboarding)" && segments[1] === "couple";
+			segments[0] === "(onboarding)" &&
+			(segments[1] === "couple" ||
+				segments[1] === "join-couple" ||
+				segments[1] === "create-couple");
 
 		if (!session) {
 			// 미로그인 → 인증 화면
