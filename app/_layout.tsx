@@ -1,5 +1,5 @@
 import "../global.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Text } from "react-native";
 import { Slot, useRouter, useSegments, SplashScreen } from "expo-router";
 import * as Linking from "expo-linking";
@@ -12,6 +12,7 @@ import {
 } from "@expo-google-fonts/ibm-plex-sans-kr";
 import { useAuthStore } from "../store/auth";
 import { supabase } from "../lib/supabase";
+import type { Session } from "@supabase/supabase-js";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +21,18 @@ const queryClient = new QueryClient({
 		queries: { staleTime: 1000 * 60 * 5, retry: 1 },
 	},
 });
+
+async function fetchProfile(userId: string) {
+	const { data, error } = await supabase
+		.from("users")
+		.select("*")
+		.eq("id", userId)
+		.single();
+	if (error && error.code !== "PGRST116") {
+		console.warn("userProfile 조회 실패:", error.message);
+	}
+	return data ?? null;
+}
 
 function RootLayoutNav() {
 	const [fontsLoaded] = useFonts({
@@ -36,8 +49,9 @@ function RootLayoutNav() {
 	} = useAuthStore();
 	const segments = useSegments() as string[];
 	const router = useRouter();
-	// 세션 복원 + 프로필 조회 완료 전까지 라우팅 보류 (깜빡임 방지)
 	const [isProfileLoading, setIsProfileLoading] = useState(true);
+	// 안전망 타이머 ref (여러 effect에서 공유)
+	const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
 		if (fontsLoaded) SplashScreen.hideAsync();
@@ -66,45 +80,55 @@ function RootLayoutNav() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	// Supabase 세션 구독
+	// Supabase 세션 구독 — 동기 핸들러로 race condition 방지
 	useEffect(() => {
-		async function fetchProfile(userId: string) {
-			const { data, error } = await supabase
-				.from("users")
-				.select("*")
-				.eq("id", userId)
-				.single();
-			if (error && error.code !== "PGRST116") {
-				console.warn("userProfile 조회 실패:", error.message);
-			}
-			return data ?? null;
-		}
-
-		// 안전망: 최대 8초 후 강제로 로딩 해제 (네트워크 행 방지)
-		const safetyTimer = setTimeout(() => setIsProfileLoading(false), 8000);
+		// 안전망: 10초 안에 INITIAL_SESSION이 처리 안 되면 강제 해제
+		safetyTimerRef.current = setTimeout(() => {
+			setIsProfileLoading(false);
+		}, 10000);
 
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange(async (event, newSession) => {
+		} = supabase.auth.onAuthStateChange((event, newSession) => {
+			// 동기적으로 session만 업데이트 (race condition 방지)
 			setSession(newSession);
-			if (newSession) {
-				setUserProfile(await fetchProfile(newSession.user.id));
-			} else {
+
+			if (!newSession) {
 				setUserProfile(null);
+				if (event === "INITIAL_SESSION") {
+					if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
+					setIsProfileLoading(false);
+				}
 			}
-			// INITIAL_SESSION: 앱 시작 시 세션 복원 완료 신호
-			if (event === "INITIAL_SESSION") {
-				clearTimeout(safetyTimer);
-				setIsProfileLoading(false);
-			}
+			// newSession이 있을 때 profile 로딩은 별도 effect에서 처리
 		});
 
 		return () => {
 			subscription.unsubscribe();
-			clearTimeout(safetyTimer);
+			if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	// 세션이 생길 때 프로필 조회 (세션 구독과 분리하여 비동기 처리)
+	useEffect(() => {
+		if (!session) return;
+
+		let cancelled = false;
+
+		fetchProfile(session.user.id).then((profile) => {
+			if (cancelled) return;
+			setUserProfile(profile);
+			// 프로필 조회 완료 후 로딩 해제 (returning user 깜빡임 방지)
+			if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
+			setIsProfileLoading(false);
+		});
+
+		return () => {
+			cancelled = true;
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [session?.user.id]);
 
 	// 3-way 라우팅 분기
 	useEffect(() => {
@@ -142,7 +166,7 @@ function RootLayoutNav() {
 			<Slot />
 			{isLoading && (
 				<View
-					className="absolute bg-cream-dark items-center justify-center"
+					className="absolute bg-cream items-center justify-center"
 					style={{ top: 0, left: 0, right: 0, bottom: 0 }}
 				>
 					{fontsLoaded && (

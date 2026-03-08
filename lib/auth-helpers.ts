@@ -32,15 +32,22 @@ export async function signInWithOAuth(provider: OAuthProvider): Promise<void> {
 
 	const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
 
+	console.log("[Auth] openAuthSessionAsync result.type:", result.type);
+
 	if (result.type !== "success") return;
+
+	console.log("[Auth] result.url:", result.url);
 
 	// PKCE flow — query param에서 code 추출 후 세션 교환
 	const url = new URL(result.url);
 	const code = url.searchParams.get("code");
 
+	console.log("[Auth] code found:", !!code);
+
 	if (!code) throw new Error("인증 코드를 받지 못했습니다");
 
 	const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+	console.log("[Auth] exchangeCodeForSession error:", sessionError?.message ?? "none");
 	if (sessionError) throw sessionError;
 }
 
