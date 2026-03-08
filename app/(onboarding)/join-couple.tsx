@@ -4,6 +4,7 @@ import { useAuthStore } from "../../store/auth";
 import { ClayButton } from "../../components/ui/clay-button";
 import { ClayInput } from "../../components/ui/clay-input";
 import { FadeInButton } from "../../components/ui/fade-in-button";
+import { TopBar } from "../../components/ui/top-bar";
 import { useJoinCouple } from "../../hooks/use-couple";
 import { useGetUserProfile } from "../../hooks/use-user";
 
@@ -46,7 +47,8 @@ export default function JoinCoupleScreen() {
 
 	return (
 		<View className="flex-1 bg-cream px-8">
-			<View className="pt-16">
+			<TopBar />
+			<View className="pt-6">
 				<Text className="font-ibm-bold text-[40px] text-neutral-700 tracking-tight leading-[52px]">
 					초대 코드를{"\n"}입력해요
 				</Text>

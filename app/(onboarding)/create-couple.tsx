@@ -1,9 +1,10 @@
 import { View, Text, Alert, Share } from "react-native";
 import { useState } from "react";
-import * as Clipboard from "expo-clipboard";
 import { Check, Copy, Share2 } from "lucide-react-native";
+import * as Clipboard from "expo-clipboard";
 import { useAuthStore } from "../../store/auth";
 import { Colors } from "../../constants/colors";
+import { TopBar } from "../../components/ui/top-bar";
 import { Shadows } from "../../constants/shadows";
 import { ClayButton } from "../../components/ui/clay-button";
 import { ClayInput } from "../../components/ui/clay-input";
@@ -133,7 +134,8 @@ export default function CreateCoupleScreen() {
 
 	return (
 		<View className="flex-1 bg-cream px-8">
-			<View className="pt-16">
+			<TopBar />
+			<View className="pt-6">
 				<Text className="font-ibm-bold text-[40px] text-neutral-700 tracking-tight leading-[52px]">
 					가계부 이름을{"\n"}뭐라고 부를까요?
 				</Text>
