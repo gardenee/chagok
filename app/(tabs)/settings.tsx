@@ -14,7 +14,7 @@ import {
   ActivityIndicator,
   Share,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   BookOpen,
   Hash,
@@ -104,6 +104,10 @@ function EditModal({
   visible, title, value, placeholder, onClose, onSave, isSaving, maxLength = 20,
 }: EditModalProps) {
   const [text, setText] = useState(value);
+
+  useEffect(() => {
+    if (visible) setText(value);
+  }, [visible]);
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -223,9 +227,13 @@ export default function SettingsScreen() {
   async function handleShareInviteCode() {
     if (!couple?.invite_code) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await Share.share({
-      message: `차곡 초대코드: ${couple.invite_code}\n앱에서 입력해서 함께 시작해요!`,
-    });
+    try {
+      await Share.share({
+        message: `차곡 초대코드: ${couple.invite_code}\n앱에서 입력해서 함께 시작해요!`,
+      });
+    } catch {
+      Alert.alert('오류', '공유하기 중 문제가 발생했어요');
+    }
   }
 
   function handleLogout() {
