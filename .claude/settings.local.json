@@ -14,7 +14,18 @@
       "Bash(git init:*)",
       "Bash(npx supabase:*)",
       "Bash(git:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(echo $PATH)",
+      "Read(//usr/local/lib/**)",
+      "Bash(node_modules/.bin/expo install:*)",
+      "Bash(ngrok version)",
+      "Bash(pkill -f \"expo start\")",
+      "Bash(curl -s http://localhost:4040/api/tunnels)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(t[''public_url'']\\) for t in d.get\\(''tunnels'',[]\\)]\")",
+      "Bash(xcrun simctl:*)",
+      "Bash(supabase db:*)",
+      "Bash(git add:*)",
+      "Bash(ls /Users/east/Desktop/Dev/chagok/*.md)"
     ]
   }
 }

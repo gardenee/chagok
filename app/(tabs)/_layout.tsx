@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, CalendarDays } from 'lucide-react-native';
+import { Home, CalendarDays, Repeat } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
 
 export default function TabLayout() {
@@ -39,6 +39,15 @@ export default function TabLayout() {
           title: '캘린더',
           tabBarIcon: ({ color, size }) => (
             <CalendarDays size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="fixed"
+        options={{
+          title: '고정지출',
+          tabBarIcon: ({ color, size }) => (
+            <Repeat size={size} color={color} strokeWidth={2} />
           ),
         }}
       />
