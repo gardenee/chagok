@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
-import type { FixedExpense } from '../types/database';
 import { useAuthStore } from '../store/auth';
+import {
+  fetchFixedExpenses,
+  createFixedExpense,
+  updateFixedExpense,
+  deleteFixedExpense,
+  type FixedExpenseInput,
+} from '../services/fixed-expenses';
+import type { FixedExpense } from '../types/database';
 
-type FixedExpenseInput = {
-  name: string;
-  amount: number;
-  due_day: number;
-  category_id?: string | null;
-};
+export type { FixedExpenseInput };
 
 export function useFixedExpenses() {
   const { userProfile } = useAuthStore();
@@ -16,16 +17,7 @@ export function useFixedExpenses() {
 
   return useQuery<FixedExpense[]>({
     queryKey: ['fixed-expenses', coupleId],
-    queryFn: async () => {
-      if (!coupleId) return [];
-      const { data, error } = await supabase
-        .from('fixed_expenses')
-        .select('*')
-        .eq('couple_id', coupleId)
-        .order('due_day', { ascending: true });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => fetchFixedExpenses(coupleId!),
     enabled: !!coupleId,
   });
 }
@@ -35,60 +27,59 @@ export function useCreateFixedExpense() {
   const { userProfile } = useAuthStore();
 
   return useMutation({
-    mutationFn: async (input: FixedExpenseInput) => {
+    mutationFn: (input: FixedExpenseInput) => {
       const coupleId = userProfile?.couple_id;
       if (!coupleId) throw new Error('로그인이 필요합니다');
-
-      const { data, error } = await supabase
-        .from('fixed_expenses')
-        .insert({ ...input, couple_id: coupleId })
-        .select()
-        .single();
-      if (error) throw error;
-      return data as FixedExpense;
+      return createFixedExpense(coupleId, input);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['fixed-expenses'] });
+    onSuccess: newItem => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      queryClient.setQueryData<FixedExpense[]>(
+        ['fixed-expenses', coupleId],
+        old => [...(old ?? []), newItem].sort((a, b) => a.due_day - b.due_day),
+      );
     },
   });
 }
 
 export function useUpdateFixedExpense() {
   const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
 
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       id,
-      ...update
-    }: { id: string } & FixedExpenseInput) => {
-      const { data, error } = await supabase
-        .from('fixed_expenses')
-        .update(update)
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data as FixedExpense;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['fixed-expenses'] });
+      ...input
+    }: Partial<FixedExpenseInput> & { id: string }) =>
+      updateFixedExpense(id, input),
+    onSuccess: updatedItem => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      queryClient.setQueryData<FixedExpense[]>(
+        ['fixed-expenses', coupleId],
+        old =>
+          (old ?? [])
+            .map(item => (item.id === updatedItem.id ? updatedItem : item))
+            .sort((a, b) => a.due_day - b.due_day),
+      );
     },
   });
 }
 
 export function useDeleteFixedExpense() {
   const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('fixed_expenses')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['fixed-expenses'] });
+    mutationFn: (id: string) => deleteFixedExpense(id),
+    onSuccess: (_, id) => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      queryClient.setQueryData<FixedExpense[]>(
+        ['fixed-expenses', coupleId],
+        old => (old ?? []).filter(item => item.id !== id),
+      );
     },
   });
 }

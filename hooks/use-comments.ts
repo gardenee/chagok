@@ -1,12 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import type { Comment } from '../types/database';
 import { useAuthStore } from '../store/auth';
+import {
+  fetchTransactionComments,
+  createComment,
+  deleteComment,
+  type CommentRow,
+} from '../services/comments';
 
-export type CommentRow = Comment & {
-  users: { nickname: string } | null;
-};
+export type { CommentRow };
 
 export function useTransactionComments(transactionId: string) {
   const queryClient = useQueryClient();
@@ -30,7 +33,6 @@ export function useTransactionComments(transactionId: string) {
         },
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
@@ -38,15 +40,7 @@ export function useTransactionComments(transactionId: string) {
 
   return useQuery<CommentRow[]>({
     queryKey: ['comments', transactionId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('comments')
-        .select('*, users(nickname)')
-        .eq('transaction_id', transactionId)
-        .order('created_at', { ascending: true });
-      if (error) throw error;
-      return data as CommentRow[];
-    },
+    queryFn: () => fetchTransactionComments(transactionId),
     enabled: !!transactionId,
   });
 }
@@ -56,7 +50,7 @@ export function useCreateComment() {
   const { session } = useAuthStore();
 
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       transactionId,
       content,
     }: {
@@ -65,19 +59,13 @@ export function useCreateComment() {
     }) => {
       const userId = session?.user.id;
       if (!userId) throw new Error('로그인이 필요합니다');
-
-      const { data, error } = await supabase
-        .from('comments')
-        .insert({ transaction_id: transactionId, user_id: userId, content })
-        .select('*, users(nickname)')
-        .single();
-      if (error) throw error;
-      return data as CommentRow;
+      return createComment(userId, transactionId, content);
     },
-    onSuccess: data => {
-      queryClient.invalidateQueries({
-        queryKey: ['comments', data.transaction_id],
-      });
+    onSuccess: newComment => {
+      queryClient.setQueryData<CommentRow[]>(
+        ['comments', newComment.transaction_id],
+        old => [...(old ?? []), newComment],
+      );
     },
   });
 }
@@ -86,19 +74,17 @@ export function useDeleteComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       id,
       transactionId,
     }: {
       id: string;
       transactionId: string;
-    }) => {
-      const { error } = await supabase.from('comments').delete().eq('id', id);
-      if (error) throw error;
-      return { transactionId };
-    },
-    onSuccess: ({ transactionId }) => {
-      queryClient.invalidateQueries({ queryKey: ['comments', transactionId] });
+    }) => deleteComment(id).then(() => ({ transactionId })),
+    onSuccess: ({ transactionId }, { id }) => {
+      queryClient.setQueryData<CommentRow[]>(['comments', transactionId], old =>
+        (old ?? []).filter(c => c.id !== id),
+      );
     },
   });
 }
