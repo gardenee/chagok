@@ -13,6 +13,7 @@ import {
 import { useAuthStore } from '../store/auth';
 import { supabase } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
+import { registerMyPushToken } from '../services/notifications';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -129,6 +130,14 @@ function RootLayoutNav() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id]);
+
+  useEffect(() => {
+    if (!userProfile?.id) return;
+
+    registerMyPushToken(userProfile.id).catch(error => {
+      console.warn('푸시 토큰 등록 실패:', error);
+    });
+  }, [userProfile?.id]);
 
   // 3-way 라우팅 분기
   useEffect(() => {

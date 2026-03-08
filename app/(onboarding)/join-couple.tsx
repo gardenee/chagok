@@ -7,6 +7,7 @@ import { FadeInButton } from '../../components/ui/fade-in-button';
 import { TopBar } from '../../components/ui/top-bar';
 import { useJoinCouple } from '../../hooks/use-couple';
 import { useGetUserProfile } from '../../hooks/use-user';
+import { sendPartnerJoinedPush } from '../../services/notifications';
 
 export default function JoinCoupleScreen() {
   const [code, setCode] = useState('');
@@ -36,6 +37,16 @@ export default function JoinCoupleScreen() {
       const profile = await getUserProfile(session!.user.id);
       setPendingInviteCode(null);
       setUserProfile(profile);
+
+      if (profile.couple_id) {
+        sendPartnerJoinedPush({
+          coupleId: profile.couple_id,
+          joinerId: profile.id,
+          joinerNickname: profile.nickname,
+        }).catch(error => {
+          console.warn('연동 완료 푸시 전송 실패:', error);
+        });
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : '';
       if (msg === 'INVALID_CODE') {
