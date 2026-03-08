@@ -14,7 +14,7 @@ export interface Database {
         Row: {
           id: string;
           book_name: string;
-          invite_code: string;
+          invite_code: string | null;
           created_at: string;
         };
         Insert: {

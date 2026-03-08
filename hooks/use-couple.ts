@@ -36,7 +36,10 @@ export function useUpdateBookName() {
 	const coupleId = userProfile?.couple_id;
 
 	return useMutation({
-		mutationFn: (bookName: string) => updateBookName(coupleId!, bookName),
+		mutationFn: (bookName: string) => {
+			if (!coupleId) throw new Error('커플 연동이 필요합니다');
+			return updateBookName(coupleId, bookName);
+		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["couple", coupleId] });
 		},
