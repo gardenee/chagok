@@ -362,9 +362,9 @@ export default function SettingsScreen() {
           />
           <View className="h-px bg-brown/5 mx-4" />
           <SettingsRow
-            icon={<Trash2 size={16} color="#EF4444" strokeWidth={2} />}
+            icon={<Trash2 size={16} color={Colors.peach} strokeWidth={2} />}
             label="계정 탈퇴"
-            labelClassName="text-red-500"
+            labelClassName="text-peach"
             onPress={handleDeleteAccount}
           />
         </View>
