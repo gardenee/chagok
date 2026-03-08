@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, CalendarDays, Repeat, Wallet, Landmark, BookCheck } from 'lucide-react-native';
+import { CalendarDays, Repeat, Landmark, BookCheck, Settings } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 
@@ -28,11 +28,20 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="fixed"
         options={{
-          title: '홈',
+          title: '고정지출',
           tabBarIcon: ({ color, size }) => (
-            <Home size={size} color={color} strokeWidth={2} />
+            <Repeat size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="budget"
+        options={{
+          title: '예산',
+          tabBarIcon: ({ color, size }) => (
+            <BookCheck size={size} color={color} strokeWidth={2} />
           ),
         }}
       />
@@ -46,15 +55,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="budget"
-        options={{
-          title: '예산·결산',
-          tabBarIcon: ({ color, size }) => (
-            <BookCheck size={size} color={color} strokeWidth={2} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="assets"
         options={{
           title: '자산',
@@ -64,11 +64,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="fixed"
+        name="settings"
         options={{
-          title: '고정지출',
+          title: '설정',
           tabBarIcon: ({ color, size }) => (
-            <Repeat size={size} color={color} strokeWidth={2} />
+            <Settings size={size} color={color} strokeWidth={2} />
           ),
         }}
       />
