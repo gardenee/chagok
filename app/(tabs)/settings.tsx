@@ -60,9 +60,9 @@ function SettingsRow({
       onPress={onPress}
       disabled={!onPress || disabled}
       activeOpacity={onPress && !disabled ? 0.6 : 1}
-      className="flex-row items-center px-4 py-4 bg-white"
+      className="flex-row items-center px-4 py-4 bg-cream"
     >
-      <View className="w-8 h-8 rounded-xl bg-neutral-100 items-center justify-center mr-3">
+      <View className="w-8 h-8 rounded-xl bg-cream-dark/70 items-center justify-center mr-3">
         {icon}
       </View>
       <Text className={`flex-1 font-ibm-semibold text-sm ${disabled ? 'text-neutral-400' : 'text-neutral-800'}`}>
@@ -174,12 +174,12 @@ function EditModal({
 function SettingsCard({ children }: { children: React.ReactNode }) {
   return (
     <View
-      className="mx-4 bg-white rounded-3xl overflow-hidden"
+      className="mx-4 bg-cream rounded-3xl overflow-hidden"
       style={{
         shadowColor: '#000',
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 1 },
       }}
     >
       {children}
@@ -188,7 +188,7 @@ function SettingsCard({ children }: { children: React.ReactNode }) {
 }
 
 function Divider() {
-  return <View className="h-px bg-neutral-100 mx-4" />;
+  return <View className="h-px bg-cream-dark mx-4" />;
 }
 
 // ── 메인 화면 ────────────────────────────────────────────────────
@@ -283,7 +283,7 @@ export default function SettingsScreen() {
 
         {/* 헤더 */}
         <View className="px-6 pt-6 pb-4">
-          <Text className="font-ibm-bold text-2xl text-brown">설정</Text>
+          <Text className="font-ibm-bold text-2xl text-brown-darker">설정</Text>
         </View>
 
         {/* ── 내 정보 ── */}
@@ -342,8 +342,8 @@ export default function SettingsScreen() {
             ].map((item, i) => (
               <View key={item.label}>
                 {i > 0 && <Divider />}
-                <View className="flex-row items-center px-4 py-4">
-                  <View className="w-8 h-8 rounded-xl bg-neutral-100 items-center justify-center mr-3">
+                <View className="flex-row items-center px-4 py-4 bg-cream">
+                  <View className="w-8 h-8 rounded-xl bg-cream-dark/70 items-center justify-center mr-3">
                     <Bell size={16} color="#A3A3A3" strokeWidth={2} />
                   </View>
                   <Text className="flex-1 font-ibm-semibold text-sm text-neutral-400">{item.label}</Text>
