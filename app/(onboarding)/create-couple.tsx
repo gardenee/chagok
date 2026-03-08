@@ -13,15 +13,6 @@ import { useCreateCouple } from "../../hooks/use-couple";
 import { useGetUserProfile } from "../../hooks/use-user";
 import type { UserProfile } from "../../types/database";
 
-function generateInviteCode(): string {
-	const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-	let code = "";
-	for (let i = 0; i < 6; i++) {
-		code += chars[Math.floor(Math.random() * chars.length)];
-	}
-	return code;
-}
-
 type Step = "name" | "invite";
 
 export default function CreateCoupleScreen() {
@@ -45,8 +36,7 @@ export default function CreateCoupleScreen() {
 		}
 
 		try {
-			const code = generateInviteCode();
-			await createCouple({ bookName: trimmed, inviteCode: code });
+			const code = await createCouple(trimmed);
 
 			const profile = await getUserProfile(session!.user.id);
 			setCreatedProfile(profile);

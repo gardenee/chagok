@@ -27,6 +27,7 @@ export interface Database {
           book_name?: string;
           invite_code?: string;
         };
+        Relationships: never[];
       };
       users: {
         Row: {
@@ -48,6 +49,7 @@ export interface Database {
           nickname?: string;
           avatar_url?: string | null;
         };
+        Relationships: never[];
       };
       categories: {
         Row: {
@@ -77,6 +79,7 @@ export interface Database {
           budget_amount?: number;
           sort_order?: number;
         };
+        Relationships: never[];
       };
       transactions: {
         Row: {
@@ -111,6 +114,7 @@ export interface Database {
           memo?: string | null;
           date?: string;
         };
+        Relationships: never[];
       };
       comments: {
         Row: {
@@ -130,6 +134,7 @@ export interface Database {
         Update: {
           content?: string;
         };
+        Relationships: never[];
       };
       schedules: {
         Row: {
@@ -155,6 +160,7 @@ export interface Database {
           date?: string;
           tag?: 'me' | 'partner' | 'together';
         };
+        Relationships: never[];
       };
       fixed_expenses: {
         Row: {
@@ -181,6 +187,7 @@ export interface Database {
           amount?: number;
           due_day?: number;
         };
+        Relationships: never[];
       };
       assets: {
         Row: {
@@ -213,6 +220,7 @@ export interface Database {
           color?: string;
           sort_order?: number;
         };
+        Relationships: never[];
       };
     };
     Functions: {

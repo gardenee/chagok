@@ -37,11 +37,18 @@ export default function JoinCoupleScreen() {
 			setPendingInviteCode(null);
 			setUserProfile(profile);
 		} catch (e) {
-			if (e instanceof Error && e.message === "INVALID_CODE") {
+			const msg = e instanceof Error ? e.message : "";
+			if (msg === "INVALID_CODE") {
 				Alert.alert("오류", "유효하지 않은 초대 코드예요. 다시 확인해 주세요.");
-				return;
+			} else if (msg === "ALREADY_IN_COUPLE") {
+				Alert.alert("오류", "이미 연동된 가계부가 있어요.");
+			} else if (msg === "OWN_COUPLE") {
+				Alert.alert("오류", "본인이 만든 가계부는 참여할 수 없어요.");
+			} else if (msg === "COUPLE_FULL") {
+				Alert.alert("오류", "이미 두 명이 연동된 가계부예요.");
+			} else {
+				Alert.alert("오류", "합류에 실패했습니다. 다시 시도해 주세요.");
 			}
-			Alert.alert("오류", "합류에 실패했습니다. 다시 시도해 주세요.");
 		}
 	}
 
