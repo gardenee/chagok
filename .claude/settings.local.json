@@ -27,7 +27,9 @@
       "Bash(git add:*)",
       "Bash(ls /Users/east/Desktop/Dev/chagok/*.md)",
       "Bash(git checkout:*)",
-      "Bash(npm list:*)"
+      "Bash(npm list:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)"
     ]
   }
 }
