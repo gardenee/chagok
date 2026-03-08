@@ -4,18 +4,10 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Modal,
-  TextInput,
   Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { useState } from 'react';
 import {
-  Plus,
-  X,
-  Check,
   Trash2,
   Landmark,
   Banknote,
@@ -34,6 +26,16 @@ import {
   useDeleteAsset,
 } from '../../hooks/use-assets';
 import { EmptyState } from '../../components/ui/empty-state';
+import {
+  BottomSheet,
+  BottomSheetHeader,
+} from '../../components/ui/bottom-sheet';
+import { SaveButton } from '../../components/ui/save-button';
+import { ModalTextInput, AmountInput } from '../../components/ui/modal-inputs';
+import { ScreenHeader } from '../../components/ui/screen-header';
+import { SummaryCard } from '../../components/ui/summary-card';
+import { ItemCard } from '../../components/ui/item-card';
+import { LoadingState } from '../../components/ui/loading-state';
 import type { Asset } from '../../types/database';
 
 type AssetType = {
@@ -114,7 +116,7 @@ export default function AssetsTab() {
       return;
     }
     const type = modal.form.type;
-    const { Icon, color } = getAssetType(type);
+    const { color } = getAssetType(type);
     try {
       if (modal.editingId) {
         await updateAsset.mutateAsync({
@@ -173,44 +175,17 @@ export default function AssetsTab() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {/* 헤더 */}
-        <View className='flex-row items-center justify-between px-6 pt-6 pb-4'>
-          <Text className='font-ibm-bold text-2xl text-brown-darker'>자산</Text>
-          <TouchableOpacity
-            onPress={openCreate}
-            className='w-10 h-10 rounded-full items-center justify-center'
-            activeOpacity={0.6}
-          >
-            <Plus size={22} color={Colors.brownDarker} strokeWidth={2.5} />
-          </TouchableOpacity>
-        </View>
+        <ScreenHeader title='자산' onAdd={openCreate} />
 
-        {/* 총 자산 카드 */}
-        <View
-          className='mx-4 bg-butter rounded-3xl px-6 py-6'
-          style={{
-            shadowColor: '#000',
-            shadowOpacity: 0.06,
-            shadowRadius: 10,
-            shadowOffset: { width: 0, height: 3 },
-          }}
-        >
-          <Text className='font-ibm-semibold text-sm text-brown-dark mb-1'>
-            총 자산
-          </Text>
-          <Text className='font-ibm-bold text-3xl text-brown-dark'>
-            {totalAssets > 0 ? `${formatAmount(totalAssets)}원` : '0원'}
-          </Text>
-          <Text className='font-ibm-regular text-xs text-brown-dark mt-2'>
-            항목 {assets.length}개
-          </Text>
-        </View>
+        <SummaryCard
+          label='총 자산'
+          amount={totalAssets}
+          subtext={`항목 ${assets.length}개`}
+        />
 
         {/* 유형별 분류 */}
         {isLoading ? (
-          <View className='py-16 items-center'>
-            <ActivityIndicator color={Colors.butter} />
-          </View>
+          <LoadingState className='py-16' />
         ) : assets.length === 0 ? (
           <EmptyState
             icon={Landmark}
@@ -241,38 +216,24 @@ export default function AssetsTab() {
                   </View>
                   <View className='gap-2'>
                     {group.items.map(a => (
-                      <TouchableOpacity
-                        key={a.id}
-                        onPress={() => openEdit(a)}
-                        activeOpacity={0.8}
-                      >
+                      <ItemCard key={a.id} onPress={() => openEdit(a)}>
                         <View
-                          className='bg-white rounded-3xl px-4 py-4 flex-row items-center gap-3'
-                          style={{
-                            shadowColor: Colors.brown,
-                            shadowOpacity: 0.07,
-                            shadowRadius: 10,
-                            shadowOffset: { width: 0, height: 2 },
-                          }}
+                          className='w-11 h-11 rounded-2xl items-center justify-center'
+                          style={{ backgroundColor: group.color + '80' }}
                         >
-                          <View
-                            className='w-11 h-11 rounded-2xl items-center justify-center'
-                            style={{ backgroundColor: group.color + '80' }}
-                          >
-                            <group.Icon
-                              size={20}
-                              color={Colors.brown}
-                              strokeWidth={2.5}
-                            />
-                          </View>
-                          <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
-                            {a.name}
-                          </Text>
-                          <Text className='font-ibm-bold text-base text-neutral-800'>
-                            {formatAmount(a.amount)}원
-                          </Text>
+                          <group.Icon
+                            size={20}
+                            color={Colors.brown}
+                            strokeWidth={2.5}
+                          />
                         </View>
-                      </TouchableOpacity>
+                        <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
+                          {a.name}
+                        </Text>
+                        <Text className='font-ibm-bold text-base text-neutral-800'>
+                          {formatAmount(a.amount)}원
+                        </Text>
+                      </ItemCard>
                     ))}
                   </View>
                 </View>
@@ -283,149 +244,72 @@ export default function AssetsTab() {
       </ScrollView>
 
       {/* ── 자산 추가/수정 모달 ── */}
-      <Modal
+      <BottomSheet
         visible={modal.visible}
-        animationType='slide'
-        transparent
-        onRequestClose={() => setModal(s => ({ ...s, visible: false }))}
+        onClose={() => setModal(s => ({ ...s, visible: false }))}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className='flex-1 justify-end'
-        >
-          <TouchableOpacity
-            className='flex-1'
-            activeOpacity={1}
-            onPress={() => setModal(s => ({ ...s, visible: false }))}
-          />
-          <View
-            className='bg-white rounded-t-3xl px-6 pt-5 pb-10'
-            style={{
-              shadowColor: '#000',
-              shadowOpacity: 0.1,
-              shadowRadius: 20,
-              shadowOffset: { width: 0, height: -4 },
-            }}
-          >
-            {/* 모달 헤더 */}
-            <View className='flex-row items-center justify-between mb-5'>
-              <Text className='font-ibm-bold text-lg text-neutral-800'>
-                {modal.editingId ? '자산 수정' : '자산 추가'}
-              </Text>
-              <View className='flex-row items-center gap-3'>
-                {modal.editingId && (
-                  <TouchableOpacity
-                    onPress={() => handleDelete(modal.editingId!)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Trash2
-                      size={18}
-                      color={Colors.brown + '60'}
-                      strokeWidth={2}
-                    />
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  onPress={() => setModal(s => ({ ...s, visible: false }))}
+        <BottomSheetHeader
+          title={modal.editingId ? '자산 수정' : '자산 추가'}
+          onClose={() => setModal(s => ({ ...s, visible: false }))}
+          onDelete={
+            modal.editingId ? () => handleDelete(modal.editingId!) : undefined
+          }
+          className='mb-5'
+        />
+
+        {/* 자산 유형 chips */}
+        <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+          유형
+        </Text>
+        <View className='flex-row flex-wrap gap-2 mb-4'>
+          {ASSET_TYPES.map(({ key, label, Icon, color }) => {
+            const isSelected = modal.form.type === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                onPress={() =>
+                  setModal(s => ({ ...s, form: { ...s.form, type: key } }))
+                }
+                className={`flex-row items-center gap-1.5 px-3 py-2 rounded-2xl ${isSelected ? '' : 'bg-neutral-100'}`}
+                style={isSelected ? { backgroundColor: color } : {}}
+                activeOpacity={0.7}
+              >
+                <Icon size={14} color={Colors.brown} strokeWidth={2.5} />
+                <Text
+                  className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                 >
-                  <X size={22} color={Colors.brown} strokeWidth={2} />
-                </TouchableOpacity>
-              </View>
-            </View>
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
-            {/* 자산 유형 */}
-            <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-              유형
-            </Text>
-            <View className='flex-row flex-wrap gap-2 mb-4'>
-              {ASSET_TYPES.map(({ key, label, Icon, color }) => {
-                const isSelected = modal.form.type === key;
-                return (
-                  <TouchableOpacity
-                    key={key}
-                    onPress={() =>
-                      setModal(s => ({
-                        ...s,
-                        form: { ...s.form, type: key },
-                      }))
-                    }
-                    className={`flex-row items-center gap-1.5 px-3 py-2 rounded-2xl ${isSelected ? '' : 'bg-neutral-100'}`}
-                    style={isSelected ? { backgroundColor: color } : {}}
-                    activeOpacity={0.7}
-                  >
-                    <Icon size={14} color={Colors.brown} strokeWidth={2.5} />
-                    <Text
-                      className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                    >
-                      {label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+        <ModalTextInput
+          value={modal.form.name}
+          onChangeText={v =>
+            setModal(s => ({ ...s, form: { ...s.form, name: v } }))
+          }
+          placeholder='자산 이름 (예: 국민은행, 비상금)'
+          maxLength={20}
+          className='mb-4'
+        />
 
-            {/* 자산 이름 */}
-            <View className='bg-neutral-100 rounded-2xl px-4 py-3.5 mb-4'>
-              <TextInput
-                className='font-ibm-regular text-sm text-neutral-800'
-                placeholder='자산 이름 (예: 국민은행, 비상금)'
-                placeholderTextColor='#A3A3A3'
-                value={modal.form.name}
-                onChangeText={v =>
-                  setModal(s => ({ ...s, form: { ...s.form, name: v } }))
-                }
-                maxLength={20}
-              />
-            </View>
+        <AmountInput
+          value={modal.form.amount}
+          onChangeText={v =>
+            setModal(s => ({ ...s, form: { ...s.form, amount: v } }))
+          }
+          placeholder='현재 잔액'
+          className='mb-5'
+        />
 
-            {/* 금액 */}
-            <View className='bg-neutral-100 rounded-2xl px-4 py-3.5 mb-5 flex-row items-center'>
-              <Text className='font-ibm-semibold text-neutral-500 text-base mr-2'>
-                ₩
-              </Text>
-              <TextInput
-                className='flex-1 font-ibm-semibold text-base text-neutral-800'
-                placeholder='현재 잔액'
-                placeholderTextColor='#A3A3A3'
-                keyboardType='numeric'
-                value={modal.form.amount}
-                onChangeText={v =>
-                  setModal(s => ({
-                    ...s,
-                    form: { ...s.form, amount: v.replace(/[^0-9]/g, '') },
-                  }))
-                }
-              />
-              <Text className='font-ibm-regular text-sm text-brown/40'>원</Text>
-            </View>
-
-            {/* 저장 버튼 */}
-            <TouchableOpacity
-              onPress={handleSave}
-              disabled={isSaving}
-              className='bg-butter rounded-2xl py-4 items-center flex-row justify-center gap-2'
-              activeOpacity={0.8}
-              style={{
-                shadowColor: Colors.butter,
-                shadowOpacity: 0.25,
-                shadowRadius: 6,
-                shadowOffset: { width: 0, height: 3 },
-              }}
-            >
-              {isSaving ? (
-                <ActivityIndicator color={Colors.brown} />
-              ) : (
-                <>
-                  <Check size={18} color={Colors.brown} strokeWidth={2.5} />
-                  <Text className='font-ibm-bold text-base text-brown'>
-                    {modal.editingId ? '수정 완료' : '저장'}
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+        <SaveButton
+          onPress={handleSave}
+          isSaving={isSaving}
+          label={modal.editingId ? '수정 완료' : '저장'}
+        />
+      </BottomSheet>
     </SafeAreaView>
   );
 }

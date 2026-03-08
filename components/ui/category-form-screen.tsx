@@ -3,8 +3,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  TextInput,
-  ActivityIndicator,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
@@ -34,6 +32,8 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
+import { SaveButton } from './save-button';
+import { ModalTextInput, AmountInput } from './modal-inputs';
 
 export const ICON_MAP: Record<string, LucideIcon> = {
   shopping: ShoppingCart,
@@ -139,17 +139,14 @@ export function CategoryFormScreen({
           </View>
 
           {/* 이름 */}
-          <View className='bg-neutral-100 rounded-2xl px-4 py-3.5 mb-6'>
-            <TextInput
-              className='font-ibm-regular text-sm text-neutral-800'
-              placeholder='카테고리 이름 (예: 식비, 교통비)'
-              placeholderTextColor='#A3A3A3'
-              value={form.name}
-              onChangeText={v => onChange({ ...form, name: v })}
-              maxLength={10}
-              autoFocus
-            />
-          </View>
+          <ModalTextInput
+            value={form.name}
+            onChangeText={v => onChange({ ...form, name: v })}
+            placeholder='카테고리 이름 (예: 식비, 교통비)'
+            maxLength={10}
+            autoFocus
+            className='mb-6'
+          />
 
           {/* 아이콘 */}
           <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
@@ -210,51 +207,21 @@ export function CategoryFormScreen({
           </View>
 
           {/* 월 예산 */}
-          <View className='bg-neutral-100 rounded-2xl px-4 py-3.5 mb-2 flex-row items-center'>
-            <Text className='font-ibm-semibold text-neutral-500 text-base mr-2'>
-              ₩
-            </Text>
-            <TextInput
-              className='flex-1 font-ibm-semibold text-base text-neutral-800'
-              placeholder='월 예산 금액'
-              placeholderTextColor='#A3A3A3'
-              keyboardType='numeric'
-              value={form.budget_amount}
-              onChangeText={v =>
-                onChange({ ...form, budget_amount: v.replace(/[^0-9]/g, '') })
-              }
-            />
-            <Text className='font-ibm-regular text-sm text-neutral-400'>
-              원
-            </Text>
-          </View>
+          <AmountInput
+            value={form.budget_amount}
+            onChangeText={v => onChange({ ...form, budget_amount: v })}
+            placeholder='월 예산 금액'
+            className='mb-2'
+          />
         </ScrollView>
 
         {/* 저장 버튼 (하단 고정) */}
         <View className='px-6 pb-6 pt-3'>
-          <TouchableOpacity
+          <SaveButton
             onPress={onSave}
-            disabled={isSaving}
-            className='bg-butter rounded-2xl py-4 items-center flex-row justify-center gap-2'
-            activeOpacity={0.8}
-            style={{
-              shadowColor: Colors.butter,
-              shadowOpacity: 0.25,
-              shadowRadius: 6,
-              shadowOffset: { width: 0, height: 3 },
-            }}
-          >
-            {isSaving ? (
-              <ActivityIndicator color={Colors.brown} />
-            ) : (
-              <>
-                <Check size={18} color={Colors.brown} strokeWidth={2.5} />
-                <Text className='font-ibm-bold text-base text-brown'>
-                  {editingId ? '수정 완료' : '저장'}
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
+            isSaving={isSaving}
+            label={editingId ? '수정 완료' : '저장'}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

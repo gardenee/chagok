@@ -4,20 +4,12 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Modal,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { useState } from 'react';
 import {
-  Plus,
   Repeat,
   Trash2,
-  X,
-  Check,
   ChevronLeft,
   ChevronRight,
   Wallet,
@@ -31,6 +23,16 @@ import {
   useDeleteFixedExpense,
 } from '../../hooks/use-fixed-expenses';
 import { EmptyState } from '../../components/ui/empty-state';
+import {
+  BottomSheet,
+  BottomSheetHeader,
+} from '../../components/ui/bottom-sheet';
+import { SaveButton } from '../../components/ui/save-button';
+import { ModalTextInput, AmountInput } from '../../components/ui/modal-inputs';
+import { ScreenHeader } from '../../components/ui/screen-header';
+import { SummaryCard } from '../../components/ui/summary-card';
+import { ItemCard } from '../../components/ui/item-card';
+import { LoadingState } from '../../components/ui/loading-state';
 import type { FixedExpense } from '../../types/database';
 
 type FormData = {
@@ -40,10 +42,6 @@ type FormData = {
 };
 
 const INITIAL_FORM: FormData = { name: '', amount: '', due_day: 1 };
-
-function formatAmount(amount: number): string {
-  return amount.toLocaleString('ko-KR');
-}
 
 function ordinalDay(day: number): string {
   return `매월 ${day}일`;
@@ -145,49 +143,18 @@ export default function FixedScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* 헤더 */}
-        <View className='flex-row items-center justify-between px-6 pt-6 pb-2'>
-          <Text className='font-ibm-bold text-2xl text-brown-darker'>
-            고정지출
-          </Text>
-          <TouchableOpacity
-            onPress={openCreate}
-            className='w-10 h-10 rounded-full items-center justify-center'
-            activeOpacity={0.6}
-          >
-            <Plus size={22} color={Colors.brownDarker} strokeWidth={2.5} />
-          </TouchableOpacity>
-        </View>
+        <ScreenHeader title='고정지출' onAdd={openCreate} />
 
-        {/* 월 합계 카드 */}
-        <View
-          className='mx-4 mt-3 bg-butter rounded-3xl px-6 py-5'
-          style={{
-            shadowColor: '#000',
-            shadowOpacity: 0.06,
-            shadowRadius: 10,
-            shadowOffset: { width: 0, height: 3 },
-          }}
-        >
-          <View className='flex-row items-center gap-2 mb-1'>
-            <Text className='font-ibm-semibold text-sm text-brown-dark mb-1'>
-              매월 고정지출
-            </Text>
-          </View>
-          <Text className='font-ibm-bold text-3xl text-brown-dark'>
-            {formatAmount(totalAmount)}원
-          </Text>
-          <Text className='font-ibm-regular text-xs text-brown-dark mt-1'>
-            총 {fixedExpenses.length}개 항목
-          </Text>
-        </View>
+        <SummaryCard
+          label='매월 고정지출'
+          amount={totalAmount}
+          subtext={`총 ${fixedExpenses.length}개 항목`}
+        />
 
         {/* 목록 */}
         <View className='mx-4 mt-5'>
           {isLoading ? (
-            <View className='py-12 items-center'>
-              <ActivityIndicator color={Colors.butter} />
-            </View>
+            <LoadingState />
           ) : fixedExpenses.length === 0 ? (
             <EmptyState
               icon={Repeat}
@@ -197,58 +164,39 @@ export default function FixedScreen() {
           ) : (
             <View className='gap-2.5'>
               {fixedExpenses.map(item => (
-                <TouchableOpacity
-                  key={item.id}
-                  onPress={() => openEdit(item)}
-                  activeOpacity={0.8}
-                >
-                  <View
-                    className='bg-white rounded-3xl px-4 py-4 flex-row items-center gap-3'
-                    style={{
-                      shadowColor: Colors.brown,
-                      shadowOpacity: 0.07,
-                      shadowRadius: 10,
-                      shadowOffset: { width: 0, height: 2 },
-                      elevation: 2,
-                    }}
-                  >
-                    {/* 아이콘 */}
-                    <View className='w-11 h-11 rounded-2xl items-center justify-center bg-peach/40'>
-                      <Repeat
-                        size={19}
-                        color={Colors.peach}
-                        strokeWidth={2.5}
-                      />
-                    </View>
-
-                    {/* 이름 + 날짜 */}
-                    <View className='flex-1'>
-                      <Text className='font-ibm-semibold text-sm text-neutral-800'>
-                        {item.name}
-                      </Text>
-                      <Text className='font-ibm-regular text-xs text-neutral-500 mt-0.5'>
-                        {ordinalDay(item.due_day)}
-                      </Text>
-                    </View>
-
-                    {/* 금액 + 삭제 */}
-                    <View className='items-end gap-2'>
-                      <Text className='font-ibm-bold text-sm text-neutral-800'>
-                        {formatAmount(item.amount)}원
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => handleDelete(item.id, item.name)}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                      >
-                        <Trash2
-                          size={13}
-                          color={Colors.brown + '50'}
-                          strokeWidth={2}
-                        />
-                      </TouchableOpacity>
-                    </View>
+                <ItemCard key={item.id} onPress={() => openEdit(item)}>
+                  {/* 아이콘 */}
+                  <View className='w-11 h-11 rounded-2xl items-center justify-center bg-peach/40'>
+                    <Repeat size={19} color={Colors.peach} strokeWidth={2.5} />
                   </View>
-                </TouchableOpacity>
+
+                  {/* 이름 + 날짜 */}
+                  <View className='flex-1'>
+                    <Text className='font-ibm-semibold text-sm text-neutral-800'>
+                      {item.name}
+                    </Text>
+                    <Text className='font-ibm-regular text-xs text-neutral-500 mt-0.5'>
+                      {ordinalDay(item.due_day)}
+                    </Text>
+                  </View>
+
+                  {/* 금액 + 삭제 */}
+                  <View className='items-end gap-2'>
+                    <Text className='font-ibm-bold text-sm text-neutral-800'>
+                      {item.amount.toLocaleString('ko-KR')}원
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => handleDelete(item.id, item.name)}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Trash2
+                        size={13}
+                        color={Colors.brown + '50'}
+                        strokeWidth={2}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </ItemCard>
               ))}
             </View>
           )}
@@ -256,148 +204,78 @@ export default function FixedScreen() {
       </ScrollView>
 
       {/* ── 추가 / 수정 모달 ── */}
-      <Modal
-        visible={modal.visible}
-        animationType='slide'
-        transparent
-        onRequestClose={closeModal}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className='flex-1 justify-end'
-        >
-          <TouchableOpacity
-            className='flex-1'
-            activeOpacity={1}
-            onPress={closeModal}
-          />
-          <View
-            className='bg-white rounded-t-3xl px-6 pt-5 pb-10'
-            style={{
-              shadowColor: '#000',
-              shadowOpacity: 0.1,
-              shadowRadius: 20,
-              shadowOffset: { width: 0, height: -4 },
-            }}
-          >
-            {/* 모달 헤더 */}
-            <View className='flex-row items-center justify-between mb-6'>
-              <Text className='font-ibm-bold text-lg text-neutral-800'>
-                {modal.editingId ? '고정지출 수정' : '고정지출 추가'}
-              </Text>
-              <TouchableOpacity onPress={closeModal}>
-                <X size={22} color={Colors.brown} strokeWidth={2} />
-              </TouchableOpacity>
-            </View>
+      <BottomSheet visible={modal.visible} onClose={closeModal}>
+        <BottomSheetHeader
+          title={modal.editingId ? '고정지출 수정' : '고정지출 추가'}
+          onClose={closeModal}
+          className='mb-6'
+        />
 
-            {/* 항목명 */}
-            <View className='bg-neutral-100 rounded-2xl px-4 py-3.5 mb-4'>
-              <TextInput
-                className='font-ibm-regular text-sm text-neutral-800'
-                placeholder='항목 이름 (예: 월세, 넷플릭스)'
-                placeholderTextColor='#A3A3A3'
-                value={modal.form.name}
-                onChangeText={v =>
-                  setModal(s => ({ ...s, form: { ...s.form, name: v } }))
-                }
-                maxLength={20}
-                autoFocus={!modal.editingId}
-              />
-            </View>
+        <ModalTextInput
+          value={modal.form.name}
+          onChangeText={v =>
+            setModal(s => ({ ...s, form: { ...s.form, name: v } }))
+          }
+          placeholder='항목 이름 (예: 월세, 넷플릭스)'
+          maxLength={20}
+          autoFocus={!modal.editingId}
+          className='mb-4'
+        />
 
-            {/* 금액 */}
-            <View className='bg-neutral-100 rounded-2xl px-4 py-3.5 mb-4 flex-row items-center'>
-              <Text className='font-ibm-semibold text-neutral-500 text-base mr-2'>
-                ₩
-              </Text>
-              <TextInput
-                className='flex-1 font-ibm-semibold text-base text-neutral-800'
-                placeholder='금액 입력'
-                placeholderTextColor='#A3A3A3'
-                keyboardType='numeric'
-                value={modal.form.amount}
-                onChangeText={v =>
-                  setModal(s => ({
-                    ...s,
-                    form: { ...s.form, amount: v.replace(/[^0-9]/g, '') },
-                  }))
-                }
-              />
-            </View>
+        <AmountInput
+          value={modal.form.amount}
+          onChangeText={v =>
+            setModal(s => ({ ...s, form: { ...s.form, amount: v } }))
+          }
+          className='mb-4'
+        />
 
-            {/* 납부일 */}
-            <View className='mb-6'>
-              <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                납부일
-              </Text>
-              <View className='bg-neutral-100 rounded-2xl px-4 py-3 flex-row items-center justify-between'>
-                <TouchableOpacity
-                  onPress={() => adjustDueDay(-1)}
-                  disabled={modal.form.due_day <= 1}
-                  className='w-9 h-9 rounded-xl bg-cream items-center justify-center'
-                  activeOpacity={0.7}
-                >
-                  <ChevronLeft
-                    size={18}
-                    color={
-                      modal.form.due_day <= 1
-                        ? Colors.brown + '30'
-                        : Colors.brown
-                    }
-                    strokeWidth={2.5}
-                  />
-                </TouchableOpacity>
-
-                <Text className='font-ibm-bold text-base text-neutral-800'>
-                  매월 {modal.form.due_day}일
-                </Text>
-
-                <TouchableOpacity
-                  onPress={() => adjustDueDay(1)}
-                  disabled={modal.form.due_day >= 31}
-                  className='w-9 h-9 rounded-xl bg-cream items-center justify-center'
-                  activeOpacity={0.7}
-                >
-                  <ChevronRight
-                    size={18}
-                    color={
-                      modal.form.due_day >= 31
-                        ? Colors.brown + '30'
-                        : Colors.brown
-                    }
-                    strokeWidth={2.5}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* 저장 버튼 */}
+        {/* 납부일 */}
+        <View className='mb-6'>
+          <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+            납부일
+          </Text>
+          <View className='bg-neutral-100 rounded-2xl px-4 py-3 flex-row items-center justify-between'>
             <TouchableOpacity
-              onPress={handleSave}
-              disabled={isSaving}
-              className='bg-butter rounded-2xl py-4 items-center flex-row justify-center gap-2'
-              activeOpacity={0.8}
-              style={{
-                shadowColor: Colors.butter,
-                shadowOpacity: 0.25,
-                shadowRadius: 6,
-                shadowOffset: { width: 0, height: 3 },
-              }}
+              onPress={() => adjustDueDay(-1)}
+              disabled={modal.form.due_day <= 1}
+              className='w-9 h-9 rounded-xl bg-cream items-center justify-center'
+              activeOpacity={0.7}
             >
-              {isSaving ? (
-                <ActivityIndicator color={Colors.brown} />
-              ) : (
-                <>
-                  <Check size={18} color={Colors.brown} strokeWidth={2.5} />
-                  <Text className='font-ibm-bold text-base text-brown'>
-                    {modal.editingId ? '수정 완료' : '저장'}
-                  </Text>
-                </>
-              )}
+              <ChevronLeft
+                size={18}
+                color={
+                  modal.form.due_day <= 1 ? Colors.brown + '30' : Colors.brown
+                }
+                strokeWidth={2.5}
+              />
+            </TouchableOpacity>
+            <Text className='font-ibm-bold text-base text-neutral-800'>
+              매월 {modal.form.due_day}일
+            </Text>
+            <TouchableOpacity
+              onPress={() => adjustDueDay(1)}
+              disabled={modal.form.due_day >= 31}
+              className='w-9 h-9 rounded-xl bg-cream items-center justify-center'
+              activeOpacity={0.7}
+            >
+              <ChevronRight
+                size={18}
+                color={
+                  modal.form.due_day >= 31 ? Colors.brown + '30' : Colors.brown
+                }
+                strokeWidth={2.5}
+              />
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
-      </Modal>
+        </View>
+
+        <SaveButton
+          onPress={handleSave}
+          isSaving={isSaving}
+          label={modal.editingId ? '수정 완료' : '저장'}
+        />
+      </BottomSheet>
     </SafeAreaView>
   );
 }

@@ -6,10 +6,11 @@ import {
   SafeAreaView,
   Modal,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { useState, useMemo } from 'react';
-import { Plus, ChevronLeft, ChevronRight, Wallet } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Wallet } from 'lucide-react-native';
+import { ScreenHeader } from '../../components/ui/screen-header';
+import { LoadingState } from '../../components/ui/loading-state';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '../../constants/colors';
 import {
@@ -187,18 +188,7 @@ export default function BudgetTab() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* 헤더 */}
-        <View className='flex-row items-center justify-between px-6 pt-6 pb-2'>
-          <Text className='font-ibm-bold text-2xl text-brown-darker'>
-            예산·결산
-          </Text>
-          <TouchableOpacity
-            onPress={openCreate}
-            className='w-10 h-10 rounded-full items-center justify-center'
-            activeOpacity={0.6}
-          >
-            <Plus size={22} color={Colors.brownDarker} strokeWidth={2.5} />
-          </TouchableOpacity>
-        </View>
+        <ScreenHeader title='예산·결산' onAdd={openCreate} />
 
         {/* 월 네비게이터 */}
         <View className='flex-row items-center justify-center gap-5 px-6 pt-1 pb-3'>
@@ -273,9 +263,7 @@ export default function BudgetTab() {
           </Text>
 
           {isLoading ? (
-            <View className='py-12 items-center'>
-              <ActivityIndicator color={Colors.butter} />
-            </View>
+            <LoadingState />
           ) : categories.length === 0 ? (
             <View className='bg-cream-dark/40 rounded-3xl py-12 items-center gap-3'>
               <Wallet size={32} color={Colors.brown + '30'} strokeWidth={1.5} />
