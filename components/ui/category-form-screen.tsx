@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import {
-  ChevronLeft,
+  X,
   Check,
   Trash2,
   ShoppingCart,
@@ -117,15 +117,6 @@ export function CategoryFormScreen({
         >
           {/* 헤더 */}
           <View className='flex-row items-center justify-between pt-5 mb-6'>
-            <TouchableOpacity
-              onPress={onBack}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <ChevronLeft size={22} color={Colors.brown} strokeWidth={2.5} />
-            </TouchableOpacity>
-            <Text className='font-ibm-bold text-lg text-neutral-800'>
-              {editingId ? '카테고리 수정' : '카테고리 추가'}
-            </Text>
             {editingId && onDelete ? (
               <TouchableOpacity
                 onPress={onDelete}
@@ -136,6 +127,15 @@ export function CategoryFormScreen({
             ) : (
               <View style={{ width: 22 }} />
             )}
+            <Text className='font-ibm-bold text-lg text-neutral-800'>
+              {editingId ? '카테고리 수정' : '카테고리 추가'}
+            </Text>
+            <TouchableOpacity
+              onPress={onBack}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <X size={22} color={Colors.brown} strokeWidth={2.5} />
+            </TouchableOpacity>
           </View>
 
           {/* 이름 */}
