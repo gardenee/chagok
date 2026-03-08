@@ -7,6 +7,7 @@ import {
   Platform,
 } from 'react-native';
 import { X, Trash2 } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 
 type BottomSheetProps = {
@@ -16,6 +17,7 @@ type BottomSheetProps = {
 };
 
 export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
+  const insets = useSafeAreaInsets();
   return (
     <Modal
       visible={visible}
@@ -33,8 +35,9 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
           onPress={onClose}
         />
         <View
-          className='bg-white rounded-t-3xl px-6 pt-5 pb-10'
+          className='bg-white rounded-t-3xl px-6 pt-5'
           style={{
+            paddingBottom: Math.max(insets.bottom, 24),
             shadowColor: '#000',
             shadowOpacity: 0.1,
             shadowRadius: 24,
@@ -70,14 +73,14 @@ export function BottomSheetHeader({
             onPress={onDelete}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Trash2 size={18} color={Colors.brown + '60'} strokeWidth={2} />
+            <Trash2 size={18} color='#A3A3A3' strokeWidth={2} />
           </TouchableOpacity>
         )}
         <TouchableOpacity
           onPress={onClose}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <X size={22} color='#737373' strokeWidth={2} />
+          <X size={22} color='#A3A3A3' strokeWidth={2} />
         </TouchableOpacity>
       </View>
     </View>

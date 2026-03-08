@@ -122,12 +122,8 @@ function formatTime(dateStr: string): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-function getTagClassName(tag: 'me' | 'partner' | 'together'): string {
-  return { me: 'bg-butter', partner: 'bg-peach', together: 'bg-lavender' }[tag];
-}
-
 function getTagBgColor(tag: 'me' | 'partner' | 'together'): string {
-  return { me: '#FAD97A', partner: '#F7B8A0', together: '#D4C5F0' }[tag];
+  return { me: '#FAD97A', partner: '#F7B8A0', together: '#FAD97A' }[tag];
 }
 
 function formatAmountShort(n: number): string {
@@ -709,6 +705,38 @@ export default function CalendarTab() {
           </TouchableOpacity>
         </View>
 
+        {/* 탭 전환 */}
+        <View className='flex-1 flex-row mx-4 mb-3 bg-cream rounded-2xl p-1 mr-3'>
+          <TouchableOpacity
+            onPress={() => {
+              setActiveTab('ledger');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+            className={`flex-1 py-2.5 rounded-xl items-center ${activeTab === 'ledger' ? 'bg-butter' : ''}`}
+            activeOpacity={0.7}
+          >
+            <Text
+              className={`font-ibm-semibold text-sm ${activeTab === 'ledger' ? 'text-brown' : 'text-brown/40'}`}
+            >
+              가계부
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setActiveTab('schedule');
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+            className={`flex-1 py-2.5 rounded-xl items-center ${activeTab === 'schedule' ? 'bg-butter' : ''}`}
+            activeOpacity={0.7}
+          >
+            <Text
+              className={`font-ibm-semibold text-sm ${activeTab === 'schedule' ? 'text-brown' : 'text-brown/40'}`}
+            >
+              일정
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         {/* 캘린더 카드 */}
         <View
           className='mx-4 mt-3 bg-white rounded-3xl p-4'
@@ -724,7 +752,7 @@ export default function CalendarTab() {
             {WEEKDAYS.map((day, i) => (
               <View key={day} className='flex-1 items-center py-1.5'>
                 <Text
-                  className={`font-ibm-semibold text-xs ${i === 0 ? 'text-peach' : i === 6 ? 'text-lavender-dark' : 'text-brown/70'}`}
+                  className={`font-ibm-semibold text-xs ${i === 0 ? 'text-peach' : i === 6 ? 'text-neutral-400' : 'text-brown/70'}`}
                 >
                   {day}
                 </Text>
@@ -745,8 +773,8 @@ export default function CalendarTab() {
                 fixedExpenses.some(fe => fe.due_day === item.day);
               // 일정 탭용
               const daySchedules = schedulesByDate[item.date] ?? [];
-              const visibleSchedules = daySchedules.slice(0, 3);
-              const extraCount = daySchedules.length - 3;
+              const visibleSchedules = daySchedules.slice(0, 2);
+              const extraCount = daySchedules.length - 2;
               return (
                 <TouchableOpacity
                   key={`${item.date}-${index}`}
@@ -786,7 +814,7 @@ export default function CalendarTab() {
                             : col === 6
                               ? isSelected
                                 ? 'text-brown'
-                                : 'text-lavender-dark'
+                                : 'text-neutral-500'
                               : isSelected
                                 ? 'text-brown'
                                 : 'text-neutral-800'
@@ -795,145 +823,85 @@ export default function CalendarTab() {
                       {item.day}
                     </Text>
                   </View>
-                  {/* 가계부 탭: 날짜별 지출/수입 금액 */}
-                  {activeTab === 'ledger' && (
-                    <View
-                      className='w-full items-center'
-                      style={{ minHeight: 26 }}
-                    >
-                      {item.isCurrentMonth && dayExpense > 0 && (
-                        <Text
-                          className='font-ibm-semibold text-peach text-center'
-                          style={{ fontSize: 8, lineHeight: 12 }}
-                          numberOfLines={1}
-                        >
-                          -{formatAmountShort(dayExpense)}
-                        </Text>
-                      )}
-                      {item.isCurrentMonth && dayIncome > 0 && (
-                        <Text
-                          className='font-ibm-semibold text-lavender-dark text-center'
-                          style={{ fontSize: 8, lineHeight: 12 }}
-                          numberOfLines={1}
-                        >
-                          +{formatAmountShort(dayIncome)}
-                        </Text>
-                      )}
-                      {hasFixed && dayExpense === 0 && dayIncome === 0 && (
-                        <View
-                          className='w-1 h-1 rounded-full bg-butter mt-1'
-                          style={{
-                            borderWidth: 0.5,
-                            borderColor: Colors.brown + '40',
-                          }}
-                        />
-                      )}
-                    </View>
-                  )}
-                  {/* 일정 탭: 일정 제목 미리보기 */}
-                  {activeTab === 'schedule' && (
-                    <View
-                      className='w-full px-0.5 mt-0.5'
-                      style={{ minHeight: 28 }}
-                    >
-                      {item.isCurrentMonth &&
-                        visibleSchedules.map(s => (
-                          <View
-                            key={s.id}
-                            className='rounded-sm mb-px overflow-hidden'
-                            style={{
-                              backgroundColor: getTagBgColor(s.tag) + 'BB',
-                            }}
+                  {/* 날짜 셀 하단: 탭 무관하게 동일 높이 */}
+                  <View className='w-full items-center' style={{ height: 26 }}>
+                    {activeTab === 'ledger' ? (
+                      <>
+                        {item.isCurrentMonth && dayExpense > 0 && (
+                          <Text
+                            className='font-ibm-semibold text-peach text-center'
+                            style={{ fontSize: 8, lineHeight: 12 }}
+                            numberOfLines={1}
                           >
+                            -{formatAmountShort(dayExpense)}
+                          </Text>
+                        )}
+                        {item.isCurrentMonth && dayIncome > 0 && (
+                          <Text
+                            className='font-ibm-semibold text-brown text-center'
+                            style={{
+                              fontSize: 8,
+                              lineHeight: 12,
+                              opacity: 0.55,
+                            }}
+                            numberOfLines={1}
+                          >
+                            +{formatAmountShort(dayIncome)}
+                          </Text>
+                        )}
+                        {hasFixed && dayExpense === 0 && dayIncome === 0 && (
+                          <View
+                            className='w-1 h-1 rounded-full bg-butter mt-1'
+                            style={{
+                              borderWidth: 0.5,
+                              borderColor: Colors.brown + '40',
+                            }}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <View className='w-full px-0.5 mt-0.5'>
+                        {item.isCurrentMonth &&
+                          visibleSchedules.map(s => (
                             <Text
-                              className='font-ibm-semibold text-brown'
-                              style={{
-                                fontSize: 7,
-                                lineHeight: 11,
-                                paddingHorizontal: 2,
-                              }}
+                              key={s.id}
+                              className='font-ibm-semibold text-brown/70'
+                              style={{ fontSize: 7, lineHeight: 11 }}
                               numberOfLines={1}
                             >
                               {s.title}
                             </Text>
-                          </View>
-                        ))}
-                      {item.isCurrentMonth && extraCount > 0 && (
-                        <Text
-                          className='font-ibm-regular text-neutral-400 text-center'
-                          style={{ fontSize: 7, lineHeight: 10 }}
-                        >
-                          +{extraCount}
-                        </Text>
-                      )}
-                    </View>
-                  )}
+                          ))}
+                        {item.isCurrentMonth && extraCount > 0 && (
+                          <Text
+                            className='font-ibm-regular text-neutral-400 text-center'
+                            style={{ fontSize: 7, lineHeight: 10 }}
+                          >
+                            +{extraCount}개
+                          </Text>
+                        )}
+                      </View>
+                    )}
+                  </View>
                 </TouchableOpacity>
               );
             })}
           </View>
-
-          {activeTab === 'ledger' ? (
-            <View className='flex-row gap-4 justify-end mt-2 pt-2 border-t border-cream-dark'>
-              <View className='flex-row items-center gap-1'>
-                <View className='w-2 h-2 rounded-full bg-peach' />
-                <Text className='font-ibm-regular text-[10px] text-neutral-400'>
-                  지출
-                </Text>
-              </View>
-              <View className='flex-row items-center gap-1'>
-                <View className='w-2 h-2 rounded-full bg-lavender-dark' />
-                <Text className='font-ibm-regular text-[10px] text-neutral-400'>
-                  수입
-                </Text>
-              </View>
-              <View className='flex-row items-center gap-1'>
-                <View
-                  className='w-2 h-2 rounded-full bg-butter'
-                  style={{ borderWidth: 0.5, borderColor: Colors.brown + '40' }}
-                />
-                <Text className='font-ibm-regular text-[10px] text-neutral-400'>
-                  고정
-                </Text>
-              </View>
-            </View>
-          ) : (
-            <View className='flex-row gap-4 justify-end mt-2 pt-2 border-t border-cream-dark'>
-              <View className='flex-row items-center gap-1'>
-                <View className='w-2 h-2 rounded-full bg-butter' />
-                <Text className='font-ibm-regular text-[10px] text-neutral-400'>
-                  나
-                </Text>
-              </View>
-              <View className='flex-row items-center gap-1'>
-                <View className='w-2 h-2 rounded-full bg-peach' />
-                <Text className='font-ibm-regular text-[10px] text-neutral-400'>
-                  파트너
-                </Text>
-              </View>
-              <View className='flex-row items-center gap-1'>
-                <View className='w-2 h-2 rounded-full bg-lavender' />
-                <Text className='font-ibm-regular text-[10px] text-neutral-400'>
-                  함께
-                </Text>
-              </View>
-            </View>
-          )}
         </View>
 
         {/* 선택일 요약 (가계부 탭만) */}
         {activeTab === 'ledger' && (
           <View className='mx-4 mt-4 flex-row gap-3'>
-            <View className='flex-1 bg-butter/50 rounded-2xl px-4 py-3.5'>
-              <Text className='font-ibm-regular text-xs text-brown/80'>
+            <View className='flex-1 bg-cream rounded-2xl px-4 py-3.5'>
+              <Text className='font-ibm-regular text-xs text-brown/60'>
                 지출
               </Text>
               <Text className='font-ibm-bold text-[15px] text-brown mt-1'>
                 {totalExpense > 0 ? `-${formatAmount(totalExpense)}원` : '-'}
               </Text>
             </View>
-            <View className='flex-1 bg-lavender/60 rounded-2xl px-4 py-3.5'>
-              <Text className='font-ibm-regular text-xs text-brown/80'>
+            <View className='flex-1 bg-cream rounded-2xl px-4 py-3.5'>
+              <Text className='font-ibm-regular text-xs text-brown/60'>
                 수입
               </Text>
               <Text className='font-ibm-bold text-[15px] text-brown mt-1'>
@@ -942,38 +910,6 @@ export default function CalendarTab() {
             </View>
           </View>
         )}
-
-        {/* 탭 전환 */}
-        <View className='mx-4 mt-5 flex-row bg-neutral-100 rounded-2xl p-1'>
-          <TouchableOpacity
-            onPress={() => {
-              setActiveTab('ledger');
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-            className={`flex-1 py-2.5 rounded-xl items-center ${activeTab === 'ledger' ? 'bg-butter' : ''}`}
-            activeOpacity={0.7}
-          >
-            <Text
-              className={`font-ibm-semibold text-sm ${activeTab === 'ledger' ? 'text-brown' : 'text-brown/40'}`}
-            >
-              가계부
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setActiveTab('schedule');
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-            className={`flex-1 py-2.5 rounded-xl items-center ${activeTab === 'schedule' ? 'bg-lavender' : ''}`}
-            activeOpacity={0.7}
-          >
-            <Text
-              className={`font-ibm-semibold text-sm ${activeTab === 'schedule' ? 'text-brown' : 'text-brown/40'}`}
-            >
-              일정
-            </Text>
-          </TouchableOpacity>
-        </View>
 
         {/* 탭 콘텐츠 */}
         <View className='mx-4 mt-4'>
@@ -1003,14 +939,8 @@ export default function CalendarTab() {
             ) : (
               <TouchableOpacity
                 onPress={openScheduleCreate}
-                className='w-8 h-8 rounded-full bg-lavender items-center justify-center'
-                activeOpacity={0.7}
-                style={{
-                  shadowColor: '#000',
-                  shadowOpacity: 0.08,
-                  shadowRadius: 6,
-                  shadowOffset: { width: 0, height: 2 },
-                }}
+                className='w-8 h-8 rounded-full items-center justify-center'
+                activeOpacity={0.6}
               >
                 <Plus size={16} color={Colors.brown} strokeWidth={2.5} />
               </TouchableOpacity>
@@ -1073,7 +1003,7 @@ export default function CalendarTab() {
                         </View>
                       </View>
                       <Text
-                        className={`font-ibm-bold text-sm ${isExpense ? 'text-neutral-800' : 'text-lavender-dark'}`}
+                        className={`font-ibm-bold text-sm ${isExpense ? 'text-neutral-800' : 'text-brown'}`}
                       >
                         {isExpense ? '-' : '+'}
                         {formatAmount(t.amount)}원
@@ -1173,7 +1103,7 @@ export default function CalendarTab() {
               onPress={() =>
                 setTxModal(s => ({ ...s, form: { ...s.form, type } }))
               }
-              className={`flex-1 py-2.5 rounded-xl items-center ${txModal.form.type === type ? (type === 'expense' ? 'bg-peach' : 'bg-lavender') : ''}`}
+              className={`flex-1 py-2.5 rounded-xl items-center ${txModal.form.type === type ? 'bg-white' : ''}`}
               activeOpacity={0.7}
             >
               <Text
@@ -1292,7 +1222,7 @@ export default function CalendarTab() {
                   form: { ...s.form, tag: value },
                 }))
               }
-              className={`flex-1 py-2.5 rounded-2xl items-center ${txModal.form.tag === value ? getTagClassName(value) : 'bg-neutral-100'}`}
+              className={`flex-1 py-2.5 rounded-2xl items-center ${txModal.form.tag === value ? 'bg-neutral-200' : 'bg-neutral-100'}`}
               activeOpacity={0.7}
             >
               <Text
@@ -1445,7 +1375,7 @@ export default function CalendarTab() {
                   form: { ...s.form, tag: value },
                 }))
               }
-              className={`flex-1 py-2.5 rounded-2xl items-center ${scheduleModal.form.tag === value ? getTagClassName(value) : 'bg-neutral-100'}`}
+              className={`flex-1 py-2.5 rounded-2xl items-center ${scheduleModal.form.tag === value ? 'bg-neutral-200' : 'bg-neutral-100'}`}
               activeOpacity={0.7}
             >
               <Text
@@ -1474,24 +1404,6 @@ export default function CalendarTab() {
           onClose={() => setYearMonthModal(false)}
           className='mb-5'
         />
-
-        {/* 오늘 버튼 */}
-        <View className='items-end mb-4'>
-          <TouchableOpacity
-            onPress={() => {
-              setPickerYear(todayDate.getFullYear());
-              setCurrentYear(todayDate.getFullYear());
-              setCurrentMonth(todayDate.getMonth());
-              setSelectedDate(todayStr);
-              setYearMonthModal(false);
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-            className='px-3 py-1.5 rounded-xl bg-butter'
-            activeOpacity={0.7}
-          >
-            <Text className='font-ibm-semibold text-xs text-brown'>오늘</Text>
-          </TouchableOpacity>
-        </View>
 
         {/* 년도 선택 */}
         <View className='flex-row items-center justify-center gap-6 mb-6'>
@@ -1526,7 +1438,7 @@ export default function CalendarTab() {
                   setYearMonthModal(false);
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
-                className={`rounded-2xl py-3 items-center ${isSelected ? 'bg-butter' : 'bg-neutral-100'}`}
+                className={`rounded-2xl py-3 items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                 style={{ width: '23%' }}
                 activeOpacity={0.7}
               >
@@ -1661,7 +1573,7 @@ export default function CalendarTab() {
               <View className='flex-row items-start justify-between'>
                 <View className='flex-1'>
                   <View
-                    className={`self-start px-2.5 py-1 rounded-full mb-2 ${getTagClassName(detailTx?.tag ?? 'me')}`}
+                    className={`self-start px-2.5 py-1 rounded-full mb-2 ${'bg-butter'}`}
                   >
                     <Text className='font-ibm-semibold text-[11px] text-brown'>
                       {detailTx
@@ -1672,9 +1584,7 @@ export default function CalendarTab() {
                   <Text className='font-ibm-bold text-base text-brown'>
                     {detailTx?.memo ?? detailTx?.categories?.name ?? '내역'}
                   </Text>
-                  <Text
-                    className={`font-ibm-bold text-lg mt-0.5 ${detailTx?.type === 'expense' ? 'text-brown' : 'text-lavender-dark'}`}
-                  >
+                  <Text className={`font-ibm-bold text-lg mt-0.5 text-brown`}>
                     {detailTx?.type === 'expense' ? '-' : '+'}
                     {formatAmount(detailTx?.amount ?? 0)}원
                   </Text>
