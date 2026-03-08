@@ -57,24 +57,39 @@ function RootLayoutNav() {
 
   // Supabase 세션 구독
   useEffect(() => {
+    async function fetchProfile(userId: string) {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      if (error && error.code !== 'PGRST116') {
+        console.warn('userProfile 조회 실패:', error.message);
+      }
+      return data ?? null;
+    }
+
+    // 초기 세션을 직접 가져와 로딩 상태를 확실히 해제
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        setUserProfile(await fetchProfile(session.user.id));
+      } else {
+        setUserProfile(null);
+      }
+      setIsProfileLoading(false);
+    });
+
+    // 이후 세션 변경 구독 (INITIAL_SESSION은 이미 처리했으므로 건너뜀)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
+        if (event === 'INITIAL_SESSION') return;
         setSession(newSession);
-
         if (newSession) {
-          const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', newSession.user.id)
-            .single();
-          if (error && error.code !== 'PGRST116') {
-            console.warn('userProfile 조회 실패:', error.message);
-          }
-          setUserProfile(data ?? null);
+          setUserProfile(await fetchProfile(newSession.user.id));
         } else {
           setUserProfile(null);
         }
-        setIsProfileLoading(false);
       }
     );
 
@@ -103,7 +118,8 @@ function RootLayoutNav() {
       if (!inOnboarding) router.replace('/(onboarding)/couple');
     } else {
       // 모두 완료 → 메인
-      if (inAuthGroup || inOnboarding) router.replace('/(tabs)');
+      const inTabs = segments[0] === '(tabs)';
+      if (!inTabs) router.replace('/(tabs)');
     }
   }, [fontsLoaded, isProfileLoading, session, userProfile, segments]);
 
