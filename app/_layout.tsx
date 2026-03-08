@@ -80,33 +80,29 @@ function RootLayoutNav() {
 			return data ?? null;
 		}
 
-		// 초기 세션을 직접 가져와 로딩 상태를 확실히 해제
-		supabase.auth.getSession().then(async ({ data: { session } }) => {
-			setSession(session);
-			if (session) {
-				setUserProfile(await fetchProfile(session.user.id));
-			} else {
-				setUserProfile(null);
-			}
-			setIsProfileLoading(false);
-		}).catch(() => {
-			setIsProfileLoading(false);
-		});
+		// 안전망: 최대 8초 후 강제로 로딩 해제 (네트워크 행 방지)
+		const safetyTimer = setTimeout(() => setIsProfileLoading(false), 8000);
 
-		// 이후 세션 변경 구독 (INITIAL_SESSION은 이미 처리했으므로 건너뜀)
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange(async (event, newSession) => {
-			if (event === "INITIAL_SESSION") return;
 			setSession(newSession);
 			if (newSession) {
 				setUserProfile(await fetchProfile(newSession.user.id));
 			} else {
 				setUserProfile(null);
 			}
+			// INITIAL_SESSION: 앱 시작 시 세션 복원 완료 신호
+			if (event === "INITIAL_SESSION") {
+				clearTimeout(safetyTimer);
+				setIsProfileLoading(false);
+			}
 		});
 
-		return () => subscription.unsubscribe();
+		return () => {
+			subscription.unsubscribe();
+			clearTimeout(safetyTimer);
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
