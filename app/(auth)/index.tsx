@@ -8,15 +8,12 @@ export default function OnboardingScreen() {
 
 	return (
 		<View className="flex-1 bg-butter px-8 justify-center pb-[60px]">
-			<View className="items-start px-[10%]">
-				<Text className="font-ibm-semibold text-[13px] text-white bg-black/30 px-3 py-[5px] rounded-[20px] self-start overflow-hidden">
-					공유 가계부
-				</Text>
-				<Text className="font-ibm-bold text-[80px] text-brown tracking-tight">
+			<View className="items-start px-[5%] pt-[5%]">
+				<Text className="font-ibm-bold text-[80px] text-brown-dark tracking-tight leading-[100px]">
 					차곡
 				</Text>
-				<Text className="font-ibm-semibold text-xl text-brown">
-					우리 둘이 차곡차곡
+				<Text className="font-ibm-regular text-xl text-brown-darker">
+					우리 둘이 차곡차곡{"\n"}써내려가는 공유 가계부
 				</Text>
 
 				<TouchableOpacity
@@ -24,8 +21,10 @@ export default function OnboardingScreen() {
 					className="flex-row items-center gap-1.5 mt-12"
 					activeOpacity={0.6}
 				>
-					<Text className="font-ibm-bold text-[17px] text-brown">시작하기</Text>
-					<ArrowRight size={18} color={Colors.brown} strokeWidth={2.5} />
+					<Text className="font-ibm-bold text-[17px] text-brown-dark">
+						시작하기
+					</Text>
+					<ArrowRight size={18} color={Colors.brownDark} strokeWidth={3} />
 				</TouchableOpacity>
 			</View>
 		</View>

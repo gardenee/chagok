@@ -25,7 +25,9 @@
       "Bash(xcrun simctl:*)",
       "Bash(supabase db:*)",
       "Bash(git add:*)",
-      "Bash(ls /Users/east/Desktop/Dev/chagok/*.md)"
+      "Bash(ls /Users/east/Desktop/Dev/chagok/*.md)",
+      "Bash(git checkout:*)",
+      "Bash(npm list:*)"
     ]
   }
 }
