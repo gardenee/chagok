@@ -22,6 +22,22 @@ export function useCategories() {
   });
 }
 
+export function useExpenseCategories() {
+  const result = useCategories();
+  return {
+    ...result,
+    data: result.data?.filter(c => c.type === 'expense') ?? [],
+  };
+}
+
+export function useIncomeCategories() {
+  const result = useCategories();
+  return {
+    ...result,
+    data: result.data?.filter(c => c.type === 'income') ?? [],
+  };
+}
+
 export function useCreateCategory() {
   const queryClient = useQueryClient();
   const { userProfile } = useAuthStore();

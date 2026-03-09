@@ -75,6 +75,7 @@ import {
   useUpdateCategory,
   useDeleteCategory,
 } from '../../hooks/use-categories';
+import { usePaymentMethods } from '../../hooks/use-payment-methods';
 import { EmptyState } from '../../components/ui/empty-state';
 import type { Schedule, FixedExpense } from '../../types/database';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -87,6 +88,7 @@ type TxFormData = {
   tag: 'me' | 'partner' | 'together';
   memo: string;
   category_id: string | null;
+  payment_method_id: string | null;
 };
 
 type ScheduleFormData = {
@@ -100,6 +102,7 @@ const INITIAL_TX_FORM: TxFormData = {
   tag: 'me',
   memo: '',
   category_id: null,
+  payment_method_id: null,
 };
 const INITIAL_SCHEDULE_FORM: ScheduleFormData = { title: '', tag: 'me' };
 
@@ -213,6 +216,7 @@ export default function CalendarTab() {
     useMonthSchedules(currentYear, currentMonth);
   const { data: fixedExpenses = [] } = useFixedExpenses();
   const { data: categories = [] } = useCategories();
+  const { data: paymentMethods = [] } = usePaymentMethods();
   const { data: comments = [], isLoading: commentsLoading } =
     useTransactionComments(detailTx?.id ?? '');
   const { data: members = [] } = useCoupleMembers();
@@ -291,15 +295,15 @@ export default function CalendarTab() {
   }
   async function handleCatSave() {
     const name = txModal.catForm.name.trim();
-    const amount = parseInt(
-      txModal.catForm.budget_amount.replace(/[^0-9]/g, ''),
-      10,
-    );
+    const isIncome = txModal.form.type === 'income';
+    const amount = isIncome
+      ? 0
+      : parseInt(txModal.catForm.budget_amount.replace(/[^0-9]/g, ''), 10);
     if (!name) {
       Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
       return;
     }
-    if (!amount || amount <= 0) {
+    if (!isIncome && (!amount || amount <= 0)) {
       Alert.alert('입력 오류', '예산을 올바르게 입력해주세요');
       return;
     }
@@ -319,6 +323,7 @@ export default function CalendarTab() {
           color: txModal.catForm.color,
           budget_amount: amount,
           sort_order: categories.length,
+          type: txModal.form.type,
         });
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -473,6 +478,7 @@ export default function CalendarTab() {
         tag: t.tag,
         memo: t.memo ?? '',
         category_id: t.category_id ?? null,
+        payment_method_id: t.payment_method_id ?? null,
       },
       view: 'tx',
     }));
@@ -490,6 +496,7 @@ export default function CalendarTab() {
       tag: txModal.form.tag,
       memo: txModal.form.memo.trim() || null,
       category_id: txModal.form.category_id,
+      payment_method_id: txModal.form.payment_method_id,
       date: selectedDate,
     };
     try {
@@ -1015,9 +1022,17 @@ export default function CalendarTab() {
                             </Text>
                           </View>
                           {cat && (
-                            <Text className='font-ibm-regular text-xs text-neutral-400'>
-                              {cat.name}
-                            </Text>
+                            <View
+                              className='px-1.5 py-0.5 rounded-full'
+                              style={{ backgroundColor: cat.color + '33' }}
+                            >
+                              <Text
+                                className='font-ibm-semibold text-[10px]'
+                                style={{ color: cat.color }}
+                              >
+                                {cat.name}
+                              </Text>
+                            </View>
                           )}
                         </View>
                       </View>
@@ -1153,7 +1168,7 @@ export default function CalendarTab() {
         />
 
         {/* 카테고리 선택 */}
-        <View className='mb-5'>
+        <View className='mb-4'>
           <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
             <Text className='font-ibm-semibold text-xs text-neutral-600'>
               카테고리
@@ -1188,46 +1203,126 @@ export default function CalendarTab() {
                   추가
                 </Text>
               </TouchableOpacity>
-              {categories.map(c => {
-                const Icon = ICON_MAP[c.icon] ?? Wallet;
-                const isSelected = txModal.form.category_id === c.id;
-                return (
-                  <TouchableOpacity
-                    key={c.id}
-                    onPress={() => {
-                      setTxModal(s => ({
-                        ...s,
-                        form: {
-                          ...s.form,
-                          category_id: isSelected ? null : c.id,
-                        },
-                      }));
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }}
-                    className='items-center gap-1'
-                    activeOpacity={0.7}
-                  >
-                    <View
-                      className='w-12 h-12 rounded-2xl items-center justify-center'
-                      style={{
-                        backgroundColor: c.color + '30',
-                        borderWidth: isSelected ? 2 : 0,
-                        borderColor: isSelected ? c.color : 'transparent',
+              {categories
+                .filter(c => c.type === txModal.form.type)
+                .map(c => {
+                  const Icon = ICON_MAP[c.icon] ?? Wallet;
+                  const isSelected = txModal.form.category_id === c.id;
+                  return (
+                    <TouchableOpacity
+                      key={c.id}
+                      onPress={() => {
+                        setTxModal(s => ({
+                          ...s,
+                          form: {
+                            ...s.form,
+                            category_id: isSelected ? null : c.id,
+                          },
+                        }));
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       }}
+                      className='items-center gap-1'
+                      activeOpacity={0.7}
                     >
-                      <Icon size={20} color={c.color} strokeWidth={2.5} />
-                    </View>
-                    <Text
-                      className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                    >
-                      {c.name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+                      <View
+                        className='w-12 h-12 rounded-2xl items-center justify-center'
+                        style={{
+                          backgroundColor: c.color + '30',
+                          borderWidth: isSelected ? 2 : 0,
+                          borderColor: isSelected ? c.color : 'transparent',
+                        }}
+                      >
+                        <Icon size={20} color={c.color} strokeWidth={2.5} />
+                      </View>
+                      <Text
+                        className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                      >
+                        {c.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
             </View>
           </ScrollView>
         </View>
+
+        {/* 결제수단 선택 (지출이고 결제수단이 있을 때만) */}
+        {txModal.form.type === 'expense' && paymentMethods.length > 0 && (
+          <View className='mb-4'>
+            <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
+              결제수단
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyboardShouldPersistTaps='handled'
+            >
+              <View className='flex-row gap-2 pr-2'>
+                <TouchableOpacity
+                  onPress={() =>
+                    setTxModal(s => ({
+                      ...s,
+                      form: { ...s.form, payment_method_id: null },
+                    }))
+                  }
+                  className='items-center gap-1'
+                  activeOpacity={0.7}
+                >
+                  <View
+                    className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100'
+                    style={{
+                      borderWidth:
+                        txModal.form.payment_method_id === null ? 2 : 0,
+                      borderColor: Colors.brown,
+                    }}
+                  >
+                    <Wallet size={20} color='#A3A3A3' strokeWidth={2.5} />
+                  </View>
+                  <Text className='font-ibm-semibold text-[10px] text-neutral-500'>
+                    없음
+                  </Text>
+                </TouchableOpacity>
+                {paymentMethods.map(pm => {
+                  const isSelected = txModal.form.payment_method_id === pm.id;
+                  return (
+                    <TouchableOpacity
+                      key={pm.id}
+                      onPress={() => {
+                        setTxModal(s => ({
+                          ...s,
+                          form: {
+                            ...s.form,
+                            payment_method_id: isSelected ? null : pm.id,
+                          },
+                        }));
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      className='items-center gap-1'
+                      activeOpacity={0.7}
+                    >
+                      <View
+                        className='w-12 h-12 rounded-2xl items-center justify-center'
+                        style={{
+                          backgroundColor: pm.color + '50',
+                          borderWidth: isSelected ? 2 : 0,
+                          borderColor: isSelected ? pm.color : 'transparent',
+                        }}
+                      >
+                        <Wallet size={20} color={pm.color} strokeWidth={2.5} />
+                      </View>
+                      <Text
+                        className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                        numberOfLines={1}
+                      >
+                        {pm.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </View>
+        )}
 
         <View className='flex-row gap-2 mb-6'>
           {tagOptions.map(({ value, label }) => (
@@ -1288,7 +1383,8 @@ export default function CalendarTab() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
           >
-            {categories.length === 0 ? (
+            {categories.filter(c => c.type === txModal.form.type).length ===
+            0 ? (
               <View className='py-16 items-center gap-2'>
                 <Text className='font-ibm-semibold text-sm text-neutral-400'>
                   카테고리가 없어요
@@ -1296,36 +1392,38 @@ export default function CalendarTab() {
               </View>
             ) : (
               <View className='gap-2'>
-                {categories.map(c => {
-                  const Icon = ICON_MAP[c.icon] ?? Wallet;
-                  return (
-                    <TouchableOpacity
-                      key={c.id}
-                      onPress={() => openCatEdit(c)}
-                      activeOpacity={0.8}
-                    >
-                      <View className='flex-row items-center gap-3 bg-neutral-50 rounded-2xl px-4 py-3'>
-                        <View
-                          className='w-10 h-10 rounded-xl items-center justify-center'
-                          style={{ backgroundColor: c.color + '55' }}
-                        >
-                          <Icon size={18} color={c.color} strokeWidth={2.5} />
+                {categories
+                  .filter(c => c.type === txModal.form.type)
+                  .map(c => {
+                    const Icon = ICON_MAP[c.icon] ?? Wallet;
+                    return (
+                      <TouchableOpacity
+                        key={c.id}
+                        onPress={() => openCatEdit(c)}
+                        activeOpacity={0.8}
+                      >
+                        <View className='flex-row items-center gap-3 bg-neutral-50 rounded-2xl px-4 py-3'>
+                          <View
+                            className='w-10 h-10 rounded-xl items-center justify-center'
+                            style={{ backgroundColor: c.color + '55' }}
+                          >
+                            <Icon size={18} color={c.color} strokeWidth={2.5} />
+                          </View>
+                          <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
+                            {c.name}
+                          </Text>
+                          <Text className='font-ibm-regular text-xs text-neutral-400'>
+                            {c.budget_amount.toLocaleString('ko-KR')}원
+                          </Text>
+                          <ChevronRight
+                            size={16}
+                            color='#D4D4D4'
+                            strokeWidth={2}
+                          />
                         </View>
-                        <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
-                          {c.name}
-                        </Text>
-                        <Text className='font-ibm-regular text-xs text-neutral-400'>
-                          {c.budget_amount.toLocaleString('ko-KR')}원
-                        </Text>
-                        <ChevronRight
-                          size={16}
-                          color='#D4D4D4'
-                          strokeWidth={2}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
+                      </TouchableOpacity>
+                    );
+                  })}
               </View>
             )}
           </ScrollView>

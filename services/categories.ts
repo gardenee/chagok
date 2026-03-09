@@ -7,6 +7,7 @@ export type CategoryInput = {
   color: string;
   budget_amount: number;
   sort_order?: number;
+  type?: 'expense' | 'income';
 };
 
 export async function fetchCategories(coupleId: string): Promise<Category[]> {

@@ -37,6 +37,11 @@ import {
   ChartCandlestick,
   Joystick,
   Landmark,
+  Banknote,
+  Laptop,
+  TrendingUp,
+  Coins,
+  Building2,
   type LucideIcon,
 } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
@@ -71,6 +76,11 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   invest: ChartCandlestick,
   game: Joystick,
   bank: Landmark,
+  salary: Banknote,
+  freelance: Laptop,
+  dividend: TrendingUp,
+  allowance: Coins,
+  rental: Building2,
 };
 
 export const COLOR_OPTIONS = [
@@ -126,6 +136,7 @@ type Props = {
   onSave: () => void;
   onDelete?: () => void;
   mode?: 'budget' | 'category';
+  categoryType?: 'expense' | 'income';
 };
 
 export function CategoryFormScreen({
@@ -137,12 +148,18 @@ export function CategoryFormScreen({
   onSave,
   onDelete,
   mode = 'category',
+  categoryType = 'expense',
 }: Props) {
   const isBudgetMode = mode === 'budget';
+  const isIncome = categoryType === 'income';
   const title = isBudgetMode
-    ? editingId
-      ? '예산/카테고리 수정'
-      : '예산/카테고리 추가'
+    ? isIncome
+      ? editingId
+        ? '수입 카테고리 수정'
+        : '수입 카테고리 추가'
+      : editingId
+        ? '예산/카테고리 수정'
+        : '예산/카테고리 추가'
     : editingId
       ? '카테고리 수정'
       : '카테고리 추가';
@@ -184,8 +201,8 @@ export function CategoryFormScreen({
             className='mb-6'
           />
 
-          {/* 예산 (budget 모드에서 상단 배치) */}
-          {isBudgetMode && (
+          {/* 예산 (budget 모드이고 수입 카테고리가 아닌 경우) */}
+          {isBudgetMode && !isIncome && (
             <>
               <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
                 월 예산

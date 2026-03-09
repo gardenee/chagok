@@ -2,7 +2,8 @@ import { supabase } from '../lib/supabase';
 import type { Transaction } from '../types/database';
 
 export type TransactionRow = Transaction & {
-  categories: { name: string } | null;
+  categories: { name: string; icon: string; color: string } | null;
+  payment_methods: { name: string } | null;
 };
 
 export type TransactionInput = {
@@ -12,6 +13,7 @@ export type TransactionInput = {
   memo?: string | null;
   date: string;
   category_id?: string | null;
+  payment_method_id?: string | null;
 };
 
 export async function fetchMonthTransactions(
@@ -24,13 +26,13 @@ export async function fetchMonthTransactions(
   const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   const { data, error } = await supabase
     .from('transactions')
-    .select('*, categories(name)')
+    .select('*, categories(name, icon, color), payment_methods(name)')
     .eq('couple_id', coupleId)
     .gte('date', startDate)
     .lte('date', endDate)
     .order('created_at', { ascending: true });
   if (error) throw error;
-  return data as TransactionRow[];
+  return data as unknown as TransactionRow[];
 }
 
 export async function createTransaction(
@@ -41,10 +43,10 @@ export async function createTransaction(
   const { data, error } = await supabase
     .from('transactions')
     .insert({ ...input, couple_id: coupleId, user_id: userId })
-    .select('*, categories(name)')
+    .select('*, categories(name, icon, color), payment_methods(name)')
     .single();
   if (error) throw error;
-  return data as TransactionRow;
+  return data as unknown as TransactionRow;
 }
 
 export async function updateTransaction(
@@ -55,10 +57,10 @@ export async function updateTransaction(
     .from('transactions')
     .update(input)
     .eq('id', id)
-    .select('*, categories(name)')
+    .select('*, categories(name, icon, color), payment_methods(name)')
     .single();
   if (error) throw error;
-  return data as TransactionRow;
+  return data as unknown as TransactionRow;
 }
 
 export async function deleteTransaction(id: string): Promise<void> {
