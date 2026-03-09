@@ -10,6 +10,7 @@ import {
   type TransactionRow,
   type TransactionInput,
 } from '../services/transactions';
+import { sendPartnerTransactionPush } from '../services/notifications';
 
 export type { TransactionRow, TransactionInput };
 
@@ -58,8 +59,22 @@ export function useCreateTransaction() {
       if (!coupleId || !userId) throw new Error('로그인이 필요합니다');
       return createTransaction(coupleId, userId, input);
     },
-    onSuccess: () => {
+    onSuccess: newTransaction => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+
+      const coupleId = userProfile?.couple_id;
+      const nickname = userProfile?.nickname;
+      const userId = session?.user.id;
+      if (coupleId && nickname && userId) {
+        sendPartnerTransactionPush({
+          coupleId,
+          senderId: userId,
+          senderNickname: nickname,
+          amount: newTransaction.amount,
+          type: newTransaction.type,
+          categoryName: newTransaction.categories?.name,
+        }).catch(() => {});
+      }
     },
   });
 }

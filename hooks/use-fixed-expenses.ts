@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useAuthStore } from '../store/auth';
 import {
   fetchFixedExpenses,
@@ -7,6 +8,7 @@ import {
   deleteFixedExpense,
   type FixedExpenseInput,
 } from '../services/fixed-expenses';
+import { scheduleFixedExpenseReminders } from '../services/notifications';
 import type { FixedExpense } from '../types/database';
 
 export type { FixedExpenseInput };
@@ -15,11 +17,19 @@ export function useFixedExpenses() {
   const { userProfile } = useAuthStore();
   const coupleId = userProfile?.couple_id;
 
-  return useQuery<FixedExpense[]>({
+  const query = useQuery<FixedExpense[]>({
     queryKey: ['fixed-expenses', coupleId],
     queryFn: () => fetchFixedExpenses(coupleId!),
     enabled: !!coupleId,
   });
+
+  useEffect(() => {
+    if (query.data) {
+      scheduleFixedExpenseReminders(query.data).catch(() => {});
+    }
+  }, [query.data]);
+
+  return query;
 }
 
 export function useCreateFixedExpense() {

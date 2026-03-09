@@ -8,6 +8,7 @@ import {
   deleteComment,
   type CommentRow,
 } from '../services/comments';
+import { sendPartnerCommentPush } from '../services/notifications';
 
 export type { CommentRow };
 
@@ -47,7 +48,7 @@ export function useTransactionComments(transactionId: string) {
 
 export function useCreateComment() {
   const queryClient = useQueryClient();
-  const { session } = useAuthStore();
+  const { session, userProfile } = useAuthStore();
 
   return useMutation({
     mutationFn: ({
@@ -66,6 +67,18 @@ export function useCreateComment() {
         ['comments', newComment.transaction_id],
         old => [...(old ?? []), newComment],
       );
+
+      const coupleId = userProfile?.couple_id;
+      const nickname = userProfile?.nickname;
+      const userId = session?.user.id;
+      if (coupleId && nickname && userId) {
+        sendPartnerCommentPush({
+          coupleId,
+          commenterId: userId,
+          commenterNickname: nickname,
+          content: newComment.content,
+        }).catch(() => {});
+      }
     },
   });
 }
