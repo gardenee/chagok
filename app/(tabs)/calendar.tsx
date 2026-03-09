@@ -22,22 +22,19 @@ import { ModalTextInput, AmountInput } from '../../components/ui/modal-inputs';
 import { LoadingState } from '../../components/ui/loading-state';
 import { ItemCard } from '../../components/ui/item-card';
 import { useState, useMemo, useRef } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 import {
   ChevronLeft,
   ChevronRight,
-  TrendingDown,
-  TrendingUp,
   CalendarX,
   Plus,
   Trash2,
-  MessageCircle,
   Send,
   CalendarDays,
   Repeat,
   Wallet,
+  X,
 } from 'lucide-react-native';
 import {
   CategoryFormScreen,
@@ -65,7 +62,6 @@ import {
   useTransactionComments,
   useCreateComment,
   useDeleteComment,
-  type CommentRow,
 } from '../../hooks/use-comments';
 import { useCoupleMembers } from '../../hooks/use-couple-members';
 import {
@@ -81,6 +77,7 @@ import {
 } from '../../hooks/use-categories';
 import { EmptyState } from '../../components/ui/empty-state';
 import type { Schedule, FixedExpense } from '../../types/database';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -123,7 +120,7 @@ function formatTime(dateStr: string): string {
 }
 
 function getTagBgColor(tag: 'me' | 'partner' | 'together'): string {
-  return { me: '#FAD97A', partner: '#F7B8A0', together: '#FAD97A' }[tag];
+  return { me: '#FAD97A', partner: '#F7B8A0', together: '#D4C5F0' }[tag];
 }
 
 function formatAmountShort(n: number): string {
@@ -148,10 +145,10 @@ interface DayCell {
 }
 
 export default function CalendarTab() {
+  const insets = useSafeAreaInsets();
   const todayDate = new Date();
   const todayStr = formatDate(todayDate);
   const { session, userProfile } = useAuthStore();
-  const queryClient = useQueryClient();
   const myId = session?.user.id ?? '';
 
   const [currentYear, setCurrentYear] = useState(todayDate.getFullYear());
@@ -412,7 +409,7 @@ export default function CalendarTab() {
     return map;
   }, [transactions]);
 
-  // 가계부 탭용: 날짜별 지출/수입 합계
+  // 가계부 탭용: 날짜별 지출/수입 합계 (고정지출 포함)
   const dailyTotals = useMemo(() => {
     const map: Record<string, { expense: number; income: number }> = {};
     for (const t of transactions) {
@@ -420,8 +417,18 @@ export default function CalendarTab() {
       if (t.type === 'expense') map[t.date].expense += t.amount;
       else map[t.date].income += t.amount;
     }
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    for (const fe of fixedExpenses) {
+      if (fe.due_day <= daysInMonth) {
+        const m = String(currentMonth + 1).padStart(2, '0');
+        const d = String(fe.due_day).padStart(2, '0');
+        const dateStr = `${currentYear}-${m}-${d}`;
+        if (!map[dateStr]) map[dateStr] = { expense: 0, income: 0 };
+        map[dateStr].expense += fe.amount;
+      }
+    }
     return map;
-  }, [transactions]);
+  }, [transactions, fixedExpenses, currentYear, currentMonth]);
 
   const schedulesByDate = useMemo(() => {
     const map: Record<string, Schedule[]> = {};
@@ -624,14 +631,10 @@ export default function CalendarTab() {
     const text = commentText.trim();
     setCommentText('');
     try {
-      const newComment = await createComment.mutateAsync({
+      await createComment.mutateAsync({
         transactionId: txId,
         content: text,
       });
-      queryClient.setQueryData(
-        ['comments', txId],
-        (old: CommentRow[] | undefined) => [...(old ?? []), newComment],
-      );
       setTimeout(
         () => commentScrollRef.current?.scrollToEnd({ animated: true }),
         50,
@@ -752,7 +755,7 @@ export default function CalendarTab() {
             {WEEKDAYS.map((day, i) => (
               <View key={day} className='flex-1 items-center py-1.5'>
                 <Text
-                  className={`font-ibm-semibold text-xs ${i === 0 ? 'text-peach' : i === 6 ? 'text-neutral-400' : 'text-brown/70'}`}
+                  className={`font-ibm-semibold text-xs ${i === 0 ? 'text-peach-dark' : 'text-neutral-600'}`}
                 >
                   {day}
                 </Text>
@@ -768,13 +771,15 @@ export default function CalendarTab() {
               const dayTotals = dailyTotals[item.date];
               const dayExpense = dayTotals?.expense ?? 0;
               const dayIncome = dayTotals?.income ?? 0;
-              const hasFixed =
-                item.isCurrentMonth &&
-                fixedExpenses.some(fe => fe.due_day === item.day);
-              // 일정 탭용
+              // 일정 탭용 — 2행×3열, 최대 5도트 + +n
               const daySchedules = schedulesByDate[item.date] ?? [];
-              const visibleSchedules = daySchedules.slice(0, 2);
-              const extraCount = daySchedules.length - 2;
+              const hasExtraDots = daySchedules.length > 6;
+              const visibleDots = hasExtraDots
+                ? daySchedules.slice(0, 5)
+                : daySchedules;
+              const extraDotCount = hasExtraDots ? daySchedules.length - 5 : 0;
+              const dotRow1 = visibleDots.slice(0, 3);
+              const dotRow2 = visibleDots.slice(3);
               return (
                 <TouchableOpacity
                   key={`${item.date}-${index}`}
@@ -787,11 +792,15 @@ export default function CalendarTab() {
                     }
                     setSelectedDate(item.date);
                   }}
-                  className='w-[14.28%] items-center py-1'
+                  className='w-[14.28%] items-center'
+                  style={{
+                    paddingVertical: 3,
+                    opacity: item.isCurrentMonth ? 1 : 0.35,
+                  }}
                   activeOpacity={0.7}
                 >
                   <View
-                    className={`w-9 h-9 rounded-full items-center justify-center ${isSelected ? 'bg-butter' : item.isToday ? 'bg-butter/50' : ''}`}
+                    className={`w-8 h-8 rounded-full items-center justify-center ${isSelected ? 'bg-butter' : item.isToday ? 'bg-butter/40' : ''}`}
                     style={
                       isSelected
                         ? {
@@ -805,84 +814,93 @@ export default function CalendarTab() {
                   >
                     <Text
                       className={`font-ibm-semibold text-sm ${
-                        !item.isCurrentMonth
-                          ? 'text-neutral-300'
+                        isSelected
+                          ? 'text-brown-darker'
                           : col === 0
-                            ? isSelected
-                              ? 'text-brown'
-                              : 'text-peach'
-                            : col === 6
-                              ? isSelected
-                                ? 'text-brown'
-                                : 'text-neutral-500'
-                              : isSelected
-                                ? 'text-brown'
-                                : 'text-neutral-800'
+                            ? 'text-peach-dark'
+                            : 'text-neutral-800'
                       }`}
                     >
                       {item.day}
                     </Text>
                   </View>
-                  {/* 날짜 셀 하단: 탭 무관하게 동일 높이 */}
-                  <View className='w-full items-center' style={{ height: 26 }}>
-                    {activeTab === 'ledger' ? (
-                      <>
-                        {item.isCurrentMonth && dayExpense > 0 && (
-                          <Text
-                            className='font-ibm-semibold text-peach text-center'
-                            style={{ fontSize: 8, lineHeight: 12 }}
-                            numberOfLines={1}
-                          >
-                            -{formatAmountShort(dayExpense)}
-                          </Text>
-                        )}
-                        {item.isCurrentMonth && dayIncome > 0 && (
-                          <Text
-                            className='font-ibm-semibold text-brown text-center'
-                            style={{
-                              fontSize: 8,
-                              lineHeight: 12,
-                              opacity: 0.55,
-                            }}
-                            numberOfLines={1}
-                          >
-                            +{formatAmountShort(dayIncome)}
-                          </Text>
-                        )}
-                        {hasFixed && dayExpense === 0 && dayIncome === 0 && (
-                          <View
-                            className='w-1 h-1 rounded-full bg-butter mt-1'
-                            style={{
-                              borderWidth: 0.5,
-                              borderColor: Colors.brown + '40',
-                            }}
-                          />
-                        )}
-                      </>
-                    ) : (
-                      <View className='w-full px-0.5 mt-0.5'>
-                        {item.isCurrentMonth &&
-                          visibleSchedules.map(s => (
-                            <Text
+                  {/* 날짜 셀 하단 — 두 탭 height 동일 */}
+                  {activeTab === 'ledger' ? (
+                    <View
+                      className='w-full items-center'
+                      style={{ height: 30, overflow: 'hidden', paddingTop: 2 }}
+                    >
+                      {item.isCurrentMonth && dayExpense > 0 && (
+                        <Text
+                          className='font-ibm-bold text-peach-dark text-center'
+                          style={{ fontSize: 10, lineHeight: 14 }}
+                          numberOfLines={1}
+                        >
+                          -{formatAmountShort(dayExpense)}
+                        </Text>
+                      )}
+                      {item.isCurrentMonth && dayIncome > 0 && (
+                        <Text
+                          className='font-ibm-bold text-olive-dark text-center'
+                          style={{ fontSize: 10, lineHeight: 14 }}
+                          numberOfLines={1}
+                        >
+                          +{formatAmountShort(dayIncome)}
+                        </Text>
+                      )}
+                    </View>
+                  ) : (
+                    <View
+                      className='w-full items-center justify-center'
+                      style={{ height: 30, gap: 3 }}
+                    >
+                      {item.isCurrentMonth && dotRow1.length > 0 && (
+                        <View
+                          className='flex-row justify-center'
+                          style={{ gap: 3 }}
+                        >
+                          {dotRow1.map(s => (
+                            <View
                               key={s.id}
-                              className='font-ibm-semibold text-brown/70'
-                              style={{ fontSize: 7, lineHeight: 11 }}
-                              numberOfLines={1}
-                            >
-                              {s.title}
-                            </Text>
+                              style={{
+                                width: 7,
+                                height: 7,
+                                borderRadius: 3.5,
+                                backgroundColor: getTagBgColor(s.tag),
+                              }}
+                            />
                           ))}
-                        {item.isCurrentMonth && extraCount > 0 && (
-                          <Text
-                            className='font-ibm-regular text-neutral-400 text-center'
-                            style={{ fontSize: 7, lineHeight: 10 }}
+                        </View>
+                      )}
+                      {item.isCurrentMonth &&
+                        (dotRow2.length > 0 || extraDotCount > 0) && (
+                          <View
+                            className='flex-row justify-center items-center'
+                            style={{ gap: 3 }}
                           >
-                            +{extraCount}개
-                          </Text>
+                            {dotRow2.map(s => (
+                              <View
+                                key={s.id}
+                                style={{
+                                  width: 7,
+                                  height: 7,
+                                  borderRadius: 3.5,
+                                  backgroundColor: getTagBgColor(s.tag),
+                                }}
+                              />
+                            ))}
+                            {extraDotCount > 0 && (
+                              <Text
+                                className='font-ibm-semibold text-neutral-600'
+                                style={{ fontSize: 10, lineHeight: 14 }}
+                              >
+                                +{extraDotCount}
+                              </Text>
+                            )}
+                          </View>
                         )}
-                      </View>
-                    )}
-                  </View>
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })}
@@ -892,19 +910,19 @@ export default function CalendarTab() {
         {/* 선택일 요약 (가계부 탭만) */}
         {activeTab === 'ledger' && (
           <View className='mx-4 mt-4 flex-row gap-3'>
-            <View className='flex-1 bg-cream rounded-2xl px-4 py-3.5'>
-              <Text className='font-ibm-regular text-xs text-brown/60'>
+            <View className='flex-1 bg-peach/70 rounded-2xl px-4 py-3.5'>
+              <Text className='font-ibm-semibold text-xs text-neutral-600'>
                 지출
               </Text>
-              <Text className='font-ibm-bold text-[15px] text-brown mt-1'>
+              <Text className='font-ibm-bold text-base text-brown-darker mt-0.5'>
                 {totalExpense > 0 ? `-${formatAmount(totalExpense)}원` : '-'}
               </Text>
             </View>
-            <View className='flex-1 bg-cream rounded-2xl px-4 py-3.5'>
-              <Text className='font-ibm-regular text-xs text-brown/60'>
+            <View className='flex-1 bg-olive/50 rounded-2xl px-4 py-3.5'>
+              <Text className='font-ibm-semibold text-xs text-neutral-600'>
                 수입
               </Text>
-              <Text className='font-ibm-bold text-[15px] text-brown mt-1'>
+              <Text className='font-ibm-bold text-base text-brown-darker mt-0.5'>
                 {totalIncome > 0 ? `+${formatAmount(totalIncome)}원` : '-'}
               </Text>
             </View>
@@ -917,7 +935,7 @@ export default function CalendarTab() {
           <View className='flex-row items-center justify-between mb-3'>
             <Text className='font-ibm-bold text-base text-neutral-700'>
               {getSelectedDateLabel(selectedDate)}{' '}
-              {activeTab === 'ledger' ? '거래' : '일정'}
+              {activeTab === 'ledger' ? '거래내역' : '일정목록'}
             </Text>
             {activeTab === 'ledger' ? (
               <View className='flex-row gap-2'>
@@ -926,14 +944,18 @@ export default function CalendarTab() {
                   className='w-8 h-8 rounded-full items-center justify-center'
                   activeOpacity={0.6}
                 >
-                  <Repeat size={16} color={Colors.brown} strokeWidth={2.5} />
+                  <Repeat
+                    size={16}
+                    color={Colors.brownDark}
+                    strokeWidth={2.5}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={openTxCreate}
                   className='w-8 h-8 rounded-full items-center justify-center'
                   activeOpacity={0.6}
                 >
-                  <Plus size={16} color={Colors.brown} strokeWidth={2.5} />
+                  <Plus size={16} color={Colors.brownDark} strokeWidth={2.5} />
                 </TouchableOpacity>
               </View>
             ) : (
@@ -942,7 +964,7 @@ export default function CalendarTab() {
                 className='w-8 h-8 rounded-full items-center justify-center'
                 activeOpacity={0.6}
               >
-                <Plus size={16} color={Colors.brown} strokeWidth={2.5} />
+                <Plus size={16} color={Colors.brownDark} strokeWidth={2.5} />
               </TouchableOpacity>
             )}
           </View>
@@ -985,13 +1007,10 @@ export default function CalendarTab() {
                           <View
                             className='px-1.5 py-0.5 rounded-full'
                             style={{
-                              backgroundColor: getTagBgColor(t.tag) + '99',
+                              backgroundColor: getTagBgColor(t.tag),
                             }}
                           >
-                            <Text
-                              className='font-ibm-semibold text-brown'
-                              style={{ fontSize: 9 }}
-                            >
+                            <Text className='font-ibm-semibold text-xs text-brown'>
                               {resolveTagLabel(t.tag, t.user_id)}
                             </Text>
                           </View>
@@ -1003,7 +1022,7 @@ export default function CalendarTab() {
                         </View>
                       </View>
                       <Text
-                        className={`font-ibm-bold text-sm ${isExpense ? 'text-neutral-800' : 'text-brown'}`}
+                        className={`font-ibm-bold text-sm ${isExpense ? 'text-peach-dark' : 'text-olive-dark'}`}
                       >
                         {isExpense ? '-' : '+'}
                         {formatAmount(t.amount)}원
@@ -1107,7 +1126,7 @@ export default function CalendarTab() {
               activeOpacity={0.7}
             >
               <Text
-                className={`font-ibm-semibold text-sm ${txModal.form.type === type ? 'text-brown' : 'text-brown/40'}`}
+                className={`font-ibm-semibold text-sm ${txModal.form.type === type ? 'text-neutral-800' : 'text-neutral-500'}`}
               >
                 {type === 'expense' ? '지출' : '수입'}
               </Text>
@@ -1136,7 +1155,7 @@ export default function CalendarTab() {
         {/* 카테고리 선택 */}
         <View className='mb-5'>
           <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-            <Text className='font-ibm-semibold text-xs text-neutral-500'>
+            <Text className='font-ibm-semibold text-xs text-neutral-600'>
               카테고리
             </Text>
             {categories.length > 0 && (
@@ -1145,7 +1164,7 @@ export default function CalendarTab() {
                 activeOpacity={0.7}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Text className='font-ibm-semibold text-xs text-brown/60'>
+                <Text className='font-ibm-semibold text-xs text-neutral-600 bg-neutral-200 rounded-2xl px-2 py-0.5'>
                   수정
                 </Text>
               </TouchableOpacity>
@@ -1165,7 +1184,7 @@ export default function CalendarTab() {
                 <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
                   <Plus size={18} color='#A3A3A3' strokeWidth={2} />
                 </View>
-                <Text className='font-ibm-semibold text-[10px] text-neutral-400'>
+                <Text className='font-ibm-semibold text-[10px] text-neutral-600'>
                   추가
                 </Text>
               </TouchableOpacity>
@@ -1201,7 +1220,7 @@ export default function CalendarTab() {
                       />
                     </View>
                     <Text
-                      className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-brown' : 'text-neutral-400'}`}
+                      className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-700' : 'text-neutral-600'}`}
                     >
                       {c.name}
                     </Text>
@@ -1226,7 +1245,7 @@ export default function CalendarTab() {
               activeOpacity={0.7}
             >
               <Text
-                className={`font-ibm-semibold text-sm ${txModal.form.tag === value ? 'text-brown' : 'text-brown/40'}`}
+                className={`font-ibm-semibold text-sm ${txModal.form.tag === value ? 'text-neutral-800' : 'text-neutral-500'}`}
               >
                 {label}
               </Text>
@@ -1366,25 +1385,33 @@ export default function CalendarTab() {
         />
 
         <View className='flex-row gap-2 mb-6'>
-          {tagOptions.map(({ value, label }) => (
-            <TouchableOpacity
-              key={value}
-              onPress={() =>
-                setScheduleModal(s => ({
-                  ...s,
-                  form: { ...s.form, tag: value },
-                }))
-              }
-              className={`flex-1 py-2.5 rounded-2xl items-center ${scheduleModal.form.tag === value ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-              activeOpacity={0.7}
-            >
-              <Text
-                className={`font-ibm-semibold text-sm ${scheduleModal.form.tag === value ? 'text-brown' : 'text-brown/40'}`}
+          {tagOptions.map(({ value, label }) => {
+            const isSelected = scheduleModal.form.tag === value;
+            return (
+              <TouchableOpacity
+                key={value}
+                onPress={() =>
+                  setScheduleModal(s => ({
+                    ...s,
+                    form: { ...s.form, tag: value },
+                  }))
+                }
+                className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? '' : 'bg-neutral-100'}`}
+                style={
+                  isSelected
+                    ? { backgroundColor: getTagBgColor(value) }
+                    : undefined
+                }
+                activeOpacity={0.7}
               >
-                {label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  className={`font-ibm-semibold text-sm ${isSelected ? 'text-brown' : 'text-brown/40'}`}
+                >
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <SaveButton
@@ -1399,28 +1426,60 @@ export default function CalendarTab() {
         visible={yearMonthModal}
         onClose={() => setYearMonthModal(false)}
       >
-        <BottomSheetHeader
-          title='월 선택'
-          onClose={() => setYearMonthModal(false)}
-          className='mb-5'
-        />
-
-        {/* 년도 선택 */}
-        <View className='flex-row items-center justify-center gap-6 mb-6'>
+        {/* 오늘 버튼(좌) + 연도 토글(중앙) + 닫기(우) */}
+        <View className='flex-row items-center justify-between mb-5'>
+          {/* 오늘 버튼 */}
           <TouchableOpacity
-            onPress={() => setPickerYear(y => y - 1)}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            onPress={() => {
+              setPickerYear(todayDate.getFullYear());
+              setCurrentYear(todayDate.getFullYear());
+              setCurrentMonth(todayDate.getMonth());
+              setYearMonthModal(false);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+            className='px-3 py-1.5 rounded-xl bg-neutral-100'
+            style={{ minWidth: 52 }}
+            activeOpacity={0.7}
           >
-            <ChevronLeft size={22} color={Colors.brown} strokeWidth={2.5} />
+            <Text className='font-ibm-semibold text-xs text-brown/70 text-center'>
+              오늘
+            </Text>
           </TouchableOpacity>
-          <Text className='font-ibm-bold text-2xl text-neutral-800 w-24 text-center'>
-            {pickerYear}년
-          </Text>
+
+          {/* 연도 토글 */}
+          <View className='flex-row items-center gap-3'>
+            <TouchableOpacity
+              onPress={() => setPickerYear(y => y - 1)}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
+              <ChevronLeft
+                size={22}
+                color={Colors.brownDarker}
+                strokeWidth={2.5}
+              />
+            </TouchableOpacity>
+            <Text className='font-ibm-bold text-xl text-brown-darker w-20 text-center'>
+              {pickerYear}년
+            </Text>
+            <TouchableOpacity
+              onPress={() => setPickerYear(y => y + 1)}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
+              <ChevronRight
+                size={22}
+                color={Colors.brownDarker}
+                strokeWidth={2.5}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* 닫기 */}
           <TouchableOpacity
-            onPress={() => setPickerYear(y => y + 1)}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            onPress={() => setYearMonthModal(false)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={{ minWidth: 52, alignItems: 'flex-end' }}
           >
-            <ChevronRight size={22} color={Colors.brown} strokeWidth={2.5} />
+            <X size={22} color='#A3A3A3' strokeWidth={2} />
           </TouchableOpacity>
         </View>
 
@@ -1483,42 +1542,34 @@ export default function CalendarTab() {
           className='mb-4'
         />
 
-        <View className='bg-neutral-100 rounded-2xl px-4 py-3 mb-6 flex-row items-center justify-between'>
-          <Text className='font-ibm-regular text-sm text-brown/60'>
-            매월 결제일
+        <View className='mb-6'>
+          <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+            납부일
           </Text>
-          <View className='flex-row items-center gap-3'>
-            <TouchableOpacity
-              onPress={() =>
-                setFixedModal(s => ({
-                  ...s,
-                  form: {
-                    ...s.form,
-                    due_day: Math.max(1, s.form.due_day - 1),
-                  },
-                }))
-              }
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <ChevronLeft size={18} color={Colors.brown} strokeWidth={2} />
-            </TouchableOpacity>
-            <Text className='font-ibm-bold text-base text-brown w-10 text-center'>
-              {fixedModal.form.due_day}일
-            </Text>
-            <TouchableOpacity
-              onPress={() =>
-                setFixedModal(s => ({
-                  ...s,
-                  form: {
-                    ...s.form,
-                    due_day: Math.min(31, s.form.due_day + 1),
-                  },
-                }))
-              }
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <ChevronRight size={18} color={Colors.brown} strokeWidth={2} />
-            </TouchableOpacity>
+          <View className='flex-row flex-wrap gap-1.5'>
+            {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
+              const isSelected = fixedModal.form.due_day === day;
+              return (
+                <TouchableOpacity
+                  key={day}
+                  onPress={() =>
+                    setFixedModal(s => ({
+                      ...s,
+                      form: { ...s.form, due_day: day },
+                    }))
+                  }
+                  className={`rounded-xl items-center justify-center ${isSelected ? 'bg-butter' : 'bg-neutral-100'}`}
+                  style={{ width: 38, height: 36 }}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    className={`font-ibm-semibold text-xs ${isSelected ? 'text-brown' : 'text-neutral-500'}`}
+                  >
+                    {day}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
@@ -1551,6 +1602,7 @@ export default function CalendarTab() {
             className='bg-white rounded-t-3xl'
             style={{
               maxHeight: SCREEN_HEIGHT * 0.45,
+              paddingBottom: Math.max(insets.bottom, 24),
               shadowColor: '#000',
               shadowOpacity: 0.1,
               shadowRadius: 20,
@@ -1573,9 +1625,14 @@ export default function CalendarTab() {
               <View className='flex-row items-start justify-between'>
                 <View className='flex-1'>
                   <View
-                    className={`self-start px-2.5 py-1 rounded-full mb-2 ${'bg-butter'}`}
+                    className='self-start px-2.5 py-1 rounded-full mb-2'
+                    style={{
+                      backgroundColor: detailTx
+                        ? getTagBgColor(detailTx.tag)
+                        : '#FAD97A',
+                    }}
                   >
-                    <Text className='font-ibm-semibold text-[11px] text-brown'>
+                    <Text className='font-ibm-semibold text-xs text-brown'>
                       {detailTx
                         ? resolveTagLabel(detailTx.tag, detailTx.user_id)
                         : ''}
@@ -1584,7 +1641,9 @@ export default function CalendarTab() {
                   <Text className='font-ibm-bold text-base text-brown'>
                     {detailTx?.memo ?? detailTx?.categories?.name ?? '내역'}
                   </Text>
-                  <Text className={`font-ibm-bold text-lg mt-0.5 text-brown`}>
+                  <Text
+                    className={`font-ibm-bold text-lg mt-0.5 ${detailTx?.type === 'expense' ? 'text-peach-dark' : 'text-olive-dark'}`}
+                  >
                     {detailTx?.type === 'expense' ? '-' : '+'}
                     {formatAmount(detailTx?.amount ?? 0)}원
                   </Text>
@@ -1597,7 +1656,7 @@ export default function CalendarTab() {
                     }
                   }}
                 >
-                  <Text className='font-ibm-semibold text-xs text-brown/40'>
+                  <Text className='font-ibm-semibold text-xs text-neutral-600'>
                     수정
                   </Text>
                 </TouchableOpacity>
@@ -1669,7 +1728,7 @@ export default function CalendarTab() {
               )}
             </ScrollView>
 
-            <View className='flex-row items-center gap-3 px-6 py-4'>
+            <View className='flex-row items-center gap-3 px-6 pt-4'>
               <View className='flex-1 bg-neutral-100 rounded-2xl px-4 py-3'>
                 <TextInput
                   className='font-ibm-regular text-sm text-brown'

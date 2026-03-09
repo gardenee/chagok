@@ -53,18 +53,16 @@ export function AmountInput({
     <View
       className={`bg-neutral-100 rounded-2xl px-4 py-3.5 flex-row items-center ${className}`}
     >
-      <Text className='font-ibm-semibold text-neutral-500 text-base mr-2'>
-        ₩
-      </Text>
+      <Text className='font-ibm-regular text-sm text-neutral-800 mr-2'>₩</Text>
       <TextInput
-        className='flex-1 font-ibm-semibold text-base text-neutral-800'
+        className='flex-1 font-ibm-regular text-sm text-neutral-800'
         placeholder={placeholder}
         placeholderTextColor='#A3A3A3'
         keyboardType='numeric'
         value={value}
         onChangeText={v => onChangeText(v.replace(/[^0-9]/g, ''))}
       />
-      <Text className='font-ibm-regular text-sm text-brown/40'>원</Text>
+      <Text className='font-ibm-regular text-sm text-neutral-800'>원</Text>
     </View>
   );
 }

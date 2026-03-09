@@ -134,7 +134,7 @@ export function CategoryFormScreen({
               onPress={onBack}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <X size={22} color={Colors.brown} strokeWidth={2.5} />
+              <X size={22} color='#A3A3A3' strokeWidth={2} />
             </TouchableOpacity>
           </View>
 

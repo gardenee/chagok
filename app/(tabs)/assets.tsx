@@ -200,16 +200,9 @@ export default function AssetsTab() {
               return (
                 <View key={group.key}>
                   <View className='flex-row items-center justify-between mb-2'>
-                    <View className='flex-row items-center gap-2'>
-                      <group.Icon
-                        size={14}
-                        color={Colors.brown + '80'}
-                        strokeWidth={2}
-                      />
-                      <Text className='font-ibm-semibold text-xs text-neutral-500'>
-                        {group.label}
-                      </Text>
-                    </View>
+                    <Text className='font-ibm-semibold text-xs text-neutral-500'>
+                      {group.label}
+                    </Text>
                     <Text className='font-ibm-semibold text-xs text-neutral-500'>
                       {formatAmount(groupTotal)}원
                     </Text>
@@ -262,7 +255,7 @@ export default function AssetsTab() {
           유형
         </Text>
         <View className='flex-row flex-wrap gap-2 mb-4'>
-          {ASSET_TYPES.map(({ key, label, Icon, color }) => {
+          {ASSET_TYPES.map(({ key, label }) => {
             const isSelected = modal.form.type === key;
             return (
               <TouchableOpacity
@@ -270,13 +263,11 @@ export default function AssetsTab() {
                 onPress={() =>
                   setModal(s => ({ ...s, form: { ...s.form, type: key } }))
                 }
-                className={`flex-row items-center gap-1.5 px-3 py-2 rounded-2xl ${isSelected ? '' : 'bg-neutral-100'}`}
-                style={isSelected ? { backgroundColor: color } : {}}
+                className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                 activeOpacity={0.7}
               >
-                <Icon size={14} color={Colors.brown} strokeWidth={2.5} />
                 <Text
-                  className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                  className={`font-ibm-semibold text-xs ${isSelected ? 'text-brown-dark' : 'text-brown-dark/60'}`}
                 >
                   {label}
                 </Text>

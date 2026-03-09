@@ -7,13 +7,7 @@ import {
   Alert,
 } from 'react-native';
 import { useState } from 'react';
-import {
-  Repeat,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Wallet,
-} from 'lucide-react-native';
+import { Repeat, Trash2, Wallet } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '../../constants/colors';
 import {
@@ -129,14 +123,6 @@ export default function FixedScreen() {
     ]);
   }
 
-  function adjustDueDay(delta: number) {
-    setModal(s => {
-      const next = s.form.due_day + delta;
-      if (next < 1 || next > 31) return s;
-      return { ...s, form: { ...s.form, due_day: next } };
-    });
-  }
-
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
@@ -235,38 +221,27 @@ export default function FixedScreen() {
           <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
             납부일
           </Text>
-          <View className='bg-neutral-100 rounded-2xl px-4 py-3 flex-row items-center justify-between'>
-            <TouchableOpacity
-              onPress={() => adjustDueDay(-1)}
-              disabled={modal.form.due_day <= 1}
-              className='w-9 h-9 rounded-xl bg-cream items-center justify-center'
-              activeOpacity={0.7}
-            >
-              <ChevronLeft
-                size={18}
-                color={
-                  modal.form.due_day <= 1 ? Colors.brown + '30' : Colors.brown
-                }
-                strokeWidth={2.5}
-              />
-            </TouchableOpacity>
-            <Text className='font-ibm-bold text-base text-neutral-800'>
-              매월 {modal.form.due_day}일
-            </Text>
-            <TouchableOpacity
-              onPress={() => adjustDueDay(1)}
-              disabled={modal.form.due_day >= 31}
-              className='w-9 h-9 rounded-xl bg-cream items-center justify-center'
-              activeOpacity={0.7}
-            >
-              <ChevronRight
-                size={18}
-                color={
-                  modal.form.due_day >= 31 ? Colors.brown + '30' : Colors.brown
-                }
-                strokeWidth={2.5}
-              />
-            </TouchableOpacity>
+          <View className='flex-row flex-wrap gap-1.5'>
+            {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
+              const isSelected = modal.form.due_day === day;
+              return (
+                <TouchableOpacity
+                  key={day}
+                  onPress={() =>
+                    setModal(s => ({ ...s, form: { ...s.form, due_day: day } }))
+                  }
+                  className={`rounded-xl items-center justify-center ${isSelected ? 'bg-butter' : 'bg-neutral-100'}`}
+                  style={{ width: 38, height: 36 }}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    className={`font-ibm-semibold text-xs ${isSelected ? 'text-brown' : 'text-neutral-500'}`}
+                  >
+                    {day}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
