@@ -10,6 +10,8 @@ import {
   type TransactionRow,
   type TransactionInput,
 } from '../services/transactions';
+import { sendPartnerTransactionPush } from '../services/notifications';
+import { useNotificationSettingsStore } from '../store/notification-settings';
 
 export type { TransactionRow, TransactionInput };
 
@@ -50,6 +52,7 @@ export function useMonthTransactions(year: number, month: number) {
 export function useCreateTransaction() {
   const queryClient = useQueryClient();
   const { userProfile, session } = useAuthStore();
+  const { partnerTransaction: notifyEnabled } = useNotificationSettingsStore();
 
   return useMutation({
     mutationFn: (input: TransactionInput) => {
@@ -58,8 +61,22 @@ export function useCreateTransaction() {
       if (!coupleId || !userId) throw new Error('로그인이 필요합니다');
       return createTransaction(coupleId, userId, input);
     },
-    onSuccess: () => {
+    onSuccess: newTransaction => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+
+      const coupleId = userProfile?.couple_id;
+      const nickname = userProfile?.nickname;
+      const userId = session?.user.id;
+      if (notifyEnabled && coupleId && nickname && userId) {
+        sendPartnerTransactionPush({
+          coupleId,
+          senderId: userId,
+          senderNickname: nickname,
+          amount: newTransaction.amount,
+          type: newTransaction.type,
+          categoryName: newTransaction.categories?.name,
+        }).catch(() => {});
+      }
     },
   });
 }

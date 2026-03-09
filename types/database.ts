@@ -35,6 +35,7 @@ export interface Database {
           couple_id: string | null;
           nickname: string;
           avatar_url: string | null;
+          expo_push_token: string | null;
           created_at: string;
         };
         Insert: {
@@ -42,12 +43,14 @@ export interface Database {
           couple_id?: string | null;
           nickname: string;
           avatar_url?: string | null;
+          expo_push_token?: string | null;
           created_at?: string;
         };
         Update: {
           couple_id?: string | null;
           nickname?: string;
           avatar_url?: string | null;
+          expo_push_token?: string | null;
         };
         Relationships: never[];
       };
