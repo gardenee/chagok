@@ -131,17 +131,20 @@ export async function sendPartnerCommentPush({
   commenterId,
   commenterNickname,
   content,
+  transactionId,
 }: {
   coupleId: string;
   commenterId: string;
   commenterNickname: string;
   content: string;
+  transactionId: string;
 }): Promise<void> {
   const token = await getPartnerToken(coupleId, commenterId);
   if (!token) return;
 
   await sendExpoPush(token, `${commenterNickname}의 댓글`, content, {
     type: 'PARTNER_COMMENT',
+    transactionId,
   });
 }
 

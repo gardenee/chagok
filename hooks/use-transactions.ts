@@ -11,6 +11,7 @@ import {
   type TransactionInput,
 } from '../services/transactions';
 import { sendPartnerTransactionPush } from '../services/notifications';
+import { useNotificationSettingsStore } from '../store/notification-settings';
 
 export type { TransactionRow, TransactionInput };
 
@@ -51,6 +52,7 @@ export function useMonthTransactions(year: number, month: number) {
 export function useCreateTransaction() {
   const queryClient = useQueryClient();
   const { userProfile, session } = useAuthStore();
+  const { partnerTransaction: notifyEnabled } = useNotificationSettingsStore();
 
   return useMutation({
     mutationFn: (input: TransactionInput) => {
@@ -65,7 +67,7 @@ export function useCreateTransaction() {
       const coupleId = userProfile?.couple_id;
       const nickname = userProfile?.nickname;
       const userId = session?.user.id;
-      if (coupleId && nickname && userId) {
+      if (notifyEnabled && coupleId && nickname && userId) {
         sendPartnerTransactionPush({
           coupleId,
           senderId: userId,

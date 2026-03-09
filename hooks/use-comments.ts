@@ -9,6 +9,7 @@ import {
   type CommentRow,
 } from '../services/comments';
 import { sendPartnerCommentPush } from '../services/notifications';
+import { useNotificationSettingsStore } from '../store/notification-settings';
 
 export type { CommentRow };
 
@@ -49,6 +50,7 @@ export function useTransactionComments(transactionId: string) {
 export function useCreateComment() {
   const queryClient = useQueryClient();
   const { session, userProfile } = useAuthStore();
+  const { comment: notifyEnabled } = useNotificationSettingsStore();
 
   return useMutation({
     mutationFn: ({
@@ -71,12 +73,13 @@ export function useCreateComment() {
       const coupleId = userProfile?.couple_id;
       const nickname = userProfile?.nickname;
       const userId = session?.user.id;
-      if (coupleId && nickname && userId) {
+      if (notifyEnabled && coupleId && nickname && userId) {
         sendPartnerCommentPush({
           coupleId,
           commenterId: userId,
           commenterNickname: nickname,
           content: newComment.content,
+          transactionId: newComment.transaction_id,
         }).catch(() => {});
       }
     },

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { View, Text } from 'react-native';
 import { Slot, useRouter, useSegments, SplashScreen } from 'expo-router';
 import * as Linking from 'expo-linking';
+import * as Notifications from 'expo-notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   useFonts,
@@ -12,8 +13,17 @@ import {
 } from '@expo-google-fonts/ibm-plex-sans-kr';
 import { useAuthStore } from '../store/auth';
 import { supabase } from '../lib/supabase';
-import type { Session } from '@supabase/supabase-js';
 import { registerMyPushToken } from '../services/notifications';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 SplashScreen.preventAutoHideAsync();
 
@@ -53,6 +63,8 @@ function RootLayoutNav() {
   const [isProfileLoading, setIsProfileLoading] = useState(true);
   // 안전망 타이머 ref (여러 effect에서 공유)
   const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingNotificationRef =
+    useRef<Notifications.NotificationResponse | null>(null);
 
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();
@@ -141,6 +153,45 @@ function RootLayoutNav() {
       console.warn('푸시 토큰 등록 실패:', error);
     });
   }, [userProfile?.id]);
+
+  // 알림 탭 리스너 (앱 실행 중 / 백그라운드)
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(
+      response => {
+        pendingNotificationRef.current = response;
+      },
+    );
+
+    // 앱이 종료된 상태에서 알림 탭으로 열린 경우 (cold start)
+    Notifications.getLastNotificationResponseAsync().then(response => {
+      if (response) pendingNotificationRef.current = response;
+    });
+
+    return () => sub.remove();
+  }, []);
+
+  // 유저가 탭에 들어온 후 pending 알림 처리
+  useEffect(() => {
+    if (!fontsLoaded || isProfileLoading || !userProfile?.couple_id) return;
+    const response = pendingNotificationRef.current;
+    if (!response) return;
+
+    pendingNotificationRef.current = null;
+    const data = response.notification.request.content.data as Record<
+      string,
+      string
+    >;
+
+    if (data.type === 'PARTNER_TRANSACTION') {
+      router.push('/(tabs)/calendar');
+    } else if (data.type === 'PARTNER_COMMENT') {
+      router.push('/(tabs)/calendar');
+    } else if (data.type === 'FIXED_EXPENSE') {
+      router.push('/(tabs)/fixed');
+    } else if (data.type === 'COUPLE_JOINED') {
+      router.push('/(tabs)/settings');
+    }
+  }, [fontsLoaded, isProfileLoading, userProfile?.couple_id]);
 
   // 3-way 라우팅 분기
   useEffect(() => {

@@ -28,6 +28,7 @@ import { ModalTextInput } from '../../components/ui/modal-inputs';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '../../constants/colors';
 import { useAuthStore } from '../../store/auth';
+import { useNotificationSettingsStore } from '../../store/notification-settings';
 import { supabase } from '../../lib/supabase';
 import { useCouple, useUpdateBookName } from '../../hooks/use-couple';
 import { useCoupleMembers } from '../../hooks/use-couple-members';
@@ -161,6 +162,14 @@ export default function SettingsScreen() {
   const { data: members = [] } = useCoupleMembers();
   const updateBookName = useUpdateBookName();
   const updateNickname = useUpdateNickname();
+  const {
+    partnerTransaction,
+    comment,
+    fixedExpenseReminder,
+    setPartnerTransaction,
+    setComment,
+    setFixedExpenseReminder,
+  } = useNotificationSettingsStore();
 
   const [editModal, setEditModal] = useState<{
     type: 'bookName' | 'nickname' | null;
@@ -289,28 +298,53 @@ export default function SettingsScreen() {
         <View className='mt-3'>
           <SettingsCard>
             {[
-              { label: '짝꿍 지출 알림' },
-              { label: '댓글 알림' },
-              { label: '고정지출 리마인더' },
+              {
+                label: '짝꿍 지출 알림',
+                value: partnerTransaction,
+                onToggle: (v: boolean) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setPartnerTransaction(v);
+                },
+              },
+              {
+                label: '댓글 알림',
+                value: comment,
+                onToggle: (v: boolean) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setComment(v);
+                },
+              },
+              {
+                label: '고정지출 리마인더',
+                value: fixedExpenseReminder,
+                onToggle: (v: boolean) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setFixedExpenseReminder(v);
+                },
+              },
             ].map((item, i) => (
               <View key={item.label}>
                 {i > 0 && <Divider />}
                 <View className='flex-row items-center px-4 py-4 bg-cream'>
                   <View className='w-8 h-8 rounded-xl bg-cream-dark/70 items-center justify-center mr-3'>
-                    <Bell size={16} color='#A3A3A3' strokeWidth={2} />
+                    <Bell
+                      size={16}
+                      color={item.value ? Colors.brown : '#A3A3A3'}
+                      strokeWidth={2}
+                    />
                   </View>
-                  <Text className='flex-1 font-ibm-semibold text-sm text-neutral-400'>
+                  <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
                     {item.label}
                   </Text>
-                  <Switch value={false} disabled />
+                  <Switch
+                    value={item.value}
+                    onValueChange={item.onToggle}
+                    trackColor={{ false: '#E5E5E5', true: Colors.butter }}
+                    thumbColor='#fff'
+                  />
                 </View>
               </View>
             ))}
-            <View className='px-4 pb-3'>
-              <Text className='font-ibm-regular text-xs text-neutral-600 text-center'>
-                알림 설정은 준비 중이에요
-              </Text>
-            </View>
           </SettingsCard>
         </View>
 
