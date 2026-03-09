@@ -14,8 +14,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chagok.app",
-      "usesAppleSignIn": false
+      "bundleIdentifier": "app.chagok.ios",
+      "usesAppleSignIn": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
