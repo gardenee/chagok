@@ -77,6 +77,10 @@ import {
 } from '../../hooks/use-categories';
 import { usePaymentMethods } from '../../hooks/use-payment-methods';
 import { EmptyState } from '../../components/ui/empty-state';
+import { IconBox } from '../../components/ui/icon-box';
+import { SegmentControl } from '../../components/ui/segment-control';
+import { ColorPill, TagPill } from '../../components/ui/color-pill';
+import { formatAmount, formatAmountShort } from '../../utils/format';
 import type { Schedule, FixedExpense } from '../../types/database';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -113,10 +117,6 @@ function formatDate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-function formatAmount(amount: number): string {
-  return amount.toLocaleString('ko-KR');
-}
-
 function formatTime(dateStr: string): string {
   const d = new Date(dateStr);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -124,15 +124,6 @@ function formatTime(dateStr: string): string {
 
 function getTagBgColor(tag: 'me' | 'partner' | 'together'): string {
   return { me: '#FAD97A', partner: '#F7B8A0', together: '#D4C5F0' }[tag];
-}
-
-function formatAmountShort(n: number): string {
-  if (n >= 10000) {
-    const man = n / 10000;
-    return `${man % 1 === 0 ? Math.floor(man) : man.toFixed(1)}만`;
-  }
-  if (n >= 1000) return `${Math.floor(n / 1000)}천`;
-  return String(n);
 }
 
 function getSelectedDateLabel(dateStr: string): string {
@@ -991,18 +982,13 @@ export default function CalendarTab() {
                   const isExpense = t.type === 'expense';
                   return (
                     <ItemCard key={t.id} onPress={() => setDetailTx(t)}>
-                      <View
-                        className='w-10 h-10 rounded-2xl items-center justify-center'
-                        style={{
-                          backgroundColor: cat ? cat.color + '55' : '#F5F5F5',
-                        }}
-                      >
+                      <IconBox color={cat?.color ?? '#A3A3A3'}>
                         <CatIcon
                           size={18}
                           color={cat ? cat.color : '#A3A3A3'}
                           strokeWidth={2.5}
                         />
-                      </View>
+                      </IconBox>
                       <View className='flex-1'>
                         <Text
                           className='font-ibm-semibold text-sm text-neutral-800'
@@ -1011,28 +997,12 @@ export default function CalendarTab() {
                           {t.memo ?? cat?.name ?? '기타'}
                         </Text>
                         <View className='flex-row items-center gap-1.5 mt-0.5'>
-                          <View
-                            className='px-1.5 py-0.5 rounded-full'
-                            style={{
-                              backgroundColor: getTagBgColor(t.tag),
-                            }}
-                          >
-                            <Text className='font-ibm-semibold text-xs text-brown'>
-                              {resolveTagLabel(t.tag, t.user_id)}
-                            </Text>
-                          </View>
+                          <TagPill
+                            tag={t.tag}
+                            label={resolveTagLabel(t.tag, t.user_id)}
+                          />
                           {cat && (
-                            <View
-                              className='px-1.5 py-0.5 rounded-full'
-                              style={{ backgroundColor: cat.color + '33' }}
-                            >
-                              <Text
-                                className='font-ibm-semibold text-[10px]'
-                                style={{ color: cat.color }}
-                              >
-                                {cat.name}
-                              </Text>
-                            </View>
+                            <ColorPill label={cat.name} color={cat.color} />
                           )}
                         </View>
                       </View>
@@ -1093,14 +1063,11 @@ export default function CalendarTab() {
                     <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
                       {s.title}
                     </Text>
-                    <View
-                      className='px-2 py-1 rounded-full'
-                      style={{ backgroundColor: getTagBgColor(s.tag) }}
-                    >
-                      <Text className='font-ibm-semibold text-xs text-brown'>
-                        {resolveTagLabel(s.tag, s.user_id)}
-                      </Text>
-                    </View>
+                    <TagPill
+                      tag={s.tag}
+                      label={resolveTagLabel(s.tag, s.user_id)}
+                      className='px-2 py-1'
+                    />
                   </ItemCard>
                 ))}
               </View>
@@ -1130,24 +1097,20 @@ export default function CalendarTab() {
           className='mb-5'
         />
 
-        <View className='flex-row bg-neutral-100 rounded-2xl p-1 mb-5'>
-          {(['expense', 'income'] as const).map(type => (
-            <TouchableOpacity
-              key={type}
-              onPress={() =>
-                setTxModal(s => ({ ...s, form: { ...s.form, type } }))
-              }
-              className={`flex-1 py-2.5 rounded-xl items-center ${txModal.form.type === type ? 'bg-white' : ''}`}
-              activeOpacity={0.7}
-            >
-              <Text
-                className={`font-ibm-semibold text-sm ${txModal.form.type === type ? 'text-neutral-800' : 'text-neutral-500'}`}
-              >
-                {type === 'expense' ? '지출' : '수입'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <SegmentControl
+          options={[
+            { value: 'expense' as const, label: '지출' },
+            { value: 'income' as const, label: '수입' },
+          ]}
+          value={txModal.form.type}
+          onChange={type =>
+            setTxModal(s => ({ ...s, form: { ...s.form, type } }))
+          }
+          bgClassName='bg-neutral-100 rounded-2xl'
+          className='mb-5'
+          activeTextClassName='text-neutral-800'
+          inactiveTextClassName='text-neutral-500'
+        />
 
         <AmountInput
           value={txModal.form.amount}
@@ -1720,20 +1683,13 @@ export default function CalendarTab() {
             >
               <View className='flex-row items-start justify-between'>
                 <View className='flex-1'>
-                  <View
-                    className='self-start px-2.5 py-1 rounded-full mb-2'
-                    style={{
-                      backgroundColor: detailTx
-                        ? getTagBgColor(detailTx.tag)
-                        : '#FAD97A',
-                    }}
-                  >
-                    <Text className='font-ibm-semibold text-xs text-brown'>
-                      {detailTx
-                        ? resolveTagLabel(detailTx.tag, detailTx.user_id)
-                        : ''}
-                    </Text>
-                  </View>
+                  {detailTx && (
+                    <TagPill
+                      tag={detailTx.tag}
+                      label={resolveTagLabel(detailTx.tag, detailTx.user_id)}
+                      className='self-start px-2.5 py-1 mb-2'
+                    />
+                  )}
                   <Text className='font-ibm-bold text-base text-brown'>
                     {detailTx?.memo ?? detailTx?.categories?.name ?? '내역'}
                   </Text>

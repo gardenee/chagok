@@ -29,6 +29,9 @@ import { SummaryCard } from '../../components/ui/summary-card';
 import { LoadingState } from '../../components/ui/loading-state';
 import { SwipeableDeleteRow } from '../../components/ui/swipeable-delete-row';
 import { ICON_MAP } from '../../components/ui/category-form-screen';
+import { IconBox } from '../../components/ui/icon-box';
+import { ColorPill } from '../../components/ui/color-pill';
+import { formatAmount } from '../../utils/format';
 import type { FixedExpense } from '../../types/database';
 
 type FormData = {
@@ -186,13 +189,13 @@ export default function FixedScreen() {
                         }}
                       >
                         {/* 아이콘 */}
-                        <View className='w-11 h-11 rounded-2xl items-center justify-center bg-peach/40'>
+                        <IconBox color={Colors.peach} size='md'>
                           <Repeat
                             size={19}
                             color={Colors.peach}
                             strokeWidth={2.5}
                           />
-                        </View>
+                        </IconBox>
 
                         {/* 이름 + 날짜 + 카테고리 */}
                         <View className='flex-1'>
@@ -204,29 +207,18 @@ export default function FixedScreen() {
                               {ordinalDay(item.due_day)}
                             </Text>
                             {cat && CatIcon && (
-                              <View
-                                className='flex-row items-center gap-0.5 px-1.5 py-0.5 rounded-full'
-                                style={{ backgroundColor: cat.color + '33' }}
-                              >
-                                <CatIcon
-                                  size={10}
-                                  color={cat.color}
-                                  strokeWidth={2.5}
-                                />
-                                <Text
-                                  className='font-ibm-semibold text-[10px]'
-                                  style={{ color: cat.color }}
-                                >
-                                  {cat.name}
-                                </Text>
-                              </View>
+                              <ColorPill
+                                label={cat.name}
+                                color={cat.color}
+                                icon={CatIcon}
+                              />
                             )}
                           </View>
                         </View>
 
                         {/* 금액 */}
                         <Text className='font-ibm-bold text-sm text-neutral-800'>
-                          {item.amount.toLocaleString('ko-KR')}원
+                          {formatAmount(item.amount)}원
                         </Text>
                       </View>
                     </TouchableOpacity>
