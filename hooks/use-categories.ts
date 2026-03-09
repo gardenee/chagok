@@ -1,15 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
-import type { Category } from '../types/database';
 import { useAuthStore } from '../store/auth';
+import {
+  fetchCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  type CategoryInput,
+} from '../services/categories';
+import type { Category } from '../types/database';
 
-type CategoryInput = {
-  name: string;
-  icon: string;
-  color: string;
-  budget_amount: number;
-  sort_order?: number;
-};
+export type { CategoryInput };
 
 export function useCategories() {
   const { userProfile } = useAuthStore();
@@ -17,18 +17,25 @@ export function useCategories() {
 
   return useQuery<Category[]>({
     queryKey: ['categories', coupleId],
-    queryFn: async () => {
-      if (!coupleId) return [];
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('couple_id', coupleId)
-        .order('sort_order', { ascending: true });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => fetchCategories(coupleId!),
     enabled: !!coupleId,
   });
+}
+
+export function useExpenseCategories() {
+  const result = useCategories();
+  return {
+    ...result,
+    data: result.data?.filter(c => c.type === 'expense') ?? [],
+  };
+}
+
+export function useIncomeCategories() {
+  const result = useCategories();
+  return {
+    ...result,
+    data: result.data?.filter(c => c.type === 'income') ?? [],
+  };
 }
 
 export function useCreateCategory() {
@@ -36,56 +43,53 @@ export function useCreateCategory() {
   const { userProfile } = useAuthStore();
 
   return useMutation({
-    mutationFn: async (input: CategoryInput) => {
+    mutationFn: (input: CategoryInput) => {
       const coupleId = userProfile?.couple_id;
       if (!coupleId) throw new Error('로그인이 필요합니다');
-      const { data, error } = await supabase
-        .from('categories')
-        .insert({ ...input, couple_id: coupleId })
-        .select()
-        .single();
-      if (error) throw error;
-      return data as Category;
+      return createCategory(coupleId, input);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    onSuccess: newItem => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      queryClient.setQueryData<Category[]>(['categories', coupleId], old => [
+        ...(old ?? []),
+        newItem,
+      ]);
     },
   });
 }
 
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      ...update
-    }: { id: string } & Partial<CategoryInput>) => {
-      const { data, error } = await supabase
-        .from('categories')
-        .update(update)
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data as Category;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    mutationFn: ({ id, ...input }: Partial<CategoryInput> & { id: string }) =>
+      updateCategory(id, input),
+    onSuccess: updatedItem => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      queryClient.setQueryData<Category[]>(['categories', coupleId], old =>
+        (old ?? []).map(item =>
+          item.id === updatedItem.id ? updatedItem : item,
+        ),
+      );
     },
   });
 }
 
 export function useDeleteCategory() {
   const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('categories').delete().eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    mutationFn: (id: string) => deleteCategory(id),
+    onSuccess: (_, id) => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      queryClient.setQueryData<Category[]>(['categories', coupleId], old =>
+        (old ?? []).filter(item => item.id !== id),
+      );
     },
   });
 }

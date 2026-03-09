@@ -19,7 +19,7 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { staleTime: 1000 * 60 * 5, retry: 1 },
+    queries: { staleTime: 0, retry: 1 },
   },
 });
 
@@ -114,6 +114,9 @@ function RootLayoutNav() {
   // 세션이 생길 때 프로필 조회 (세션 구독과 분리하여 비동기 처리)
   useEffect(() => {
     if (!session) return;
+
+    // 재로그인 시 프로필 조회 완료 전 라우팅 방지
+    setIsProfileLoading(true);
 
     let cancelled = false;
 

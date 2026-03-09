@@ -63,6 +63,7 @@ export interface Database {
           color: string;
           budget_amount: number;
           sort_order: number;
+          type: 'expense' | 'income';
           created_at: string;
         };
         Insert: {
@@ -73,6 +74,7 @@ export interface Database {
           color?: string;
           budget_amount?: number;
           sort_order?: number;
+          type?: 'expense' | 'income';
           created_at?: string;
         };
         Update: {
@@ -80,6 +82,58 @@ export interface Database {
           icon?: string;
           color?: string;
           budget_amount?: number;
+          sort_order?: number;
+          type?: 'expense' | 'income';
+        };
+        Relationships: never[];
+      };
+      payment_methods: {
+        Row: {
+          id: string;
+          couple_id: string;
+          name: string;
+          type:
+            | 'credit_card'
+            | 'debit_card'
+            | 'transit'
+            | 'welfare'
+            | 'points'
+            | 'prepaid'
+            | 'other';
+          icon: string;
+          color: string;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          couple_id: string;
+          name: string;
+          type?:
+            | 'credit_card'
+            | 'debit_card'
+            | 'transit'
+            | 'welfare'
+            | 'points'
+            | 'prepaid'
+            | 'other';
+          icon?: string;
+          color?: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          name?: string;
+          type?:
+            | 'credit_card'
+            | 'debit_card'
+            | 'transit'
+            | 'welfare'
+            | 'points'
+            | 'prepaid'
+            | 'other';
+          icon?: string;
+          color?: string;
           sort_order?: number;
         };
         Relationships: never[];
@@ -90,6 +144,7 @@ export interface Database {
           couple_id: string;
           user_id: string;
           category_id: string | null;
+          payment_method_id: string | null;
           amount: number;
           type: 'expense' | 'income';
           tag: 'me' | 'partner' | 'together';
@@ -102,6 +157,7 @@ export interface Database {
           couple_id: string;
           user_id: string;
           category_id?: string | null;
+          payment_method_id?: string | null;
           amount: number;
           type: 'expense' | 'income';
           tag: 'me' | 'partner' | 'together';
@@ -111,6 +167,7 @@ export interface Database {
         };
         Update: {
           category_id?: string | null;
+          payment_method_id?: string | null;
           amount?: number;
           type?: 'expense' | 'income';
           tag?: 'me' | 'partner' | 'together';
@@ -253,6 +310,9 @@ export type Schedule = Database['public']['Tables']['schedules']['Row'];
 export type FixedExpense =
   Database['public']['Tables']['fixed_expenses']['Row'];
 export type Asset = Database['public']['Tables']['assets']['Row'];
+export type PaymentMethod =
+  Database['public']['Tables']['payment_methods']['Row'];
 
 export type TransactionType = Transaction['type'];
 export type Tag = Transaction['tag'];
+export type CategoryType = 'expense' | 'income';
