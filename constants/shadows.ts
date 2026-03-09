@@ -22,4 +22,11 @@ export const Shadows = {
     shadowRadius: 20,
     elevation: 8,
   },
+  soft: {
+    shadowColor: Colors.brown,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 2,
+  },
 } as const;

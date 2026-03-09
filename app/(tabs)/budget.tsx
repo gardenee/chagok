@@ -16,8 +16,12 @@ import {
 } from 'lucide-react-native';
 import { ScreenHeader } from '../../components/ui/screen-header';
 import { LoadingState } from '../../components/ui/loading-state';
+import { EmptyState } from '../../components/ui/empty-state';
+import { IconBox } from '../../components/ui/icon-box';
+import { SegmentControl } from '../../components/ui/segment-control';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '../../constants/colors';
+import { Shadows } from '../../constants/shadows';
 import {
   useCategories,
   useCreateCategory,
@@ -33,10 +37,7 @@ import {
   INITIAL_CATEGORY_FORM,
 } from '../../components/ui/category-form-screen';
 import { SwipeableDeleteRow } from '../../components/ui/swipeable-delete-row';
-
-function formatAmount(n: number): string {
-  return n.toLocaleString('ko-KR');
-}
+import { formatAmount } from '../../utils/format';
 
 function CategoryIcon({
   iconKey,
@@ -246,25 +247,14 @@ export default function BudgetTab() {
 
         {/* 지출/수입 세그먼트 컨트롤 */}
         <View className='mx-4 mb-4'>
-          <View className='flex-row bg-butter/40 rounded-3xl p-1'>
-            {(['expense', 'income'] as const).map(tab => (
-              <TouchableOpacity
-                key={tab}
-                onPress={() => {
-                  setCategoryTab(tab);
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }}
-                className={`flex-1 py-2.5 rounded-2xl items-center ${categoryTab === tab ? 'bg-white' : ''}`}
-                activeOpacity={0.7}
-              >
-                <Text
-                  className={`font-ibm-semibold text-sm ${categoryTab === tab ? 'text-brown' : 'text-brown/50'}`}
-                >
-                  {tab === 'expense' ? '지출' : '수입'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <SegmentControl
+            options={[
+              { value: 'expense' as const, label: '지출' },
+              { value: 'income' as const, label: '수입' },
+            ]}
+            value={categoryTab}
+            onChange={val => setCategoryTab(val)}
+          />
         </View>
 
         {/* 지출 탭: 총 예산 vs 지출 요약 카드 */}
@@ -273,10 +263,7 @@ export default function BudgetTab() {
             className='mx-4 rounded-3xl px-6 py-5 mb-2'
             style={{
               backgroundColor: isOver ? Colors.peach : Colors.butter,
-              shadowColor: '#000',
-              shadowOpacity: 0.06,
-              shadowRadius: 10,
-              shadowOffset: { width: 0, height: 3 },
+              ...Shadows.soft,
             }}
           >
             <View className='flex-row justify-between items-start mb-3'>
@@ -319,11 +306,8 @@ export default function BudgetTab() {
           <View
             className='mx-4 rounded-3xl px-6 py-5 mb-2'
             style={{
-              backgroundColor: '#C5E8D5',
-              shadowColor: '#000',
-              shadowOpacity: 0.06,
-              shadowRadius: 10,
-              shadowOffset: { width: 0, height: 3 },
+              backgroundColor: Colors.olive + '33',
+              ...Shadows.soft,
             }}
           >
             <View className='flex-row justify-between items-center'>
@@ -353,15 +337,11 @@ export default function BudgetTab() {
           {isLoading ? (
             <LoadingState />
           ) : visibleCategories.length === 0 ? (
-            <View className='bg-cream-dark/40 rounded-3xl py-12 items-center gap-3'>
-              <Wallet size={32} color={Colors.brown + '30'} strokeWidth={1.5} />
-              <Text className='font-ibm-semibold text-sm text-neutral-400'>
-                카테고리가 없어요
-              </Text>
-              <Text className='font-ibm-regular text-xs text-neutral-400'>
-                + 버튼으로 추가해보세요
-              </Text>
-            </View>
+            <EmptyState
+              icon={Wallet}
+              title='카테고리가 없어요'
+              description='+ 버튼으로 추가해보세요'
+            />
           ) : (
             <View className='gap-2.5'>
               {visibleCategories.map(c => {
@@ -386,20 +366,12 @@ export default function BudgetTab() {
                     >
                       <View
                         className='bg-white rounded-3xl px-4 py-4'
-                        style={{
-                          shadowColor: Colors.brown,
-                          shadowOpacity: 0.07,
-                          shadowRadius: 10,
-                          shadowOffset: { width: 0, height: 2 },
-                        }}
+                        style={Shadows.soft}
                       >
                         <View className='flex-row items-center gap-3 mb-3'>
-                          <View
-                            className='w-10 h-10 rounded-2xl items-center justify-center'
-                            style={{ backgroundColor: c.color + '55' }}
-                          >
+                          <IconBox color={c.color}>
                             <CategoryIcon iconKey={c.icon} color={c.color} />
-                          </View>
+                          </IconBox>
                           <View className='flex-1'>
                             <Text className='font-ibm-semibold text-sm text-neutral-800'>
                               {c.name}

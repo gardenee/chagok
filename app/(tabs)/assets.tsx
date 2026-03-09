@@ -49,6 +49,8 @@ import { SummaryCard } from '../../components/ui/summary-card';
 import { ItemCard } from '../../components/ui/item-card';
 import { LoadingState } from '../../components/ui/loading-state';
 import { SwipeableDeleteRow } from '../../components/ui/swipeable-delete-row';
+import { IconBox } from '../../components/ui/icon-box';
+import { formatAmount } from '../../utils/format';
 import type { Asset, PaymentMethod } from '../../types/database';
 
 type AssetType = {
@@ -110,10 +112,6 @@ function getPaymentMethodType(key: PaymentMethod['type']): PaymentMethodType {
     PAYMENT_METHOD_TYPES.find(t => t.key === key) ??
     PAYMENT_METHOD_TYPES[PAYMENT_METHOD_TYPES.length - 1]
   );
-}
-
-function formatAmount(n: number): string {
-  return n.toLocaleString('ko-KR');
 }
 
 type FormData = {
@@ -378,18 +376,13 @@ export default function AssetsTab() {
                               onDelete={() => handleDelete(a.id)}
                             >
                               <ItemCard onPress={() => openEdit(a)}>
-                                <View
-                                  className='w-11 h-11 rounded-2xl items-center justify-center'
-                                  style={{
-                                    backgroundColor: group.color + '80',
-                                  }}
-                                >
+                                <IconBox color={group.color} size='md'>
                                   <group.Icon
                                     size={20}
                                     color={Colors.brown}
                                     strokeWidth={2.5}
                                   />
-                                </View>
+                                </IconBox>
                                 <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
                                   {a.name}
                                 </Text>
@@ -420,16 +413,13 @@ export default function AssetsTab() {
                       onDelete={() => handleDelete(a.id)}
                     >
                       <ItemCard onPress={() => openEdit(a)}>
-                        <View
-                          className='w-11 h-11 rounded-2xl items-center justify-center'
-                          style={{ backgroundColor: '#F4A0A080' }}
-                        >
+                        <IconBox color={getAssetType('loan').color} size='md'>
                           <CircleMinus
                             size={20}
                             color={Colors.brown}
                             strokeWidth={2.5}
                           />
-                        </View>
+                        </IconBox>
                         <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
                           {a.name}
                         </Text>
@@ -456,16 +446,16 @@ export default function AssetsTab() {
                       onDelete={() => handleDelete(a.id)}
                     >
                       <ItemCard onPress={() => openEdit(a)}>
-                        <View
-                          className='w-11 h-11 rounded-2xl items-center justify-center'
-                          style={{ backgroundColor: '#B5D5F080' }}
+                        <IconBox
+                          color={getAssetType('insurance').color}
+                          size='md'
                         >
                           <ShieldCheck
                             size={20}
                             color={Colors.brown}
                             strokeWidth={2.5}
                           />
-                        </View>
+                        </IconBox>
                         <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
                           {a.name}
                         </Text>
@@ -516,16 +506,13 @@ export default function AssetsTab() {
                     onDelete={() => handlePaymentDelete(pm.id)}
                   >
                     <ItemCard onPress={() => openPaymentEdit(pm)}>
-                      <View
-                        className='w-11 h-11 rounded-2xl items-center justify-center'
-                        style={{ backgroundColor: pmType.color + '80' }}
-                      >
+                      <IconBox color={pmType.color} size='md'>
                         <pmType.Icon
                           size={20}
                           color={Colors.brown}
                           strokeWidth={2.5}
                         />
-                      </View>
+                      </IconBox>
                       <View className='flex-1'>
                         <Text className='font-ibm-semibold text-sm text-neutral-800'>
                           {pm.name}
