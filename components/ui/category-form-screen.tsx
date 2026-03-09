@@ -181,7 +181,6 @@ export function CategoryFormScreen({
             onChangeText={v => onChange({ ...form, name: v })}
             placeholder='카테고리 이름 (예: 식비, 교통비)'
             maxLength={10}
-            autoFocus
             className='mb-6'
           />
 
