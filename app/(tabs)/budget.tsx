@@ -357,6 +357,7 @@ export default function BudgetTab() {
           editingId={modal.editingId}
           form={modal.form}
           isSaving={isSaving}
+          mode='budget'
           onBack={() => setModal(s => ({ ...s, visible: false }))}
           onChange={form => setModal(s => ({ ...s, form }))}
           onSave={handleSave}

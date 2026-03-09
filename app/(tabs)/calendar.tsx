@@ -1215,11 +1215,7 @@ export default function CalendarTab() {
                         borderColor: isSelected ? c.color : 'transparent',
                       }}
                     >
-                      <Icon
-                        size={20}
-                        color={c.color}
-                        strokeWidth={2.5}
-                      />
+                      <Icon size={20} color={c.color} strokeWidth={2.5} />
                     </View>
                     <Text
                       className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
