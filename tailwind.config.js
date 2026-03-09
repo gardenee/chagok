@@ -24,11 +24,18 @@ const palette = {
 		light: "#FDE0D7",
 		DEFAULT: "#F7B8A0",
 		dark: "#EE9070",
+		darker: "#C8562E",
 	},
 	lavender: {
 		light: "#EBE4F8",
 		DEFAULT: "#D4C5F0",
 		dark: "#B8A5E3",
+	},
+	olive: {
+		light: "#D4DFB0",
+		DEFAULT: "#A8BE6A",
+		dark: "#7A9238",
+		darker: "#527018",
 	},
 	black: {
 		DEFAULT: "#000000",
