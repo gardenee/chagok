@@ -33,11 +33,13 @@ export function SaveButton({
       }}
     >
       {isSaving ? (
-        <ActivityIndicator color={Colors.brown} />
+        <ActivityIndicator color={Colors.brownDark} />
       ) : (
         <>
-          <Check size={18} color={Colors.brown} strokeWidth={2.5} />
-          <Text className='font-ibm-bold text-base text-brown'>{label}</Text>
+          <Check size={18} color={Colors.brownDark} strokeWidth={2.5} />
+          <Text className='font-ibm-bold text-base text-brown-dark'>
+            {label}
+          </Text>
         </>
       )}
     </TouchableOpacity>
