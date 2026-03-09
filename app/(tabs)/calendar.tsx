@@ -1210,17 +1210,19 @@ export default function CalendarTab() {
                     <View
                       className='w-12 h-12 rounded-2xl items-center justify-center'
                       style={{
-                        backgroundColor: isSelected ? c.color : c.color + '40',
+                        backgroundColor: c.color + '30',
+                        borderWidth: isSelected ? 2 : 0,
+                        borderColor: isSelected ? c.color : 'transparent',
                       }}
                     >
                       <Icon
                         size={20}
-                        color={isSelected ? '#fff' : c.color}
+                        color={c.color}
                         strokeWidth={2.5}
                       />
                     </View>
                     <Text
-                      className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-700' : 'text-neutral-600'}`}
+                      className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                     >
                       {c.name}
                     </Text>
