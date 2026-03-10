@@ -1384,6 +1384,44 @@ export default function CalendarTab() {
               keyboardShouldPersistTaps='handled'
             >
               <View className='flex-row gap-2 pr-2'>
+                {paymentMethods.map(pm => {
+                  const isSelected = txModal.form.payment_method_id === pm.id;
+                  return (
+                    <TouchableOpacity
+                      key={pm.id}
+                      onPress={() => {
+                        setTxModal(s => ({
+                          ...s,
+                          form: {
+                            ...s.form,
+                            payment_method_id: isSelected ? null : pm.id,
+                            asset_id: null,
+                          },
+                        }));
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      className='items-center gap-1'
+                      activeOpacity={0.7}
+                    >
+                      <View
+                        className='w-12 h-12 rounded-2xl items-center justify-center'
+                        style={{
+                          backgroundColor: pm.color + '50',
+                          borderWidth: isSelected ? 2 : 0,
+                          borderColor: isSelected ? pm.color : 'transparent',
+                        }}
+                      >
+                        <Wallet size={20} color={pm.color} strokeWidth={2.5} />
+                      </View>
+                      <Text
+                        className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                        numberOfLines={1}
+                      >
+                        {pm.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
                 {bankCashAssets.map((asset: Asset) => {
                   const isSelected = txModal.form.asset_id === asset.id;
                   const { Icon: AssetIcon, color: assetColor } =
@@ -1424,47 +1462,6 @@ export default function CalendarTab() {
                         numberOfLines={1}
                       >
                         {asset.name}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-                {bankCashAssets.length > 0 && paymentMethods.length > 0 && (
-                  <View className='w-px bg-neutral-200 mx-1 self-stretch my-2' />
-                )}
-                {paymentMethods.map(pm => {
-                  const isSelected = txModal.form.payment_method_id === pm.id;
-                  return (
-                    <TouchableOpacity
-                      key={pm.id}
-                      onPress={() => {
-                        setTxModal(s => ({
-                          ...s,
-                          form: {
-                            ...s.form,
-                            payment_method_id: isSelected ? null : pm.id,
-                            asset_id: null,
-                          },
-                        }));
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }}
-                      className='items-center gap-1'
-                      activeOpacity={0.7}
-                    >
-                      <View
-                        className='w-12 h-12 rounded-2xl items-center justify-center'
-                        style={{
-                          backgroundColor: pm.color + '50',
-                          borderWidth: isSelected ? 2 : 0,
-                          borderColor: isSelected ? pm.color : 'transparent',
-                        }}
-                      >
-                        <Wallet size={20} color={pm.color} strokeWidth={2.5} />
-                      </View>
-                      <Text
-                        className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                        numberOfLines={1}
-                      >
-                        {pm.name}
                       </Text>
                     </TouchableOpacity>
                   );
