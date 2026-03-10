@@ -72,21 +72,63 @@ function ExpenseCard({
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className='bg-white rounded-3xl p-4' style={cardShadow}>
-        {/* 1행: 카테고리 + 차액 뱃지 */}
-        <View className='flex-row items-center justify-between mb-3'>
-          <View className='flex-row items-center gap-2'>
-            <IconBox color={c.color}>
-              <CategoryIcon iconKey={c.icon} color={c.color} />
-            </IconBox>
-            <Text
-              className='font-ibm-semibold text-sm text-neutral-700'
-              numberOfLines={1}
-            >
-              {c.name}
-            </Text>
-          </View>
+      <View className='bg-white rounded-3xl p-3' style={cardShadow}>
+        {/* 1행: 아이콘 + 카테고리명 + 프로그레스바 + % */}
+        <View className='flex-row items-center gap-2 mb-2'>
+          <IconBox color={c.color}>
+            <CategoryIcon iconKey={c.icon} color={c.color} />
+          </IconBox>
+          <Text
+            className='font-ibm-semibold text-sm text-neutral-700'
+            numberOfLines={1}
+            style={{ maxWidth: 90 }}
+          >
+            {c.name}
+          </Text>
           {hasBudget && (
+            <>
+              <View
+                className='flex-1 rounded-full overflow-hidden'
+                style={{ height: 6, backgroundColor: '#f0f0f0' }}
+              >
+                <View
+                  className='rounded-full h-full'
+                  style={{
+                    width: `${ratio * 100}%`,
+                    backgroundColor: barColor,
+                  }}
+                />
+              </View>
+              <Text className='font-ibm-regular text-xs text-neutral-400'>
+                {Math.round(ratio * 100)}%
+              </Text>
+            </>
+          )}
+        </View>
+
+        {/* 2행: 목표 · 사용 수치 + 차액 뱃지 */}
+        {hasBudget ? (
+          <View className='flex-row items-center justify-between'>
+            <View className='flex-row items-baseline gap-1'>
+              <Text className='font-ibm-regular text-xs text-neutral-400'>
+                목표
+              </Text>
+              <Text className='font-ibm-bold text-sm text-neutral-700'>
+                {formatAmount(c.budget_amount)}원
+              </Text>
+              <Text className='font-ibm-regular text-xs text-neutral-300'>
+                ·
+              </Text>
+              <Text className='font-ibm-regular text-xs text-neutral-400'>
+                사용
+              </Text>
+              <Text
+                className='font-ibm-bold text-sm'
+                style={{ color: over ? Colors.peachDark : '#404040' }}
+              >
+                {formatAmount(spent)}원
+              </Text>
+            </View>
             <View
               className='px-2 py-0.5 rounded-full'
               style={{
@@ -106,53 +148,15 @@ function ExpenseCard({
                   : `절약 +${formatAmount(diff)}원`}
               </Text>
             </View>
-          )}
-        </View>
-
-        {/* 2행: 목표 vs 사용 수치 */}
-        {hasBudget ? (
-          <View className='flex-row justify-between mb-3'>
-            <View>
-              <Text className='font-ibm-regular text-xs text-neutral-400 mb-0.5'>
-                목표
-              </Text>
-              <Text className='font-ibm-bold text-base text-neutral-700'>
-                {formatAmount(c.budget_amount)}원
-              </Text>
-            </View>
-            <View className='items-end'>
-              <Text className='font-ibm-regular text-xs text-neutral-400 mb-0.5'>
-                사용
-              </Text>
-              <Text
-                className='font-ibm-bold text-base'
-                style={{ color: over ? Colors.peachDark : '#404040' }}
-              >
-                {formatAmount(spent)}원
-              </Text>
-            </View>
           </View>
         ) : (
-          <View className='mb-3'>
-            <Text className='font-ibm-bold text-base text-neutral-700'>
+          <View className='flex-row items-baseline gap-1'>
+            <Text className='font-ibm-bold text-sm text-neutral-700'>
               {formatAmount(spent)}원
             </Text>
             <Text className='font-ibm-regular text-xs text-neutral-400'>
               이번달 사용
             </Text>
-          </View>
-        )}
-
-        {/* 3행: 프로그레스바 */}
-        {hasBudget && (
-          <View
-            className='rounded-full overflow-hidden'
-            style={{ height: 6, backgroundColor: '#f5f5f5' }}
-          >
-            <View
-              className='rounded-full h-full'
-              style={{ width: `${ratio * 100}%`, backgroundColor: barColor }}
-            />
           </View>
         )}
       </View>
@@ -175,21 +179,63 @@ function IncomeCard({
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className='bg-white rounded-3xl p-4' style={cardShadow}>
-        {/* 1행: 카테고리 + 차액 뱃지 */}
-        <View className='flex-row items-center justify-between mb-3'>
-          <View className='flex-row items-center gap-2'>
-            <IconBox color={c.color}>
-              <CategoryIcon iconKey={c.icon} color={c.color} />
-            </IconBox>
-            <Text
-              className='font-ibm-semibold text-sm text-neutral-700'
-              numberOfLines={1}
-            >
-              {c.name}
-            </Text>
-          </View>
+      <View className='bg-white rounded-3xl p-3' style={cardShadow}>
+        {/* 1행: 아이콘 + 카테고리명 + 프로그레스바 + % */}
+        <View className='flex-row items-center gap-2 mb-2'>
+          <IconBox color={c.color}>
+            <CategoryIcon iconKey={c.icon} color={c.color} />
+          </IconBox>
+          <Text
+            className='font-ibm-semibold text-sm text-neutral-700'
+            numberOfLines={1}
+            style={{ maxWidth: 90 }}
+          >
+            {c.name}
+          </Text>
           {hasTarget && (
+            <>
+              <View
+                className='flex-1 rounded-full overflow-hidden'
+                style={{ height: 6, backgroundColor: '#f0f0f0' }}
+              >
+                <View
+                  className='rounded-full h-full'
+                  style={{
+                    width: `${Math.min((income / c.budget_amount) * 100, 100)}%`,
+                    backgroundColor: over ? Colors.oliveDark : Colors.olive,
+                  }}
+                />
+              </View>
+              <Text className='font-ibm-regular text-xs text-neutral-400'>
+                {Math.round(Math.min((income / c.budget_amount) * 100, 100))}%
+              </Text>
+            </>
+          )}
+        </View>
+
+        {/* 2행: 목표 · 수입 수치 + 차액 뱃지 */}
+        {hasTarget ? (
+          <View className='flex-row items-center justify-between'>
+            <View className='flex-row items-baseline gap-1'>
+              <Text className='font-ibm-regular text-xs text-neutral-400'>
+                목표
+              </Text>
+              <Text className='font-ibm-bold text-sm text-neutral-700'>
+                {formatAmount(c.budget_amount)}원
+              </Text>
+              <Text className='font-ibm-regular text-xs text-neutral-300'>
+                ·
+              </Text>
+              <Text className='font-ibm-regular text-xs text-neutral-400'>
+                수입
+              </Text>
+              <Text
+                className='font-ibm-bold text-sm'
+                style={{ color: over ? Colors.oliveDark : '#404040' }}
+              >
+                {formatAmount(income)}원
+              </Text>
+            </View>
             <View
               className='px-2 py-0.5 rounded-full'
               style={{
@@ -209,56 +255,15 @@ function IncomeCard({
                   : `미달 -${formatAmount(Math.abs(diff))}원`}
               </Text>
             </View>
-          )}
-        </View>
-
-        {/* 2행: 목표 vs 수입 수치 */}
-        {hasTarget ? (
-          <View className='flex-row justify-between mb-3'>
-            <View>
-              <Text className='font-ibm-regular text-xs text-neutral-400 mb-0.5'>
-                목표
-              </Text>
-              <Text className='font-ibm-bold text-base text-neutral-700'>
-                {formatAmount(c.budget_amount)}원
-              </Text>
-            </View>
-            <View className='items-end'>
-              <Text className='font-ibm-regular text-xs text-neutral-400 mb-0.5'>
-                수입
-              </Text>
-              <Text
-                className='font-ibm-bold text-base'
-                style={{ color: over ? Colors.oliveDark : '#404040' }}
-              >
-                {formatAmount(income)}원
-              </Text>
-            </View>
           </View>
         ) : (
-          <View className='mb-3'>
-            <Text className='font-ibm-bold text-base text-neutral-700'>
+          <View className='flex-row items-baseline gap-1'>
+            <Text className='font-ibm-bold text-sm text-neutral-700'>
               {formatAmount(income)}원
             </Text>
             <Text className='font-ibm-regular text-xs text-neutral-400'>
               이번달 수입
             </Text>
-          </View>
-        )}
-
-        {/* 3행: 프로그레스바 (목표 있을 때만) */}
-        {hasTarget && (
-          <View
-            className='rounded-full overflow-hidden'
-            style={{ height: 6, backgroundColor: '#f5f5f5' }}
-          >
-            <View
-              className='rounded-full h-full'
-              style={{
-                width: `${Math.min((income / c.budget_amount) * 100, 100)}%`,
-                backgroundColor: over ? Colors.oliveDark : Colors.olive,
-              }}
-            />
           </View>
         )}
       </View>
