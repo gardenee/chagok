@@ -203,6 +203,7 @@ export interface Database {
           user_id: string;
           title: string;
           date: string;
+          start_time: string | null;
           tag: 'me' | 'partner' | 'together';
           created_at: string;
         };
@@ -212,12 +213,14 @@ export interface Database {
           user_id: string;
           title: string;
           date: string;
+          start_time?: string | null;
           tag: 'me' | 'partner' | 'together';
           created_at?: string;
         };
         Update: {
           title?: string;
           date?: string;
+          start_time?: string | null;
           tag?: 'me' | 'partner' | 'together';
         };
         Relationships: never[];

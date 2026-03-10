@@ -13,6 +13,7 @@ type TagPillProps = {
   tag: 'me' | 'partner' | 'together';
   label: string;
   className?: string;
+  bgColor?: string;
 };
 
 function getTagBgColor(tag: 'me' | 'partner' | 'together'): string {
@@ -32,13 +33,10 @@ export function ColorPill({
   return (
     <View
       className='flex-row items-center gap-0.5 px-1.5 py-0.5 rounded-full'
-      style={{ backgroundColor: color + '33' }}
+      style={{ backgroundColor: color + '50' }}
     >
       {Icon && <Icon size={10} color={color} strokeWidth={2.5} />}
-      <Text
-        className={`font-ibm-semibold ${size === 'xs' ? 'text-[10px]' : 'text-xs'}`}
-        style={{ color }}
-      >
+      <Text className={`font-ibm-semibold text-[10px] text-neutral-700`}>
         {label}
       </Text>
     </View>
@@ -49,13 +47,16 @@ export function TagPill({
   tag,
   label,
   className = 'px-1.5 py-0.5',
+  bgColor,
 }: TagPillProps) {
   return (
     <View
       className={`rounded-full ${className}`}
-      style={{ backgroundColor: getTagBgColor(tag) }}
+      style={{ backgroundColor: bgColor ?? getTagBgColor(tag) }}
     >
-      <Text className='font-ibm-semibold text-xs text-brown'>{label}</Text>
+      <Text className='font-ibm-semibold text-[10px] text-neutral-700'>
+        {label}
+      </Text>
     </View>
   );
 }

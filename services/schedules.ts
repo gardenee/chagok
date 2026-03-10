@@ -4,6 +4,7 @@ import type { Schedule } from '../types/database';
 export type ScheduleInput = {
   title: string;
   date: string;
+  start_time?: string | null;
   tag: 'me' | 'partner' | 'together';
 };
 

@@ -19,12 +19,12 @@ export function EmptyState({
     <View
       className={`bg-cream-dark/40 rounded-3xl py-14 items-center ${containerClassName}`}
     >
-      <Icon size={32} color={Colors.brownDark} strokeWidth={1.5} />
-      <Text className='font-ibm-semibold text-sm text-brown-darker/90 mt-3 mb-1'>
+      <Icon size={32} color={Colors.brown + '60'} strokeWidth={1.5} />
+      <Text className='font-ibm-semibold text-sm text-neutral-400 mt-3 mb-1'>
         {title}
       </Text>
       {description ? (
-        <Text className='font-ibm-regular text-xs text-brown-darker/80'>
+        <Text className='font-ibm-regular text-xs text-neutral-300'>
           {description}
         </Text>
       ) : null}

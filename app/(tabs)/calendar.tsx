@@ -27,6 +27,8 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   CalendarX,
   Plus,
   Trash2,
@@ -34,6 +36,7 @@ import {
   CalendarDays,
   Repeat,
   Wallet,
+  Clock,
   X,
 } from 'lucide-react-native';
 import {
@@ -98,6 +101,7 @@ type TxFormData = {
 type ScheduleFormData = {
   title: string;
   tag: 'me' | 'partner' | 'together';
+  time: string | null;
 };
 
 const INITIAL_TX_FORM: TxFormData = {
@@ -108,7 +112,11 @@ const INITIAL_TX_FORM: TxFormData = {
   category_id: null,
   payment_method_id: null,
 };
-const INITIAL_SCHEDULE_FORM: ScheduleFormData = { title: '', tag: 'me' };
+const INITIAL_SCHEDULE_FORM: ScheduleFormData = {
+  title: '',
+  tag: 'me',
+  time: null,
+};
 
 function formatDate(date: Date): string {
   const y = date.getFullYear();
@@ -225,6 +233,18 @@ export default function CalendarTab() {
     const createdByMe = creatorId === myId;
     if (createdByMe) return tag === 'me' ? myNickname : partnerNickname;
     return tag === 'me' ? partnerNickname : myNickname;
+  }
+
+  // 실제 소비 주체 기준으로 태그 색상 결정 (이름과 색이 일치하도록)
+  function resolveTagColor(
+    tag: 'me' | 'partner' | 'together',
+    creatorId: string,
+  ): string {
+    if (tag === 'together') return Colors.lavender;
+    const createdByMe = creatorId === myId;
+    const isMyExpense =
+      (createdByMe && tag === 'me') || (!createdByMe && tag === 'partner');
+    return isMyExpense ? Colors.butter : Colors.peach;
   }
 
   // 모달 태그 옵션 (닉네임으로 표시)
@@ -436,7 +456,17 @@ export default function CalendarTab() {
   }, [schedules]);
 
   const selectedTransactions = transactionsByDate[selectedDate] ?? [];
-  const selectedSchedules = schedulesByDate[selectedDate] ?? [];
+  const selectedSchedules = useMemo(() => {
+    const list = schedulesByDate[selectedDate] ?? [];
+    return [...list].sort((a, b) => {
+      const aTime = a.start_time ?? null;
+      const bTime = b.start_time ?? null;
+      if (aTime && bTime) return aTime.localeCompare(bTime);
+      if (aTime) return -1;
+      if (bTime) return 1;
+      return 0;
+    });
+  }, [schedulesByDate, selectedDate]);
   const selectedDay = parseInt(selectedDate.split('-')[2], 10);
   const selectedFixedExpenses = fixedExpenses.filter(
     fe => fe.due_day === selectedDay,
@@ -578,9 +608,29 @@ export default function CalendarTab() {
     setScheduleModal({
       visible: true,
       editingId: s.id,
-      form: { title: s.title, tag: s.tag },
+      form: { title: s.title, tag: s.tag, time: s.start_time ?? null },
     });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+  function adjustScheduleHour(delta: number) {
+    setScheduleModal(s => {
+      const [hStr, mStr] = (s.form.time ?? '09:00').split(':');
+      const h = (parseInt(hStr) + delta + 24) % 24;
+      return {
+        ...s,
+        form: { ...s.form, time: `${String(h).padStart(2, '0')}:${mStr}` },
+      };
+    });
+  }
+  function adjustScheduleMinute(delta: number) {
+    setScheduleModal(s => {
+      const [hStr, mStr] = (s.form.time ?? '09:00').split(':');
+      const m = (parseInt(mStr) + delta + 60) % 60;
+      return {
+        ...s,
+        form: { ...s.form, time: `${hStr}:${String(m).padStart(2, '0')}` },
+      };
+    });
   }
   async function handleScheduleSave() {
     if (!scheduleModal.form.title.trim()) {
@@ -591,6 +641,7 @@ export default function CalendarTab() {
       title: scheduleModal.form.title.trim(),
       tag: scheduleModal.form.tag,
       date: selectedDate,
+      start_time: scheduleModal.form.time ?? null,
     };
     try {
       if (scheduleModal.editingId)
@@ -936,26 +987,13 @@ export default function CalendarTab() {
               {activeTab === 'ledger' ? '거래내역' : '일정목록'}
             </Text>
             {activeTab === 'ledger' ? (
-              <View className='flex-row gap-2'>
-                <TouchableOpacity
-                  onPress={openFixedCreate}
-                  className='w-8 h-8 rounded-full items-center justify-center'
-                  activeOpacity={0.6}
-                >
-                  <Repeat
-                    size={16}
-                    color={Colors.brownDark}
-                    strokeWidth={2.5}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={openTxCreate}
-                  className='w-8 h-8 rounded-full items-center justify-center'
-                  activeOpacity={0.6}
-                >
-                  <Plus size={16} color={Colors.brownDark} strokeWidth={2.5} />
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                onPress={openTxCreate}
+                className='w-8 h-8 rounded-full items-center justify-center'
+                activeOpacity={0.6}
+              >
+                <Plus size={16} color={Colors.brownDark} strokeWidth={2.5} />
+              </TouchableOpacity>
             ) : (
               <TouchableOpacity
                 onPress={openScheduleCreate}
@@ -997,13 +1035,14 @@ export default function CalendarTab() {
                           {t.memo ?? cat?.name ?? '기타'}
                         </Text>
                         <View className='flex-row items-center gap-1.5 mt-0.5'>
-                          <TagPill
-                            tag={t.tag}
-                            label={resolveTagLabel(t.tag, t.user_id)}
-                          />
                           {cat && (
                             <ColorPill label={cat.name} color={cat.color} />
                           )}
+                          <TagPill
+                            tag={t.tag}
+                            label={resolveTagLabel(t.tag, t.user_id)}
+                            bgColor={resolveTagColor(t.tag, t.user_id)}
+                          />
                         </View>
                       </View>
                       <Text
@@ -1028,9 +1067,9 @@ export default function CalendarTab() {
                       <Text className='font-ibm-semibold text-sm text-neutral-800'>
                         {fe.name}
                       </Text>
-                      <Text className='font-ibm-regular text-xs text-neutral-400 mt-0.5'>
-                        고정지출
-                      </Text>
+                      <View className='flex-row items-center mt-0.5'>
+                        <ColorPill label='고정지출' color={Colors.peach} />
+                      </View>
                     </View>
                     <Text className='font-ibm-bold text-sm text-neutral-800'>
                       {formatAmount(fe.amount)}원
@@ -1060,12 +1099,23 @@ export default function CalendarTab() {
                         strokeWidth={2.5}
                       />
                     </View>
-                    <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
-                      {s.title}
-                    </Text>
+                    <View className='flex-1'>
+                      <Text className='font-ibm-semibold text-sm text-neutral-800'>
+                        {s.title}
+                      </Text>
+                      {s.start_time && (
+                        <View className='flex-row items-center gap-1 mt-0.5'>
+                          <Clock size={10} color='#a3a3a3' strokeWidth={2} />
+                          <Text className='font-ibm-regular text-xs text-neutral-400'>
+                            {s.start_time}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                     <TagPill
                       tag={s.tag}
                       label={resolveTagLabel(s.tag, s.user_id)}
+                      bgColor={resolveTagColor(s.tag, s.user_id)}
                       className='px-2 py-1'
                     />
                   </ItemCard>
@@ -1443,7 +1493,7 @@ export default function CalendarTab() {
           className='mb-5'
         />
 
-        <View className='flex-row gap-2 mb-6'>
+        <View className='flex-row gap-2 mb-5'>
           {tagOptions.map(({ value, label }) => {
             const isSelected = scheduleModal.form.tag === value;
             return (
@@ -1455,22 +1505,149 @@ export default function CalendarTab() {
                     form: { ...s.form, tag: value },
                   }))
                 }
-                className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? '' : 'bg-neutral-100'}`}
-                style={
-                  isSelected
-                    ? { backgroundColor: getTagBgColor(value) }
-                    : undefined
-                }
+                className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                 activeOpacity={0.7}
               >
                 <Text
-                  className={`font-ibm-semibold text-sm ${isSelected ? 'text-brown' : 'text-brown/40'}`}
+                  className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                 >
                   {label}
                 </Text>
               </TouchableOpacity>
             );
           })}
+        </View>
+
+        {/* 시간 선택 */}
+        <View className='mb-6'>
+          {scheduleModal.form.time === null ? (
+            <TouchableOpacity
+              onPress={() =>
+                setScheduleModal(s => ({
+                  ...s,
+                  form: { ...s.form, time: '09:00' },
+                }))
+              }
+              className='bg-neutral-100 rounded-2xl py-3 flex-row items-center justify-center gap-2'
+              activeOpacity={0.7}
+            >
+              <Clock size={14} color='#a3a3a3' strokeWidth={2} />
+              <Text className='font-ibm-regular text-sm text-neutral-400'>
+                시간 설정 없음
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <View className='bg-neutral-100 rounded-2xl py-3 px-5 flex-row items-center'>
+              <Clock size={16} color={Colors.brown} strokeWidth={2} />
+              <View className='flex-1 flex-row items-center justify-center gap-3'>
+                {/* 시 */}
+                <View className='items-center gap-1'>
+                  <TouchableOpacity
+                    onPress={() => adjustScheduleHour(1)}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 4, left: 16, right: 16 }}
+                  >
+                    <ChevronUp
+                      size={16}
+                      color={Colors.brown}
+                      strokeWidth={2.5}
+                    />
+                  </TouchableOpacity>
+                  <TextInput
+                    value={scheduleModal.form.time.slice(0, 2)}
+                    onChangeText={v => {
+                      const digits = v.replace(/[^0-9]/g, '');
+                      const n = Math.min(
+                        parseInt(digits.slice(-2) || '0', 10),
+                        23,
+                      );
+                      setScheduleModal(s => ({
+                        ...s,
+                        form: {
+                          ...s.form,
+                          time: `${String(n).padStart(2, '0')}:${s.form.time?.slice(3, 5) ?? '00'}`,
+                        },
+                      }));
+                    }}
+                    keyboardType='number-pad'
+                    selectTextOnFocus
+                    className='font-ibm-bold text-xl text-neutral-800 w-10 text-center'
+                  />
+                  <TouchableOpacity
+                    onPress={() => adjustScheduleHour(-1)}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 4, bottom: 8, left: 16, right: 16 }}
+                  >
+                    <ChevronDown
+                      size={16}
+                      color={Colors.brown}
+                      strokeWidth={2.5}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <Text className='font-ibm-bold text-xl text-neutral-600'>
+                  :
+                </Text>
+                {/* 분 */}
+                <View className='items-center gap-1'>
+                  <TouchableOpacity
+                    onPress={() => adjustScheduleMinute(5)}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 4, left: 16, right: 16 }}
+                  >
+                    <ChevronUp
+                      size={16}
+                      color={Colors.brown}
+                      strokeWidth={2.5}
+                    />
+                  </TouchableOpacity>
+                  <TextInput
+                    value={scheduleModal.form.time.slice(3, 5)}
+                    onChangeText={v => {
+                      const digits = v.replace(/[^0-9]/g, '');
+                      const n = Math.min(
+                        parseInt(digits.slice(-2) || '0', 10),
+                        59,
+                      );
+                      setScheduleModal(s => ({
+                        ...s,
+                        form: {
+                          ...s.form,
+                          time: `${s.form.time?.slice(0, 2) ?? '09'}:${String(n).padStart(2, '0')}`,
+                        },
+                      }));
+                    }}
+                    keyboardType='number-pad'
+                    selectTextOnFocus
+                    className='font-ibm-bold text-xl text-neutral-800 w-10 text-center'
+                  />
+                  <TouchableOpacity
+                    onPress={() => adjustScheduleMinute(-5)}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 4, bottom: 8, left: 16, right: 16 }}
+                  >
+                    <ChevronDown
+                      size={16}
+                      color={Colors.brown}
+                      strokeWidth={2.5}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() =>
+                  setScheduleModal(s => ({
+                    ...s,
+                    form: { ...s.form, time: null },
+                  }))
+                }
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                activeOpacity={0.7}
+              >
+                <X size={18} color='#a3a3a3' strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         <SaveButton
