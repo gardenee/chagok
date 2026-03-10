@@ -108,9 +108,8 @@ export default function CategoriesScreen() {
   async function handleSave() {
     const name = modal.form.name.trim();
     const isIncome = modal.categoryType === 'income';
-    const amount = isIncome
-      ? 0
-      : parseInt(modal.form.budget_amount.replace(/[^0-9]/g, ''), 10);
+    const amount =
+      parseInt(modal.form.budget_amount.replace(/[^0-9]/g, ''), 10) || 0;
 
     if (!name) {
       Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
@@ -291,6 +290,13 @@ export default function CategoriesScreen() {
           onSave={handleSave}
           onDelete={
             modal.editingId ? () => handleDelete(modal.editingId!) : undefined
+          }
+          onTypeChange={type =>
+            setModal(s => ({
+              ...s,
+              categoryType: type,
+              form: { ...INITIAL_CATEGORY_FORM },
+            }))
           }
         />
       </Modal>

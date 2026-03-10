@@ -137,6 +137,7 @@ type Props = {
   onDelete?: () => void;
   mode?: 'budget' | 'category';
   categoryType?: 'expense' | 'income';
+  onTypeChange?: (type: 'expense' | 'income') => void;
 };
 
 export function CategoryFormScreen({
@@ -149,20 +150,15 @@ export function CategoryFormScreen({
   onDelete,
   mode = 'category',
   categoryType = 'expense',
+  onTypeChange,
 }: Props) {
   const isBudgetMode = mode === 'budget';
   const isIncome = categoryType === 'income';
-  const title = isBudgetMode
+  const title = editingId
     ? isIncome
-      ? editingId
-        ? '수입 카테고리 수정'
-        : '수입 카테고리 추가'
-      : editingId
-        ? '예산/카테고리 수정'
-        : '예산/카테고리 추가'
-    : editingId
-      ? '카테고리 수정'
-      : '카테고리 추가';
+      ? '수입 카테고리 수정'
+      : '지출 카테고리 수정'
+    : '카테고리 추가';
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -189,6 +185,36 @@ export function CategoryFormScreen({
             </TouchableOpacity>
           </View>
 
+          {/* 타입 토글 — 추가 모드에만 표시 */}
+          {!editingId && (
+            <View
+              className='flex-row rounded-2xl p-1 mb-6'
+              style={{ backgroundColor: Colors.butter }}
+            >
+              {(['expense', 'income'] as const).map(type => {
+                const isActive = categoryType === type;
+                return (
+                  <TouchableOpacity
+                    key={type}
+                    onPress={() => onTypeChange?.(type)}
+                    activeOpacity={0.8}
+                    className='flex-1 rounded-xl py-2 items-center'
+                    style={isActive ? { backgroundColor: '#fff' } : undefined}
+                  >
+                    <Text
+                      className='font-ibm-semibold text-sm'
+                      style={{
+                        color: isActive ? Colors.brownDarker : Colors.brown,
+                      }}
+                    >
+                      {type === 'expense' ? '지출' : '수입'}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+
           {/* 이름 */}
           <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
             카테고리명
@@ -201,16 +227,18 @@ export function CategoryFormScreen({
             className='mb-6'
           />
 
-          {/* 예산 (budget 모드이고 수입 카테고리가 아닌 경우) */}
-          {isBudgetMode && !isIncome && (
+          {/* 예산 (budget 모드) */}
+          {isBudgetMode && (
             <>
               <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                월 예산
+                {isIncome ? '목표 수입 (선택)' : '월 예산'}
               </Text>
               <AmountInput
                 value={form.budget_amount}
                 onChangeText={v => onChange({ ...form, budget_amount: v })}
-                placeholder='예산 금액을 입력하세요'
+                placeholder={
+                  isIncome ? '목표 수입 금액 (선택)' : '예산 금액을 입력하세요'
+                }
                 className='mb-6'
               />
             </>
