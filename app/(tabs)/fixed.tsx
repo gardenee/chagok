@@ -261,7 +261,7 @@ export default function FixedScreen() {
         {categories.length > 0 && (
           <View className='mb-4'>
             <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-              카테고리 (선택)
+              카테고리
             </Text>
             <ScrollView
               horizontal
@@ -348,12 +348,12 @@ export default function FixedScreen() {
                   onPress={() =>
                     setModal(s => ({ ...s, form: { ...s.form, due_day: day } }))
                   }
-                  className={`rounded-xl items-center justify-center ${isSelected ? 'bg-butter' : 'bg-neutral-100'}`}
+                  className={`rounded-xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                   style={{ width: 38, height: 36 }}
                   activeOpacity={0.7}
                 >
                   <Text
-                    className={`font-ibm-semibold text-xs ${isSelected ? 'text-brown' : 'text-neutral-500'}`}
+                    className={`${isSelected ? 'font-ibm-bold' : 'font-ibm-semibold'} text-xs ${isSelected ? 'text-neutral-700' : 'text-neutral-500'}`}
                   >
                     {day}
                   </Text>
