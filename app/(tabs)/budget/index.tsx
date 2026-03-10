@@ -17,14 +17,7 @@ import {
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '../../../constants/colors';
-
-const cardShadow = {
-  shadowColor: Colors.brown,
-  shadowOffset: { width: 0, height: 3 },
-  shadowOpacity: 0.18,
-  shadowRadius: 6,
-  elevation: 5,
-};
+import { Shadows } from '../../../constants/shadows';
 import { useCategories } from '../../../hooks/use-categories';
 import { useMonthTransactions } from '../../../hooks/use-transactions';
 import { IconBox } from '../../../components/ui/icon-box';
@@ -72,7 +65,7 @@ function ExpenseCard({
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className='bg-white rounded-3xl p-3' style={cardShadow}>
+      <View className='bg-white rounded-3xl p-3' style={Shadows.primary}>
         {/* 1행: 아이콘 + 카테고리명 + 목표·사용 수치 */}
         <View className='flex-row items-center gap-2 mb-2'>
           <IconBox color={c.color}>
@@ -174,7 +167,7 @@ function IncomeCard({
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className='bg-white rounded-3xl p-3' style={cardShadow}>
+      <View className='bg-white rounded-3xl p-3' style={Shadows.primary}>
         {/* 1행: 아이콘 + 카테고리명 + 목표·수입 수치 */}
         <View className='flex-row items-center gap-2 mb-2'>
           <IconBox color={c.color}>
@@ -329,7 +322,7 @@ export default function BudgetIndex() {
   }
 
   return (
-    <SafeAreaView className='flex-1 bg-white'>
+    <SafeAreaView className='flex-1 bg-cream'>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -377,7 +370,7 @@ export default function BudgetIndex() {
                 {/* 총 수입 카드 */}
                 <View
                   className='flex-1 bg-olive-light rounded-3xl p-4'
-                  style={cardShadow}
+                  style={Shadows.primary}
                 >
                   <View className='flex-row items-center gap-2 mb-1'>
                     <TrendingUp
@@ -400,7 +393,7 @@ export default function BudgetIndex() {
                 {/* 총 지출 카드 */}
                 <View
                   className='flex-1 bg-peach-light rounded-3xl p-4'
-                  style={cardShadow}
+                  style={Shadows.primary}
                 >
                   <View className='flex-row items-center gap-2 mb-1'>
                     <Wallet
@@ -428,7 +421,7 @@ export default function BudgetIndex() {
                 return (
                   <View
                     className='bg-white rounded-3xl px-4 py-3'
-                    style={cardShadow}
+                    style={Shadows.primary}
                   >
                     <View className='flex-row items-center justify-between'>
                       <View className='flex-row items-center gap-2'>
