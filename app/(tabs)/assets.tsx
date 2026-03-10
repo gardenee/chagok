@@ -25,11 +25,11 @@ import {
   ASSET_TYPE_OPTIONS,
   getAssetTypeOption,
   type UnifiedFormData,
-} from '../../components/ui/asset-payment-form-screen';
+} from '../../components/asset/asset-payment-form-screen';
 import {
   getPmColor,
   PM_TYPE_OPTIONS,
-} from '../../components/ui/payment-method-form-screen';
+} from '../../components/asset/payment-method-form-screen';
 import { EmptyState } from '../../components/ui/empty-state';
 import { ScreenHeader } from '../../components/ui/screen-header';
 import { SummaryCard } from '../../components/ui/summary-card';

@@ -22,8 +22,8 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
-import { SaveButton } from './save-button';
-import { ModalTextInput, AmountInput } from './modal-inputs';
+import { SaveButton } from '../ui/save-button';
+import { ModalTextInput, AmountInput } from '../ui/modal-inputs';
 import { PM_TYPE_OPTIONS } from './payment-method-form-screen';
 import type { Asset, PaymentMethod } from '../../types/database';
 

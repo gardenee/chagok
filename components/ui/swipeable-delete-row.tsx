@@ -1,11 +1,4 @@
-import {
-  View,
-  TouchableOpacity,
-  PanResponder,
-  Animated,
-  Pressable,
-  Modal,
-} from 'react-native';
+import { View, PanResponder, Animated, Pressable, Modal } from 'react-native';
 import type { ReactNode } from 'react';
 import { useRef, useState, useCallback } from 'react';
 import { Trash2 } from 'lucide-react-native';

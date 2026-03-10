@@ -18,8 +18,8 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
-import { SaveButton } from './save-button';
-import { ModalTextInput } from './modal-inputs';
+import { SaveButton } from '../ui/save-button';
+import { ModalTextInput } from '../ui/modal-inputs';
 import type { PaymentMethod } from '../../types/database';
 
 export type PaymentMethodFormData = {
