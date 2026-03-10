@@ -239,7 +239,7 @@ export default function CategoriesScreen() {
                 <EmptyState
                   icon={Wallet}
                   title='지출 카테고리가 없어요'
-                  description='+ 추가 버튼으로 만들어보세요'
+                  description='우상단 + 버튼으로 만들어보세요'
                 />
               ) : (
                 <View className='gap-2.5'>
@@ -260,7 +260,7 @@ export default function CategoriesScreen() {
                 <EmptyState
                   icon={TrendingUp}
                   title='수입 카테고리가 없어요'
-                  description='+ 추가 버튼으로 만들어보세요'
+                  description='우상단 + 버튼으로 만들어보세요'
                 />
               ) : (
                 <View className='gap-2.5'>
