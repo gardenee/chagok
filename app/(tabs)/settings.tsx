@@ -7,6 +7,7 @@ import {
   Switch,
   Alert,
   Share,
+  Modal,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import {
@@ -18,7 +19,9 @@ import {
   ChevronRight,
   Users,
   Link,
+  X,
 } from 'lucide-react-native';
+import Constants from 'expo-constants';
 import {
   BottomSheet,
   BottomSheetHeader,
@@ -174,6 +177,8 @@ export default function SettingsScreen() {
   const [editModal, setEditModal] = useState<{
     type: 'bookName' | 'nickname' | null;
   }>({ type: null });
+  const [notifInboxVisible, setNotifInboxVisible] = useState(false);
+  const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 
   const partner = members.find(m => m.id !== userProfile?.id);
   const isLinked = !!partner;
@@ -240,8 +245,14 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}
       >
-        <View className='px-6 pt-6 pb-4'>
+        <View className='px-6 pt-6 pb-4 flex-row items-center justify-between'>
           <Text className='font-ibm-bold text-2xl text-brown-darker'>설정</Text>
+          <TouchableOpacity
+            onPress={() => setNotifInboxVisible(true)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Bell size={22} color={Colors.brown} strokeWidth={2} />
+          </TouchableOpacity>
         </View>
 
         <SettingsCard>
@@ -262,36 +273,47 @@ export default function SettingsScreen() {
               onPress={() => openEdit('bookName')}
             />
             <Divider />
-            <SettingsRow
-              icon={<Hash size={16} color='#737373' strokeWidth={2} />}
-              label='초대코드'
-              value={
-                coupleLoading
-                  ? '...'
-                  : isLinked
-                    ? undefined
-                    : (couple?.invite_code ?? '-')
-              }
-              onPress={isLinked ? undefined : handleShareInviteCode}
-              rightElement={
-                isLinked ? (
-                  <View className='flex-row items-center gap-1 bg-butter rounded-full px-2.5 py-1'>
-                    <Link size={11} color={Colors.brown} strokeWidth={2.5} />
-                    <Text className='font-ibm-semibold text-xs text-brown-dark'>
-                      연동 완료
-                    </Text>
-                  </View>
-                ) : null
-              }
-              showChevron={!isLinked}
-            />
-            <Divider />
-            <SettingsRow
-              icon={<Users size={16} color='#737373' strokeWidth={2} />}
-              label='짝꿍'
-              value={partner?.nickname ?? '아직 연동 전'}
-              showChevron={false}
-            />
+            {isLinked ? (
+              <>
+                <SettingsRow
+                  icon={<Users size={16} color='#737373' strokeWidth={2} />}
+                  label='짝꿍'
+                  value={partner?.nickname ?? '-'}
+                  showChevron={false}
+                />
+                <Divider />
+                <SettingsRow
+                  icon={<Hash size={16} color='#737373' strokeWidth={2} />}
+                  label='초대코드'
+                  value=''
+                  showChevron={false}
+                  rightElement={
+                    <View className='flex-row items-center gap-1 bg-butter rounded-full px-2.5 py-1'>
+                      <Link size={11} color={Colors.brown} strokeWidth={2.5} />
+                      <Text className='font-ibm-semibold text-xs text-brown-dark'>
+                        연동 완료
+                      </Text>
+                    </View>
+                  }
+                />
+              </>
+            ) : (
+              <>
+                <SettingsRow
+                  icon={<Hash size={16} color='#737373' strokeWidth={2} />}
+                  label='초대코드'
+                  value={coupleLoading ? '...' : (couple?.invite_code ?? '-')}
+                  onPress={handleShareInviteCode}
+                />
+                <Divider />
+                <SettingsRow
+                  icon={<Users size={16} color='#737373' strokeWidth={2} />}
+                  label='짝꿍'
+                  value='아직 연동 전'
+                  showChevron={false}
+                />
+              </>
+            )}
           </SettingsCard>
         </View>
 
@@ -357,7 +379,38 @@ export default function SettingsScreen() {
             />
           </SettingsCard>
         </View>
+
+        <Text className='font-ibm-regular text-xs text-neutral-400 text-center mt-6'>
+          버전 {appVersion}
+        </Text>
       </ScrollView>
+
+      <Modal
+        visible={notifInboxVisible}
+        animationType='slide'
+        presentationStyle='pageSheet'
+        onRequestClose={() => setNotifInboxVisible(false)}
+      >
+        <SafeAreaView className='flex-1 bg-cream'>
+          <View className='flex-row items-center justify-between px-6 pt-4 pb-4 border-b border-cream-dark'>
+            <Text className='font-ibm-bold text-xl text-brown-darker'>
+              알림
+            </Text>
+            <TouchableOpacity
+              onPress={() => setNotifInboxVisible(false)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <X size={22} color='#A3A3A3' strokeWidth={2} />
+            </TouchableOpacity>
+          </View>
+          <View className='flex-1 items-center justify-center gap-2'>
+            <Bell size={36} color='#D4D4D4' strokeWidth={1.5} />
+            <Text className='font-ibm-semibold text-sm text-neutral-400'>
+              아직 알림이 없어요
+            </Text>
+          </View>
+        </SafeAreaView>
+      </Modal>
 
       <EditModal
         visible={editModal.type === 'nickname'}
