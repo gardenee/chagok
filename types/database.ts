@@ -102,6 +102,7 @@ export interface Database {
             | 'other';
           icon: string;
           color: string;
+          limit: number | null;
           sort_order: number;
           created_at: string;
         };
@@ -119,6 +120,7 @@ export interface Database {
             | 'other';
           icon?: string;
           color?: string;
+          limit?: number | null;
           sort_order?: number;
           created_at?: string;
         };
@@ -134,6 +136,7 @@ export interface Database {
             | 'other';
           icon?: string;
           color?: string;
+          limit?: number | null;
           sort_order?: number;
         };
         Relationships: never[];
@@ -145,6 +148,7 @@ export interface Database {
           user_id: string;
           category_id: string | null;
           payment_method_id: string | null;
+          asset_id: string | null;
           amount: number;
           type: 'expense' | 'income';
           tag: 'me' | 'partner' | 'together';
@@ -158,6 +162,7 @@ export interface Database {
           user_id: string;
           category_id?: string | null;
           payment_method_id?: string | null;
+          asset_id?: string | null;
           amount: number;
           type: 'expense' | 'income';
           tag: 'me' | 'partner' | 'together';
@@ -168,6 +173,7 @@ export interface Database {
         Update: {
           category_id?: string | null;
           payment_method_id?: string | null;
+          asset_id?: string | null;
           amount?: number;
           type?: 'expense' | 'income';
           tag?: 'me' | 'partner' | 'together';
@@ -257,7 +263,7 @@ export interface Database {
           id: string;
           couple_id: string;
           name: string;
-          amount: number;
+          amount: number | null;
           type: string;
           icon: string;
           color: string;
@@ -268,7 +274,7 @@ export interface Database {
           id?: string;
           couple_id: string;
           name: string;
-          amount: number;
+          amount?: number | null;
           type?: string;
           icon?: string;
           color?: string;
@@ -277,7 +283,7 @@ export interface Database {
         };
         Update: {
           name?: string;
-          amount?: number;
+          amount?: number | null;
           type?: string;
           icon?: string;
           color?: string;

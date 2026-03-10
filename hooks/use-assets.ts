@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/auth';
 
 type AssetInput = {
   name: string;
-  amount: number;
+  amount?: number | null;
   type: string;
   icon: string;
   color: string;

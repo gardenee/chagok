@@ -6,6 +6,7 @@ export type PaymentMethodInput = {
   type: PaymentMethod['type'];
   icon?: string;
   color?: string;
+  limit?: number | null;
   sort_order?: number;
 };
 

@@ -78,13 +78,32 @@ import {
   useUpdateCategory,
   useDeleteCategory,
 } from '../../hooks/use-categories';
-import { usePaymentMethods } from '../../hooks/use-payment-methods';
+import {
+  usePaymentMethods,
+  useCreatePaymentMethod,
+  useUpdatePaymentMethod,
+  useDeletePaymentMethod,
+} from '../../hooks/use-payment-methods';
+import { useAssets } from '../../hooks/use-assets';
+import { getAssetTypeOption } from '../../components/ui/asset-payment-form-screen';
+import {
+  PaymentMethodFormScreen,
+  PM_TYPE_OPTIONS,
+  INITIAL_PM_FORM,
+  getPmColor,
+  type PaymentMethodFormData,
+} from '../../components/ui/payment-method-form-screen';
 import { EmptyState } from '../../components/ui/empty-state';
 import { IconBox } from '../../components/ui/icon-box';
 import { SegmentControl } from '../../components/ui/segment-control';
 import { ColorPill, TagPill } from '../../components/ui/color-pill';
 import { formatAmount, formatAmountShort } from '../../utils/format';
-import type { Schedule, FixedExpense } from '../../types/database';
+import type {
+  Schedule,
+  FixedExpense,
+  PaymentMethod,
+  Asset,
+} from '../../types/database';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -96,6 +115,7 @@ type TxFormData = {
   memo: string;
   category_id: string | null;
   payment_method_id: string | null;
+  asset_id: string | null;
 };
 
 type ScheduleFormData = {
@@ -111,6 +131,7 @@ const INITIAL_TX_FORM: TxFormData = {
   memo: '',
   category_id: null,
   payment_method_id: null,
+  asset_id: null,
 };
 const INITIAL_SCHEDULE_FORM: ScheduleFormData = {
   title: '',
@@ -161,10 +182,12 @@ export default function CalendarTab() {
     visible: boolean;
     editingId: string | null;
     form: TxFormData;
-    view: 'tx' | 'catMgmt' | 'catForm';
+    view: 'tx' | 'catMgmt' | 'catForm' | 'pmMgmt' | 'pmForm';
     catEditingId: string | null;
     catForm: CategoryFormData;
     catFormSource: 'tx' | 'catMgmt';
+    pmEditingId: string | null;
+    pmForm: PaymentMethodFormData;
   }>({
     visible: false,
     editingId: null,
@@ -173,6 +196,8 @@ export default function CalendarTab() {
     catEditingId: null,
     catForm: INITIAL_CATEGORY_FORM,
     catFormSource: 'tx',
+    pmEditingId: null,
+    pmForm: INITIAL_PM_FORM,
   });
   const [scheduleModal, setScheduleModal] = useState<{
     visible: boolean;
@@ -216,6 +241,13 @@ export default function CalendarTab() {
   const { data: fixedExpenses = [] } = useFixedExpenses();
   const { data: categories = [] } = useCategories();
   const { data: paymentMethods = [] } = usePaymentMethods();
+  const { data: allAssets = [] } = useAssets();
+  const bankCashAssets = allAssets.filter(
+    (a: Asset) => a.type === 'bank' || a.type === 'cash',
+  );
+  const createPaymentMethod = useCreatePaymentMethod();
+  const updatePaymentMethod = useUpdatePaymentMethod();
+  const deletePaymentMethod = useDeletePaymentMethod();
   const { data: comments = [], isLoading: commentsLoading } =
     useTransactionComments(detailTx?.id ?? '');
   const { data: members = [] } = useCoupleMembers();
@@ -268,6 +300,72 @@ export default function CalendarTab() {
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
+
+  async function handlePmSave() {
+    const name = txModal.pmForm.name.trim();
+    if (!name) {
+      Alert.alert('입력 오류', '결제수단 이름을 입력해주세요');
+      return;
+    }
+    const color = getPmColor(txModal.pmForm.type);
+    try {
+      if (txModal.pmEditingId) {
+        await updatePaymentMethod.mutateAsync({
+          id: txModal.pmEditingId,
+          name,
+          type: txModal.pmForm.type,
+          color,
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setTxModal(s => ({
+          ...s,
+          view: 'pmMgmt',
+          pmEditingId: null,
+          pmForm: INITIAL_PM_FORM,
+        }));
+      } else {
+        const created = await createPaymentMethod.mutateAsync({
+          name,
+          type: txModal.pmForm.type,
+          color,
+          sort_order: paymentMethods.length,
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setTxModal(s => ({
+          ...s,
+          view: 'tx',
+          pmForm: INITIAL_PM_FORM,
+          form: { ...s.form, payment_method_id: created.id },
+        }));
+      }
+    } catch {
+      Alert.alert('오류', '저장 중 문제가 발생했어요');
+    }
+  }
+
+  function handlePmDelete(id: string) {
+    Alert.alert('결제수단 삭제', '이 결제수단을 삭제할까요?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deletePaymentMethod.mutateAsync(id);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            setTxModal(s => ({
+              ...s,
+              view: 'pmMgmt',
+              pmEditingId: null,
+              pmForm: INITIAL_PM_FORM,
+            }));
+          } catch {
+            Alert.alert('오류', '삭제 중 문제가 발생했어요');
+          }
+        },
+      },
+    ]);
+  }
 
   const isTxSaving = createTx.isPending || updateTx.isPending;
   const isScheduleSaving = createSchedule.isPending || updateSchedule.isPending;
@@ -500,6 +598,7 @@ export default function CalendarTab() {
         memo: t.memo ?? '',
         category_id: t.category_id ?? null,
         payment_method_id: t.payment_method_id ?? null,
+        asset_id: t.asset_id ?? null,
       },
       view: 'tx',
     }));
@@ -518,6 +617,7 @@ export default function CalendarTab() {
       memo: txModal.form.memo.trim() || null,
       category_id: txModal.form.category_id,
       payment_method_id: txModal.form.payment_method_id,
+      asset_id: txModal.form.asset_id,
       date: selectedDate,
     };
     try {
@@ -1204,18 +1304,6 @@ export default function CalendarTab() {
             keyboardShouldPersistTaps='handled'
           >
             <View className='flex-row gap-2 pr-2'>
-              <TouchableOpacity
-                onPress={openCatCreate}
-                className='items-center gap-1'
-                activeOpacity={0.7}
-              >
-                <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
-                  <Plus size={18} color='#A3A3A3' strokeWidth={2} />
-                </View>
-                <Text className='font-ibm-semibold text-[10px] text-neutral-600'>
-                  추가
-                </Text>
-              </TouchableOpacity>
               {categories
                 .filter(c => c.type === txModal.form.type)
                 .map(c => {
@@ -1255,46 +1343,94 @@ export default function CalendarTab() {
                     </TouchableOpacity>
                   );
                 })}
+              <TouchableOpacity
+                onPress={openCatCreate}
+                className='items-center gap-1'
+                activeOpacity={0.7}
+              >
+                <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
+                  <Plus size={18} color='#A3A3A3' strokeWidth={2} />
+                </View>
+                <Text className='font-ibm-semibold text-[10px] text-neutral-600'>
+                  추가
+                </Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </View>
 
-        {/* 결제수단 선택 (지출이고 결제수단이 있을 때만) */}
-        {txModal.form.type === 'expense' && paymentMethods.length > 0 && (
+        {/* 결제수단 선택 (지출일 때) */}
+        {txModal.form.type === 'expense' && (
           <View className='mb-4'>
-            <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
-              결제수단
-            </Text>
+            <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
+              <Text className='font-ibm-semibold text-xs text-neutral-600'>
+                결제수단
+              </Text>
+              {paymentMethods.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => setTxModal(s => ({ ...s, view: 'pmMgmt' }))}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text className='font-ibm-semibold text-xs text-neutral-600 bg-neutral-200 rounded-2xl px-2 py-0.5'>
+                    수정
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               keyboardShouldPersistTaps='handled'
             >
               <View className='flex-row gap-2 pr-2'>
-                <TouchableOpacity
-                  onPress={() =>
-                    setTxModal(s => ({
-                      ...s,
-                      form: { ...s.form, payment_method_id: null },
-                    }))
-                  }
-                  className='items-center gap-1'
-                  activeOpacity={0.7}
-                >
-                  <View
-                    className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100'
-                    style={{
-                      borderWidth:
-                        txModal.form.payment_method_id === null ? 2 : 0,
-                      borderColor: Colors.brown,
-                    }}
-                  >
-                    <Wallet size={20} color='#A3A3A3' strokeWidth={2.5} />
-                  </View>
-                  <Text className='font-ibm-semibold text-[10px] text-neutral-500'>
-                    없음
-                  </Text>
-                </TouchableOpacity>
+                {bankCashAssets.map((asset: Asset) => {
+                  const isSelected = txModal.form.asset_id === asset.id;
+                  const { Icon: AssetIcon, color: assetColor } =
+                    getAssetTypeOption(asset.type);
+                  return (
+                    <TouchableOpacity
+                      key={`asset-${asset.id}`}
+                      onPress={() => {
+                        setTxModal(s => ({
+                          ...s,
+                          form: {
+                            ...s.form,
+                            asset_id: isSelected ? null : asset.id,
+                            payment_method_id: null,
+                          },
+                        }));
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      className='items-center gap-1'
+                      activeOpacity={0.7}
+                    >
+                      <View
+                        className='w-12 h-12 rounded-2xl items-center justify-center'
+                        style={{
+                          backgroundColor: assetColor + '80',
+                          borderWidth: isSelected ? 2 : 0,
+                          borderColor: isSelected ? assetColor : 'transparent',
+                        }}
+                      >
+                        <AssetIcon
+                          size={20}
+                          color={Colors.brown}
+                          strokeWidth={2.5}
+                        />
+                      </View>
+                      <Text
+                        className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                        numberOfLines={1}
+                      >
+                        {asset.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+                {bankCashAssets.length > 0 && paymentMethods.length > 0 && (
+                  <View className='w-px bg-neutral-200 mx-1 self-stretch my-2' />
+                )}
                 {paymentMethods.map(pm => {
                   const isSelected = txModal.form.payment_method_id === pm.id;
                   return (
@@ -1306,6 +1442,7 @@ export default function CalendarTab() {
                           form: {
                             ...s.form,
                             payment_method_id: isSelected ? null : pm.id,
+                            asset_id: null,
                           },
                         }));
                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1332,31 +1469,55 @@ export default function CalendarTab() {
                     </TouchableOpacity>
                   );
                 })}
+                <TouchableOpacity
+                  onPress={() =>
+                    setTxModal(s => ({
+                      ...s,
+                      view: 'pmForm',
+                      pmEditingId: null,
+                      pmForm: INITIAL_PM_FORM,
+                    }))
+                  }
+                  className='items-center gap-1'
+                  activeOpacity={0.7}
+                >
+                  <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
+                    <Plus size={18} color='#A3A3A3' strokeWidth={2} />
+                  </View>
+                  <Text className='font-ibm-semibold text-[10px] text-neutral-600'>
+                    추가
+                  </Text>
+                </TouchableOpacity>
               </View>
             </ScrollView>
           </View>
         )}
 
-        <View className='flex-row gap-2 mb-6'>
-          {tagOptions.map(({ value, label }) => (
-            <TouchableOpacity
-              key={value}
-              onPress={() =>
-                setTxModal(s => ({
-                  ...s,
-                  form: { ...s.form, tag: value },
-                }))
-              }
-              className={`flex-1 py-2.5 rounded-2xl items-center ${txModal.form.tag === value ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-              activeOpacity={0.7}
-            >
-              <Text
-                className={`font-ibm-semibold text-sm ${txModal.form.tag === value ? 'text-neutral-800' : 'text-neutral-500'}`}
+        <View className='mb-6'>
+          <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
+            {'누가'}
+          </Text>
+          <View className='flex-row gap-2'>
+            {tagOptions.map(({ value, label }) => (
+              <TouchableOpacity
+                key={value}
+                onPress={() =>
+                  setTxModal(s => ({
+                    ...s,
+                    form: { ...s.form, tag: value },
+                  }))
+                }
+                className={`flex-1 py-2.5 rounded-2xl items-center ${txModal.form.tag === value ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                activeOpacity={0.7}
               >
-                {label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  className={`font-ibm-semibold text-sm ${txModal.form.tag === value ? 'text-neutral-800' : 'text-neutral-500'}`}
+                >
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         <SaveButton
@@ -1466,6 +1627,128 @@ export default function CalendarTab() {
         />
       </Modal>
 
+      {/* ── 결제수단 관리 모달 (풀스크린) ── */}
+      <Modal
+        visible={txModal.visible && txModal.view === 'pmMgmt'}
+        animationType='none'
+        onRequestClose={() => setTxModal(s => ({ ...s, view: 'tx' }))}
+      >
+        <SafeAreaView className='flex-1 bg-white'>
+          <View className='flex-row items-center justify-between px-6 pt-5 mb-5'>
+            <TouchableOpacity
+              onPress={() => setTxModal(s => ({ ...s, view: 'tx' }))}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <ChevronLeft size={22} color={Colors.brown} strokeWidth={2.5} />
+            </TouchableOpacity>
+            <Text className='font-ibm-bold text-lg text-neutral-800'>
+              결제수단 관리
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                setTxModal(s => ({
+                  ...s,
+                  view: 'pmForm',
+                  pmEditingId: null,
+                  pmForm: INITIAL_PM_FORM,
+                }))
+              }
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              activeOpacity={0.7}
+            >
+              <Plus size={22} color={Colors.brown} strokeWidth={2.5} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
+          >
+            {paymentMethods.length === 0 ? (
+              <View className='py-16 items-center gap-2'>
+                <Text className='font-ibm-semibold text-sm text-neutral-400'>
+                  결제수단이 없어요
+                </Text>
+              </View>
+            ) : (
+              <View className='gap-2'>
+                {paymentMethods.map(pm => {
+                  const pmType = PM_TYPE_OPTIONS.find(t => t.key === pm.type);
+                  const Icon = pmType?.Icon ?? Wallet;
+                  return (
+                    <TouchableOpacity
+                      key={pm.id}
+                      onPress={() =>
+                        setTxModal(s => ({
+                          ...s,
+                          view: 'pmForm',
+                          pmEditingId: pm.id,
+                          pmForm: { name: pm.name, type: pm.type },
+                        }))
+                      }
+                      activeOpacity={0.8}
+                    >
+                      <View className='flex-row items-center gap-3 bg-neutral-50 rounded-2xl px-4 py-3'>
+                        <View
+                          className='w-10 h-10 rounded-xl items-center justify-center'
+                          style={{ backgroundColor: pm.color + '55' }}
+                        >
+                          <Icon size={18} color={pm.color} strokeWidth={2.5} />
+                        </View>
+                        <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
+                          {pm.name}
+                        </Text>
+                        <Text className='font-ibm-regular text-xs text-neutral-400'>
+                          {pmType?.label ?? ''}
+                        </Text>
+                        <ChevronRight
+                          size={16}
+                          color='#D4D4D4'
+                          strokeWidth={2}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
+      {/* ── 결제수단 추가/수정 모달 (풀스크린, 공통 컴포넌트) ── */}
+      <Modal
+        visible={txModal.visible && txModal.view === 'pmForm'}
+        animationType='none'
+        onRequestClose={() =>
+          setTxModal(s => ({
+            ...s,
+            view: s.pmEditingId ? 'pmMgmt' : 'tx',
+          }))
+        }
+      >
+        <PaymentMethodFormScreen
+          editingId={txModal.pmEditingId}
+          form={txModal.pmForm}
+          isSaving={
+            createPaymentMethod.isPending || updatePaymentMethod.isPending
+          }
+          onBack={() =>
+            setTxModal(s => ({
+              ...s,
+              view: s.pmEditingId ? 'pmMgmt' : 'tx',
+            }))
+          }
+          onChange={pmForm => setTxModal(s => ({ ...s, pmForm }))}
+          onSave={handlePmSave}
+          onDelete={
+            txModal.pmEditingId
+              ? () => handlePmDelete(txModal.pmEditingId!)
+              : undefined
+          }
+        />
+      </Modal>
+
       {/* ── 일정 추가/수정 모달 ── */}
       <BottomSheet
         visible={scheduleModal.visible}
@@ -1493,29 +1776,34 @@ export default function CalendarTab() {
           className='mb-5'
         />
 
-        <View className='flex-row gap-2 mb-5'>
-          {tagOptions.map(({ value, label }) => {
-            const isSelected = scheduleModal.form.tag === value;
-            return (
-              <TouchableOpacity
-                key={value}
-                onPress={() =>
-                  setScheduleModal(s => ({
-                    ...s,
-                    form: { ...s.form, tag: value },
-                  }))
-                }
-                className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                activeOpacity={0.7}
-              >
-                <Text
-                  className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+        <View className='mb-5'>
+          <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
+            참여자
+          </Text>
+          <View className='flex-row gap-2'>
+            {tagOptions.map(({ value, label }) => {
+              const isSelected = scheduleModal.form.tag === value;
+              return (
+                <TouchableOpacity
+                  key={value}
+                  onPress={() =>
+                    setScheduleModal(s => ({
+                      ...s,
+                      form: { ...s.form, tag: value },
+                    }))
+                  }
+                  className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                  activeOpacity={0.7}
                 >
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+                  <Text
+                    className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
 
         {/* 시간 선택 */}
@@ -1533,7 +1821,7 @@ export default function CalendarTab() {
             >
               <Clock size={14} color='#a3a3a3' strokeWidth={2} />
               <Text className='font-ibm-regular text-sm text-neutral-400'>
-                시간 설정 없음
+                시작 시간 없음
               </Text>
             </TouchableOpacity>
           ) : (
