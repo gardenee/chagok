@@ -322,7 +322,7 @@ export default function BudgetIndex() {
   }
 
   return (
-    <SafeAreaView className='flex-1 bg-cream'>
+    <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}

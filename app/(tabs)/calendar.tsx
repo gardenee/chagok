@@ -68,6 +68,7 @@ import {
 } from '../../hooks/use-payment-methods';
 import { useAssets } from '../../hooks/use-assets';
 import { LoadingState } from '../../components/ui/loading-state';
+import { SegmentControl } from '../../components/ui/segment-control';
 import { ItemCard } from '../../components/ui/item-card';
 import { EmptyState } from '../../components/ui/empty-state';
 import { IconBox } from '../../components/ui/icon-box';
@@ -732,36 +733,18 @@ export default function CalendarTab() {
         </View>
 
         {/* 탭 전환 */}
-        <View className='flex-1 flex-row mx-4 mb-3 bg-cream rounded-2xl p-1 mr-3'>
-          <TouchableOpacity
-            onPress={() => {
-              setActiveTab('ledger');
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-            className={`flex-1 py-2.5 rounded-xl items-center ${activeTab === 'ledger' ? 'bg-butter' : ''}`}
-            activeOpacity={0.7}
-          >
-            <Text
-              className={`font-ibm-semibold text-sm ${activeTab === 'ledger' ? 'text-brown' : 'text-brown/40'}`}
-            >
-              가계부
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setActiveTab('schedule');
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-            className={`flex-1 py-2.5 rounded-xl items-center ${activeTab === 'schedule' ? 'bg-butter' : ''}`}
-            activeOpacity={0.7}
-          >
-            <Text
-              className={`font-ibm-semibold text-sm ${activeTab === 'schedule' ? 'text-brown' : 'text-brown/40'}`}
-            >
-              일정
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <SegmentControl
+          options={[
+            { value: 'ledger', label: '가계부' },
+            { value: 'schedule', label: '일정' },
+          ]}
+          value={activeTab}
+          onChange={tab => {
+            setActiveTab(tab as 'ledger' | 'schedule');
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }}
+          className='flex-1 mx-4 mb-3 mr-3'
+        />
 
         {/* 캘린더 그리드 */}
         <CalendarGrid

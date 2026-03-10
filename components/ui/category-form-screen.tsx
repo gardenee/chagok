@@ -46,6 +46,7 @@ import {
 } from 'lucide-react-native';
 import { Colors } from '../../constants/colors';
 import { SaveButton } from './save-button';
+import { SegmentControl } from './segment-control';
 import { ModalTextInput, AmountInput } from './modal-inputs';
 
 export const ICON_MAP: Record<string, LucideIcon> = {
@@ -187,34 +188,15 @@ export function CategoryFormScreen({
 
           {/* 타입 토글 — 추가 모드에만 표시 */}
           {!editingId && (
-            <View
-              className='flex-row rounded-2xl p-1 mb-6'
-              style={{ backgroundColor: Colors.butter }}
-            >
-              {(['expense', 'income'] as const).map(type => {
-                const isActive = categoryType === type;
-                return (
-                  <TouchableOpacity
-                    key={type}
-                    onPress={() => onTypeChange?.(type)}
-                    activeOpacity={0.8}
-                    className='flex-1 rounded-xl py-2 items-center'
-                    style={
-                      isActive ? { backgroundColor: Colors.cream } : undefined
-                    }
-                  >
-                    <Text
-                      className='font-ibm-semibold text-sm'
-                      style={{
-                        color: isActive ? Colors.brownDarker : Colors.brown,
-                      }}
-                    >
-                      {type === 'expense' ? '지출' : '수입'}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+            <SegmentControl
+              options={[
+                { value: 'expense', label: '지출' },
+                { value: 'income', label: '수입' },
+              ]}
+              value={categoryType ?? 'expense'}
+              onChange={type => onTypeChange?.(type as 'expense' | 'income')}
+              className='mb-6'
+            />
           )}
 
           {/* 이름 */}
