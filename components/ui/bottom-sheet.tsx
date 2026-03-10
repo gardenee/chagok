@@ -25,15 +25,19 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
       transparent
       onRequestClose={onClose}
     >
+      {/* 오버레이: KAV와 독립적으로 전체 화면 덮음. 터치하면 닫힘 */}
+      <TouchableOpacity
+        className='absolute inset-0'
+        activeOpacity={1}
+        onPress={onClose}
+      />
+      {/* KAV가 시트만 감싸서 키보드 위로 시트가 올라오게 함.
+          pointerEvents='box-none'으로 KAV 프레임 자체는 터치를 막지 않음 */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className='flex-1 justify-end'
+        pointerEvents='box-none'
       >
-        <TouchableOpacity
-          className='flex-1'
-          activeOpacity={1}
-          onPress={onClose}
-        />
         <View
           className='bg-white rounded-t-3xl px-6 pt-5'
           style={{
