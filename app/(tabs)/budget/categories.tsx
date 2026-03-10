@@ -99,7 +99,10 @@ export default function CategoriesScreen() {
         name: c.name,
         icon: c.icon,
         color: c.color,
-        budget_amount: String(c.budget_amount),
+        budget_amount:
+          c.type === 'income' && c.budget_amount === 0
+            ? ''
+            : String(c.budget_amount),
       },
     });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

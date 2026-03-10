@@ -199,7 +199,9 @@ export function CategoryFormScreen({
                     onPress={() => onTypeChange?.(type)}
                     activeOpacity={0.8}
                     className='flex-1 rounded-xl py-2 items-center'
-                    style={isActive ? { backgroundColor: '#fff' } : undefined}
+                    style={
+                      isActive ? { backgroundColor: Colors.cream } : undefined
+                    }
                   >
                     <Text
                       className='font-ibm-semibold text-sm'
