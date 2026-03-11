@@ -4,10 +4,8 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Switch,
   Alert,
   Share,
-  Modal,
 } from 'react-native';
 import { useState } from 'react';
 import {
@@ -18,13 +16,11 @@ import {
   LogOut,
   Users,
   Link,
-  X,
 } from 'lucide-react-native';
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/store/auth';
-import { useNotificationSettingsStore } from '@/store/notification-settings';
 import { supabase } from '@/lib/supabase';
 import { useCouple, useUpdateBookName } from '@/hooks/use-couple';
 import { useCoupleMembers } from '@/hooks/use-couple-members';
@@ -32,6 +28,8 @@ import { useUpdateNickname } from '@/hooks/use-user';
 import { SettingsRow } from '@/components/settings/settings-row';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
 import { EditModal } from '@/components/settings/edit-modal';
+import { NotificationInbox } from '@/components/settings/notification-inbox';
+import { NotificationSettings } from '@/components/settings/notification-settings';
 
 export default function SettingsScreen() {
   const { userProfile } = useAuthStore();
@@ -39,15 +37,6 @@ export default function SettingsScreen() {
   const { data: members = [] } = useCoupleMembers();
   const updateBookName = useUpdateBookName();
   const updateNickname = useUpdateNickname();
-  const {
-    partnerTransaction,
-    comment,
-    fixedExpenseReminder,
-    setPartnerTransaction,
-    setComment,
-    setFixedExpenseReminder,
-  } = useNotificationSettingsStore();
-
   const [editModal, setEditModal] = useState<{
     type: 'bookName' | 'nickname' | null;
   }>({ type: null });
@@ -192,56 +181,7 @@ export default function SettingsScreen() {
         </View>
 
         <View className='mt-3'>
-          <SettingsCard>
-            {[
-              {
-                label: '짝꿍 지출 알림',
-                value: partnerTransaction,
-                onToggle: (v: boolean) => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setPartnerTransaction(v);
-                },
-              },
-              {
-                label: '댓글 알림',
-                value: comment,
-                onToggle: (v: boolean) => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setComment(v);
-                },
-              },
-              {
-                label: '고정지출 리마인더',
-                value: fixedExpenseReminder,
-                onToggle: (v: boolean) => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setFixedExpenseReminder(v);
-                },
-              },
-            ].map((item, i) => (
-              <View key={item.label}>
-                {i > 0 && <Divider />}
-                <View className='flex-row items-center px-4 py-4 bg-cream'>
-                  <View className='w-8 h-8 rounded-xl bg-cream-dark/70 items-center justify-center mr-3'>
-                    <Bell
-                      size={16}
-                      color={item.value ? Colors.brown : '#A3A3A3'}
-                      strokeWidth={2}
-                    />
-                  </View>
-                  <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
-                    {item.label}
-                  </Text>
-                  <Switch
-                    value={item.value}
-                    onValueChange={item.onToggle}
-                    trackColor={{ false: '#E5E5E5', true: Colors.butter }}
-                    thumbColor='#fff'
-                  />
-                </View>
-              </View>
-            ))}
-          </SettingsCard>
+          <NotificationSettings />
         </View>
 
         <View className='mt-3'>
@@ -259,32 +199,10 @@ export default function SettingsScreen() {
         </Text>
       </ScrollView>
 
-      <Modal
+      <NotificationInbox
         visible={notifInboxVisible}
-        animationType='slide'
-        presentationStyle='pageSheet'
-        onRequestClose={() => setNotifInboxVisible(false)}
-      >
-        <SafeAreaView className='flex-1 bg-cream'>
-          <View className='flex-row items-center justify-between px-6 pt-4 pb-4 border-b border-cream-dark'>
-            <Text className='font-ibm-bold text-xl text-brown-darker'>
-              알림
-            </Text>
-            <TouchableOpacity
-              onPress={() => setNotifInboxVisible(false)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <X size={22} color='#A3A3A3' strokeWidth={2} />
-            </TouchableOpacity>
-          </View>
-          <View className='flex-1 items-center justify-center gap-2'>
-            <Bell size={36} color='#D4D4D4' strokeWidth={1.5} />
-            <Text className='font-ibm-semibold text-sm text-neutral-400'>
-              아직 알림이 없어요
-            </Text>
-          </View>
-        </SafeAreaView>
-      </Modal>
+        onClose={() => setNotifInboxVisible(false)}
+      />
 
       <EditModal
         visible={editModal.type === 'nickname'}
