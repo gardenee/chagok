@@ -9,30 +9,24 @@ import {
 import { useState } from 'react';
 import { Repeat, Wallet } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 import {
   useFixedExpenses,
   useCreateFixedExpense,
   useUpdateFixedExpense,
   useDeleteFixedExpense,
-} from '../../hooks/use-fixed-expenses';
-import { useExpenseCategories } from '../../hooks/use-categories';
-import { EmptyState } from '../../components/ui/empty-state';
-import {
-  BottomSheet,
-  BottomSheetHeader,
-} from '../../components/ui/bottom-sheet';
-import { SaveButton } from '../../components/ui/save-button';
-import { ModalTextInput, AmountInput } from '../../components/ui/modal-inputs';
-import { ScreenHeader } from '../../components/ui/screen-header';
-import { SummaryCard } from '../../components/ui/summary-card';
-import { LoadingState } from '../../components/ui/loading-state';
-import { SwipeableDeleteRow } from '../../components/ui/swipeable-delete-row';
-import { ICON_MAP } from '../../components/ui/category-form-screen';
-import { IconBox } from '../../components/ui/icon-box';
-import { ColorPill } from '../../components/ui/color-pill';
-import { formatAmount } from '../../utils/format';
-import type { FixedExpense } from '../../types/database';
+} from '@/hooks/use-fixed-expenses';
+import { useExpenseCategories } from '@/hooks/use-categories';
+import { EmptyState } from '@/components/ui/empty-state';
+import { BottomSheet, BottomSheetHeader } from '@/components/ui/bottom-sheet';
+import { SaveButton } from '@/components/ui/save-button';
+import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
+import { ScreenHeader } from '@/components/ui/screen-header';
+import { SummaryCard } from '@/components/ui/summary-card';
+import { LoadingState } from '@/components/ui/loading-state';
+import { ICON_MAP } from '@/constants/icon-map';
+import { FixedExpenseItem } from '@/components/fixed/fixed-expense-item';
+import type { FixedExpense } from '@/types/database';
 
 type FormData = {
   name: string;
@@ -47,10 +41,6 @@ const INITIAL_FORM: FormData = {
   due_day: 1,
   category_id: null,
 };
-
-function ordinalDay(day: number): string {
-  return `매월 ${day}일`;
-}
 
 export default function FixedScreen() {
   const [modal, setModal] = useState<{
@@ -169,60 +159,14 @@ export default function FixedScreen() {
             <View className='gap-2.5'>
               {fixedExpenses.map(item => {
                 const cat = categories.find(c => c.id === item.category_id);
-                const CatIcon = cat ? (ICON_MAP[cat.icon] ?? Wallet) : null;
                 return (
-                  <SwipeableDeleteRow
+                  <FixedExpenseItem
                     key={item.id}
-                    onDelete={() => handleDelete(item.id, item.name)}
-                  >
-                    <TouchableOpacity
-                      onPress={() => openEdit(item)}
-                      activeOpacity={0.8}
-                    >
-                      <View
-                        className='bg-white rounded-3xl px-4 py-3.5 flex-row items-center gap-3'
-                        style={{
-                          shadowColor: Colors.brown,
-                          shadowOpacity: 0.07,
-                          shadowRadius: 10,
-                          shadowOffset: { width: 0, height: 2 },
-                        }}
-                      >
-                        {/* 아이콘 */}
-                        <IconBox color={Colors.peach} size='md'>
-                          <Repeat
-                            size={19}
-                            color={Colors.peach}
-                            strokeWidth={2.5}
-                          />
-                        </IconBox>
-
-                        {/* 이름 + 날짜 + 카테고리 */}
-                        <View className='flex-1'>
-                          <Text className='font-ibm-semibold text-sm text-neutral-800'>
-                            {item.name}
-                          </Text>
-                          <View className='flex-row items-center gap-1.5 mt-0.5'>
-                            <Text className='font-ibm-regular text-xs text-neutral-500'>
-                              {ordinalDay(item.due_day)}
-                            </Text>
-                            {cat && CatIcon && (
-                              <ColorPill
-                                label={cat.name}
-                                color={cat.color}
-                                icon={CatIcon}
-                              />
-                            )}
-                          </View>
-                        </View>
-
-                        {/* 금액 */}
-                        <Text className='font-ibm-bold text-sm text-neutral-800'>
-                          {formatAmount(item.amount)}원
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  </SwipeableDeleteRow>
+                    item={item}
+                    category={cat}
+                    onEdit={openEdit}
+                    onDelete={handleDelete}
+                  />
                 );
               })}
             </View>
