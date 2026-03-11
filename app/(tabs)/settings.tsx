@@ -9,7 +9,7 @@ import {
   Share,
   Modal,
 } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   BookOpen,
   Hash,
@@ -21,9 +21,6 @@ import {
   X,
 } from 'lucide-react-native';
 import Constants from 'expo-constants';
-import { BottomSheet, BottomSheetHeader } from '@/components/ui/bottom-sheet';
-import { SaveButton } from '@/components/ui/save-button';
-import { ModalTextInput } from '@/components/ui/modal-inputs';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/store/auth';
@@ -34,61 +31,7 @@ import { useCoupleMembers } from '@/hooks/use-couple-members';
 import { useUpdateNickname } from '@/hooks/use-user';
 import { SettingsRow } from '@/components/settings/settings-row';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
-
-type EditModalProps = {
-  visible: boolean;
-  title: string;
-  value: string;
-  placeholder?: string;
-  onClose: () => void;
-  onSave: (value: string) => void;
-  isSaving: boolean;
-  maxLength?: number;
-};
-
-function EditModal({
-  visible,
-  title,
-  value,
-  placeholder,
-  onClose,
-  onSave,
-  isSaving,
-  maxLength = 20,
-}: EditModalProps) {
-  const [text, setText] = useState(value);
-
-  useEffect(() => {
-    if (visible) setText(value);
-  }, [visible, value]);
-
-  const trimmed = text.trim();
-  const isDisabled = isSaving || !trimmed || trimmed === value.trim();
-
-  return (
-    <BottomSheet visible={visible} onClose={onClose}>
-      <BottomSheetHeader title={title} onClose={onClose} className='mb-5' />
-
-      <ModalTextInput
-        value={text}
-        onChangeText={setText}
-        placeholder={placeholder}
-        maxLength={maxLength}
-        autoFocus
-        className='mb-1'
-      />
-      <Text className='font-ibm-regular text-xs text-neutral-400 text-right mb-4 mr-1'>
-        {text.length}/{maxLength}
-      </Text>
-
-      <SaveButton
-        onPress={() => onSave(trimmed)}
-        isSaving={isSaving}
-        disabled={isDisabled}
-      />
-    </BottomSheet>
-  );
-}
+import { EditModal } from '@/components/settings/edit-modal';
 
 export default function SettingsScreen() {
   const { userProfile } = useAuthStore();
