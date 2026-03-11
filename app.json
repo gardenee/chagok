@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "chagok",
+    "name": "차곡",
     "slug": "chagok",
     "scheme": "chagok",
     "version": "1.0.0",
@@ -33,13 +33,7 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": [
-      "expo-router",
-      "expo-web-browser",
-      "expo-apple-authentication",
-      "expo-font",
-      "expo-notifications"
-    ],
+    "plugins": ["expo-router", "expo-web-browser", "expo-apple-authentication", "expo-font", "expo-notifications"],
     "extra": {
       "router": {},
       "eas": {
