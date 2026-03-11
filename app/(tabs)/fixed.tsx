@@ -1,5 +1,6 @@
 import { View, ScrollView, SafeAreaView, Alert, Modal } from 'react-native';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useScrollToTop } from '@react-navigation/native';
 import { Repeat } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
@@ -35,6 +36,9 @@ import type { FixedExpense, Category } from '@/types/database';
 type CatView = 'catForm' | 'catMgmt';
 
 export default function FixedScreen() {
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
+
   const [modal, setModal] = useState<{
     visible: boolean;
     editingId: string | null;
@@ -202,6 +206,7 @@ export default function FixedScreen() {
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >

@@ -7,7 +7,8 @@ import {
   Alert,
   Share,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useScrollToTop } from '@react-navigation/native';
 import {
   BookOpen,
   Hash,
@@ -32,6 +33,9 @@ import { NotificationInbox } from '@/components/settings/notification-inbox';
 import { NotificationSettings } from '@/components/settings/notification-settings';
 
 export default function SettingsScreen() {
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
+
   const { userProfile } = useAuthStore();
   const { data: couple, isLoading: coupleLoading } = useCouple();
   const { data: members = [] } = useCoupleMembers();
@@ -105,6 +109,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}
       >

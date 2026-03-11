@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, SafeAreaView, Alert } from 'react-native';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useScrollToTop } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import {
   useAssets,
@@ -27,6 +28,9 @@ import { formatAmount } from '@/utils/format';
 import type { Asset, PaymentMethod } from '@/types/database';
 
 export default function AssetsTab() {
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
+
   const { data: assets = [], isLoading } = useAssets();
   const { data: paymentMethods = [], isLoading: pmLoading } =
     usePaymentMethods();
@@ -193,6 +197,7 @@ export default function AssetsTab() {
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >

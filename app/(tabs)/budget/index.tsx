@@ -5,7 +5,8 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
+import { useScrollToTop } from '@react-navigation/native';
 import { Pencil, Wallet, TrendingUp } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -25,6 +26,8 @@ export default function BudgetIndex() {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
 
   const { data: categories = [], isLoading } = useCategories();
   const { data: transactions = [] } = useMonthTransactions(year, month);
@@ -89,6 +92,7 @@ export default function BudgetIndex() {
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >

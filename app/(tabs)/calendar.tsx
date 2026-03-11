@@ -6,7 +6,9 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useScrollToTop } from '@react-navigation/native';
 import {
   ChevronLeft,
   ChevronRight,
@@ -98,10 +100,24 @@ export default function CalendarTab() {
   const todayStr = formatDateStr(todayDate);
   const { session, userProfile } = useAuthStore();
   const myId = session?.user.id ?? '';
+  const scrollRef = useRef<ScrollView>(null);
+  const navigation = useNavigation();
+  useScrollToTop(scrollRef);
 
   const [currentYear, setCurrentYear] = useState(todayDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(todayDate.getMonth());
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
+
+  useEffect(() => {
+    return navigation.addListener('tabPress' as never, () => {
+      if (!navigation.isFocused()) return;
+      const now = new Date();
+      setCurrentYear(now.getFullYear());
+      setCurrentMonth(now.getMonth());
+      setSelectedDate(formatDateStr(now));
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    });
+  }, [navigation]);
 
   const [txModal, setTxModal] = useState<TxModalState>({
     visible: false,
@@ -675,6 +691,7 @@ export default function CalendarTab() {
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 32 }}
       >
