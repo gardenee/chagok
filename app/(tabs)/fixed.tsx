@@ -1,4 +1,4 @@
-import { View, ScrollView, SafeAreaView, Alert } from 'react-native';
+import { View, ScrollView, SafeAreaView, Alert, Modal } from 'react-native';
 import { useState } from 'react';
 import { Repeat } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -8,7 +8,12 @@ import {
   useUpdateFixedExpense,
   useDeleteFixedExpense,
 } from '@/hooks/use-fixed-expenses';
-import { useExpenseCategories } from '@/hooks/use-categories';
+import {
+  useExpenseCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from '@/hooks/use-categories';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SummaryCard } from '@/components/ui/summary-card';
@@ -19,7 +24,15 @@ import {
   type FormData,
   INITIAL_FORM,
 } from '@/components/fixed/fixed-expense-form';
-import type { FixedExpense } from '@/types/database';
+import {
+  CategoryFormScreen,
+  INITIAL_CATEGORY_FORM,
+  type CategoryFormData,
+} from '@/components/budget/category-form-screen';
+import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
+import type { FixedExpense, Category } from '@/types/database';
+
+type CatView = 'catForm' | 'catMgmt';
 
 export default function FixedScreen() {
   const [modal, setModal] = useState<{
@@ -28,13 +41,23 @@ export default function FixedScreen() {
     form: FormData;
   }>({ visible: false, editingId: null, form: INITIAL_FORM });
 
+  const [catModal, setCatModal] = useState<{
+    view: CatView | null;
+    editingId: string | null;
+    form: CategoryFormData;
+  }>({ view: null, editingId: null, form: INITIAL_CATEGORY_FORM });
+
   const { data: fixedExpenses = [], isLoading } = useFixedExpenses();
   const { data: categories = [] } = useExpenseCategories();
   const create = useCreateFixedExpense();
   const update = useUpdateFixedExpense();
   const remove = useDeleteFixedExpense();
+  const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
+  const deleteCategory = useDeleteCategory();
 
   const isSaving = create.isPending || update.isPending;
+  const isCatSaving = createCategory.isPending || updateCategory.isPending;
   const totalAmount = fixedExpenses.reduce((sum, f) => sum + f.amount, 0);
 
   function openCreate() {
@@ -90,6 +113,72 @@ export default function FixedScreen() {
     } catch {
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
+  }
+
+  function openCatCreate() {
+    setCatModal({
+      view: 'catForm',
+      editingId: null,
+      form: INITIAL_CATEGORY_FORM,
+    });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+  function openCatEdit(c: Category) {
+    setCatModal({
+      view: 'catForm',
+      editingId: c.id,
+      form: { name: c.name, icon: c.icon, color: c.color },
+    });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+  async function handleCatSave() {
+    const name = catModal.form.name.trim();
+    if (!name) {
+      Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
+      return;
+    }
+    try {
+      if (catModal.editingId) {
+        await updateCategory.mutateAsync({
+          id: catModal.editingId,
+          name,
+          icon: catModal.form.icon,
+          color: catModal.form.color,
+        });
+        setCatModal(s => ({ ...s, view: 'catMgmt', editingId: null }));
+      } else {
+        await createCategory.mutateAsync({
+          name,
+          icon: catModal.form.icon,
+          color: catModal.form.color,
+          budget_amount: 0,
+          sort_order: categories.length,
+          type: 'expense',
+        });
+        setCatModal(s => ({ ...s, view: null }));
+      }
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      Alert.alert('오류', '저장 중 문제가 발생했어요');
+    }
+  }
+  function handleCatDelete(id: string) {
+    Alert.alert('카테고리 삭제', '삭제하면 관련 예산도 사라져요. 삭제할까요?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteCategory.mutateAsync(id);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            setCatModal(s => ({ ...s, view: 'catMgmt', editingId: null }));
+          } catch {
+            Alert.alert('오류', '삭제 중 문제가 발생했어요');
+          }
+        },
+      },
+    ]);
   }
 
   function handleDelete(id: string, name: string) {
@@ -163,7 +252,58 @@ export default function FixedScreen() {
         onChange={form => setModal(s => ({ ...s, form }))}
         onClose={closeModal}
         onSave={handleSave}
+        onCatCreate={openCatCreate}
+        onCatMgmt={() => setCatModal(s => ({ ...s, view: 'catMgmt' }))}
       />
+
+      {/* 카테고리 관리 모달 */}
+      <Modal
+        visible={catModal.view === 'catMgmt'}
+        animationType='none'
+        onRequestClose={() => setCatModal(s => ({ ...s, view: null }))}
+      >
+        <CategoryManagementScreen
+          categories={categories}
+          filterType='expense'
+          onBack={() => setCatModal(s => ({ ...s, view: null }))}
+          onCreate={openCatCreate}
+          onEdit={openCatEdit}
+          onDelete={handleCatDelete}
+        />
+      </Modal>
+
+      {/* 카테고리 추가/수정 모달 */}
+      <Modal
+        visible={catModal.view === 'catForm'}
+        animationType='none'
+        onRequestClose={() =>
+          setCatModal(s => ({
+            ...s,
+            view: s.editingId ? 'catMgmt' : null,
+          }))
+        }
+      >
+        <CategoryFormScreen
+          editingId={catModal.editingId}
+          form={catModal.form}
+          isSaving={isCatSaving}
+          categoryType='expense'
+          onBack={() =>
+            setCatModal(s => ({
+              ...s,
+              view: s.editingId ? 'catMgmt' : null,
+            }))
+          }
+          onChange={form => setCatModal(s => ({ ...s, form }))}
+          onSave={handleCatSave}
+          onDelete={
+            catModal.editingId
+              ? () => handleCatDelete(catModal.editingId!)
+              : undefined
+          }
+          onTypeChange={() => {}}
+        />
+      </Modal>
     </SafeAreaView>
   );
 }

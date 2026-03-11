@@ -7,6 +7,11 @@ import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingState } from '@/components/ui/loading-state';
 import { PM_TYPE_OPTIONS } from '@/components/assets/payment-method-form-screen';
+import {
+  CREDIT_CARD_COMPANIES,
+  DEBIT_CARD_BANKS,
+  TRANSIT_PROVIDERS,
+} from '@/constants/card-companies';
 import { formatAmount } from '@/utils/format';
 import type { PaymentMethod } from '@/types/database';
 
@@ -28,6 +33,26 @@ export function PaymentMethodList({
       PM_TYPE_OPTIONS.find(t => t.key === key) ??
       PM_TYPE_OPTIONS[PM_TYPE_OPTIONS.length - 1]
     );
+  }
+
+  function getPmSubtitle(pm: PaymentMethod): string {
+    const allCompanies = [
+      ...CREDIT_CARD_COMPANIES,
+      ...DEBIT_CARD_BANKS,
+      ...TRANSIT_PROVIDERS,
+    ];
+    const company = pm.card_company
+      ? allCompanies.find(c => c.id === pm.card_company)?.name
+      : null;
+    const parts: string[] = [];
+    if (company) parts.push(company);
+    if (pm.billing_day) parts.push(`${pm.billing_day}일 결제`);
+    if (pm.limit != null) parts.push(`한도 ${formatAmount(pm.limit)}원`);
+    if (pm.annual_fee != null)
+      parts.push(`연회비 ${formatAmount(pm.annual_fee)}원`);
+    return parts.length > 0
+      ? parts.join(' · ')
+      : getPaymentMethodType(pm.type).label;
   }
 
   return isLoading ? (
@@ -53,10 +78,7 @@ export function PaymentMethodList({
                   {pm.name}
                 </Text>
                 <Text className='font-ibm-regular text-xs text-neutral-500 mt-0.5'>
-                  {pmType.label}
-                  {pm.limit != null
-                    ? ` · 한도 ${formatAmount(pm.limit)}원`
-                    : ''}
+                  {getPmSubtitle(pm)}
                 </Text>
               </View>
             </ItemCard>

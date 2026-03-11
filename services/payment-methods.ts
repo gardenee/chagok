@@ -7,6 +7,10 @@ export type PaymentMethodInput = {
   icon?: string;
   color?: string;
   limit?: number | null;
+  card_company?: string | null;
+  billing_day?: number | null;
+  annual_fee?: number | null;
+  linked_asset_id?: string | null;
   sort_order?: number;
 };
 

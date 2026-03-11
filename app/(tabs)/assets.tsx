@@ -109,8 +109,17 @@ export default function AssetsTab() {
         const limit = form.limit
           ? parseInt(form.limit.replace(/[^0-9]/g, ''), 10)
           : null;
+        const annualFee = form.annual_fee
+          ? parseInt(form.annual_fee.replace(/[^0-9]/g, ''), 10)
+          : null;
         const pmType = form.type as PaymentMethod['type'];
         const color = getPmColor(pmType);
+        const pmExtra = {
+          card_company: form.card_company || null,
+          billing_day: form.billing_day,
+          annual_fee: annualFee,
+          linked_asset_id: form.linked_asset_id,
+        };
         if (formModal.editingPm) {
           await updatePaymentMethod.mutateAsync({
             id: formModal.editingPm.id,
@@ -118,6 +127,7 @@ export default function AssetsTab() {
             type: pmType,
             color,
             limit,
+            ...pmExtra,
           });
         } else {
           await createPaymentMethod.mutateAsync({
@@ -126,6 +136,7 @@ export default function AssetsTab() {
             color,
             limit,
             sort_order: paymentMethods.length,
+            ...pmExtra,
           });
         }
       }
@@ -220,6 +231,7 @@ export default function AssetsTab() {
         editingAsset={formModal.editingAsset}
         editingPm={formModal.editingPm}
         isSaving={isSaving}
+        bankAssets={assets.filter(a => a.type === 'bank')}
         onClose={() => setFormModal(s => ({ ...s, visible: false }))}
         onSave={handleFormSave}
         onDeleteAsset={formModal.editingAsset ? handleDeleteAsset : undefined}
