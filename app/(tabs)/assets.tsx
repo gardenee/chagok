@@ -1,8 +1,6 @@
 import { View, Text, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useState } from 'react';
-import { CreditCard } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '@/constants/colors';
 import {
   useAssets,
   useCreateAsset,
@@ -20,27 +18,13 @@ import {
   getAssetTypeOption,
   type UnifiedFormData,
 } from '@/components/assets/asset-payment-form-screen';
-import {
-  getPmColor,
-  PM_TYPE_OPTIONS,
-} from '@/components/assets/payment-method-form-screen';
+import { getPmColor } from '@/components/assets/payment-method-form-screen';
 import { AssetGroups } from '@/components/assets/asset-groups';
-import { EmptyState } from '@/components/ui/empty-state';
+import { PaymentMethodList } from '@/components/assets/payment-method-list';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SummaryCard } from '@/components/ui/summary-card';
-import { ItemCard } from '@/components/ui/item-card';
-import { LoadingState } from '@/components/ui/loading-state';
-import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
-import { IconBox } from '@/components/ui/icon-box';
 import { formatAmount } from '@/utils/format';
 import type { Asset, PaymentMethod } from '@/types/database';
-
-function getPaymentMethodType(key: PaymentMethod['type']) {
-  return (
-    PM_TYPE_OPTIONS.find(t => t.key === key) ??
-    PM_TYPE_OPTIONS[PM_TYPE_OPTIONS.length - 1]
-  );
-}
 
 export default function AssetsTab() {
   const { data: assets = [], isLoading } = useAssets();
@@ -222,49 +206,12 @@ export default function AssetsTab() {
           <Text className='font-ibm-bold text-base text-neutral-700 mb-3'>
             결제수단
           </Text>
-
-          {pmLoading ? (
-            <LoadingState />
-          ) : paymentMethods.length === 0 ? (
-            <EmptyState
-              icon={CreditCard}
-              title='등록된 결제수단이 없어요'
-              description='+ 버튼으로 추가해보세요'
-            />
-          ) : (
-            <View className='gap-2'>
-              {paymentMethods.map(pm => {
-                const pmType = getPaymentMethodType(pm.type);
-                return (
-                  <SwipeableDeleteRow
-                    key={pm.id}
-                    onDelete={() => handleDeletePm(pm.id)}
-                  >
-                    <ItemCard onPress={() => openEditPm(pm)}>
-                      <IconBox color={pmType.color} size='md'>
-                        <pmType.Icon
-                          size={20}
-                          color={Colors.brown}
-                          strokeWidth={2.5}
-                        />
-                      </IconBox>
-                      <View className='flex-1'>
-                        <Text className='font-ibm-semibold text-sm text-neutral-800'>
-                          {pm.name}
-                        </Text>
-                        <Text className='font-ibm-regular text-xs text-neutral-500 mt-0.5'>
-                          {pmType.label}
-                          {pm.limit != null
-                            ? ` · 한도 ${formatAmount(pm.limit)}원`
-                            : ''}
-                        </Text>
-                      </View>
-                    </ItemCard>
-                  </SwipeableDeleteRow>
-                );
-              })}
-            </View>
-          )}
+          <PaymentMethodList
+            paymentMethods={paymentMethods}
+            isLoading={pmLoading}
+            onEdit={openEditPm}
+            onDelete={handleDeletePm}
+          />
         </View>
       </ScrollView>
 
