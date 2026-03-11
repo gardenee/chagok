@@ -98,7 +98,7 @@
 - **폰트**: `StyleSheet`에 `fontFamily` 하드코딩 금지. `tailwind.config.js`에 등록된 `font-ibm-bold` / `font-ibm-semibold` / `font-ibm-regular` 클래스 사용
 - **컬러**: `tailwind.config.js`에 등록된 팔레트(butter, brown, cream, peach, lavender) 외 임의 색상 className 사용 금지
 - **TypeScript 엄격하게**: `any` 금지, 타입 명시
-- **컴포넌트 분리 기준**: 같은 UI가 2곳 이상 쓰일 때만 분리
+- **컴포넌트 분리 기준**: 논리적 단위(헤더, 카드, 리스트 아이템, 폼, 섹션 등)로 의미 있게 묶이면 분리. 재사용 여부 무관
 - **상태관리**: 서버 상태는 React Query, 클라이언트 전역 상태는 Zustand, 로컬 상태는 useState
 - **에러처리**: 사용자에게 보이는 에러는 반드시 한국어로
 - **포맷팅 필수**: 코드 수정 후 반드시 `npm run format:check` 실행. 실패 시 `npm run format`으로 정리 후 다시 확인
