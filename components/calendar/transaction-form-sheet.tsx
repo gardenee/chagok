@@ -13,18 +13,16 @@ import { BottomSheet, BottomSheetHeader } from '@/components/ui/bottom-sheet';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { SegmentControl } from '@/components/ui/segment-control';
-import {
-  CategoryFormScreen,
-  ICON_MAP,
-} from '@/components/budget/category-form-screen';
+import { CategoryFormScreen } from '@/components/budget/category-form-screen';
+import { ICON_MAP } from '@/constants/icon-map';
 import {
   PaymentMethodFormScreen,
   PM_TYPE_OPTIONS,
   INITIAL_PM_FORM,
   type PaymentMethodFormData,
   type PmTypeOption,
-} from '@/components/asset/payment-method-form-screen';
-import { getAssetTypeOption } from '@/components/asset/asset-payment-form-screen';
+} from '@/components/assets/payment-method-form-screen';
+import { getAssetTypeOption } from '@/components/assets/asset-payment-form-screen';
 import {
   getSelectedDateLabel,
   type TxModalState,

@@ -17,7 +17,7 @@ import {
   Wallet,
   Clock,
 } from 'lucide-react-native';
-import { ICON_MAP } from '@/components/budget/category-form-screen';
+import { ICON_MAP } from '@/constants/icon-map';
 import {
   INITIAL_CATEGORY_FORM,
   type CategoryFormData,
@@ -26,7 +26,7 @@ import {
   INITIAL_PM_FORM,
   getPmColor,
   type PaymentMethodFormData,
-} from '@/components/asset/payment-method-form-screen';
+} from '@/components/assets/payment-method-form-screen';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/store/auth';

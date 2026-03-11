@@ -12,8 +12,7 @@ import { Colors } from '@/constants/colors';
 import { SaveButton } from '@/components/ui/save-button';
 import { SegmentControl } from '@/components/ui/segment-control';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
-
-export { ICON_MAP } from '@/constants/icon-map';
+import { ICON_MAP } from '@/constants/icon-map';
 
 export const COLOR_OPTIONS = [
   // 핑크/피치/레드
