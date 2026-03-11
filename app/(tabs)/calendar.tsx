@@ -74,7 +74,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { IconBox } from '@/components/ui/icon-box';
 import { ColorPill, TagPill } from '@/components/ui/color-pill';
 import { formatAmount } from '@/utils/format';
-import type { Schedule, FixedExpense, Asset } from '@/types/database';
+import type { Schedule, FixedExpense, Asset, Category } from '@/types/database';
 
 import {
   formatDateStr,
@@ -109,6 +109,7 @@ export default function CalendarTab() {
     form: INITIAL_TX_FORM,
     view: 'tx',
     catEditingId: null,
+    catCategoryType: 'expense',
     catForm: INITIAL_CATEGORY_FORM,
     catFormSource: 'tx',
     pmEditingId: null,
@@ -271,44 +272,27 @@ export default function CalendarTab() {
       ...s,
       view: 'catForm',
       catEditingId: null,
+      catCategoryType: s.form.type,
       catForm: INITIAL_CATEGORY_FORM,
       catFormSource: s.view as 'tx' | 'catMgmt',
     }));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
-  function openCatEdit(c: {
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-    budget_amount: number;
-  }) {
+  function openCatEdit(c: Category) {
     setTxModal(s => ({
       ...s,
       view: 'catForm',
       catEditingId: c.id,
-      catForm: {
-        name: c.name,
-        icon: c.icon,
-        color: c.color,
-        budget_amount: String(c.budget_amount),
-      },
+      catCategoryType: c.type,
+      catForm: { name: c.name, icon: c.icon, color: c.color },
       catFormSource: 'catMgmt',
     }));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   async function handleCatSave() {
     const name = txModal.catForm.name.trim();
-    const isIncome = txModal.form.type === 'income';
-    const amount = isIncome
-      ? 0
-      : parseInt(txModal.catForm.budget_amount.replace(/[^0-9]/g, ''), 10);
     if (!name) {
       Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
-      return;
-    }
-    if (!isIncome && (!amount || amount <= 0)) {
-      Alert.alert('입력 오류', '예산을 올바르게 입력해주세요');
       return;
     }
     try {
@@ -318,16 +302,15 @@ export default function CalendarTab() {
           name,
           icon: txModal.catForm.icon,
           color: txModal.catForm.color,
-          budget_amount: amount,
         });
       } else {
         await createCategory.mutateAsync({
           name,
           icon: txModal.catForm.icon,
           color: txModal.catForm.color,
-          budget_amount: amount,
+          budget_amount: 0,
           sort_order: categories.length,
-          type: txModal.form.type,
+          type: txModal.catCategoryType,
         });
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

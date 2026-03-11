@@ -1,8 +1,6 @@
 import { View, Text, TextInput } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { Shadows } from '@/constants/shadows';
-import { IconBox } from '@/components/ui/icon-box';
-import { CategoryIcon } from '@/components/budget/category-icon';
 import { formatAmount } from '@/utils/format';
 import type { Category } from '@/types/database';
 
@@ -24,99 +22,125 @@ export function CategorySummaryCard({
   onBudgetSave,
 }: Props) {
   const isExpense = category.type === 'expense';
-  const ratio =
-    category.budget_amount > 0
-      ? Math.min(totalAmount / category.budget_amount, 1)
-      : 0;
-  const over =
-    totalAmount > category.budget_amount && category.budget_amount > 0;
+  const budget = category.budget_amount ?? 0;
+  const ratio = budget > 0 ? Math.min(totalAmount / budget, 1) : 0;
+  const over = budget > 0 && totalAmount > budget;
+
+  // expense-card.tsx와 동일한 barColor 로직
+  const barColor = (() => {
+    if (!isExpense) return over ? Colors.oliveDark : Colors.olive;
+    if (budget <= 0) return Colors.olive;
+    const pct = (totalAmount / budget) * 100;
+    if (pct >= 100) return Colors.peachDark;
+    if (pct >= 80) return Colors.butter;
+    return Colors.olive;
+  })();
+
+  const badgeOver = isExpense ? over : !over; // 지출:초과=나쁨, 수입:미달=나쁨
+  const badgeBg = badgeOver ? `${Colors.peach}40` : `${Colors.olive}30`;
+  const badgeText = badgeOver ? Colors.peachDarker : Colors.oliveDarker;
+
+  const inputLabel = isExpense ? '월 예산' : '예상 수입';
+  const amountLabel = isExpense ? '이번달 지출' : '이번달 수입';
+  const amountColor = isExpense ? Colors.brownDarker : Colors.oliveDarker;
 
   return (
     <View
-      className='mx-4 rounded-3xl p-5 mb-4'
-      style={{ backgroundColor: Colors.butter, ...Shadows.soft }}
+      className='mx-4 mb-4 rounded-3xl p-5'
+      style={{ backgroundColor: '#EDE5CE', ...Shadows.soft }}
     >
-      <View className='flex-row items-center gap-3 mb-4'>
-        <IconBox color={category.color} size='md'>
-          <CategoryIcon
-            iconKey={category.icon}
-            color={category.color}
-            size={20}
-          />
-        </IconBox>
-        <Text className='font-ibm-bold text-lg text-brown'>
-          {category.name}
-        </Text>
-      </View>
+      {/* 지출/수입 금액 */}
+      <Text
+        className='font-ibm-regular text-xs mb-1'
+        style={{ color: '#8C7A5E' }}
+      >
+        {amountLabel}
+      </Text>
+      <Text
+        className='font-ibm-bold text-3xl mb-4'
+        style={{ color: amountColor }}
+      >
+        {formatAmount(totalAmount)}원
+      </Text>
 
-      {isExpense ? (
-        <>
-          <Text className='font-ibm-regular text-xs text-brown/70 mb-1'>
-            이번달 지출
-          </Text>
-          <Text className='font-ibm-bold text-2xl text-brown mb-3'>
-            {formatAmount(totalAmount)}원
-          </Text>
-
-          {/* 예산 인풋 */}
-          <View className='flex-row items-center gap-2 mb-3'>
-            <Text className='font-ibm-semibold text-xs text-brown/70'>
-              월 예산
+      {/* 프로그레스 바 (예산/목표 설정 시) */}
+      {budget > 0 && (
+        <View className='mb-4'>
+          <View className='flex-row justify-between mb-1.5'>
+            <Text
+              className='font-ibm-regular text-xs'
+              style={{ color: '#8C7A5E' }}
+            >
+              {isExpense ? '예산' : '목표'} {formatAmount(budget)}원
             </Text>
             <View
-              className='flex-1 flex-row items-center bg-white/70 rounded-xl px-3'
-              style={{ height: 36 }}
+              className='px-2 py-0.5 rounded-full'
+              style={{ backgroundColor: badgeBg }}
             >
-              <TextInput
-                className='flex-1 font-ibm-semibold text-sm text-brown'
-                value={budgetInput}
-                onChangeText={onBudgetChange}
-                keyboardType='numeric'
-                placeholder='예산 금액'
-                placeholderTextColor={Colors.brown + '50'}
-                onBlur={onBudgetSave}
-                returnKeyType='done'
-                onSubmitEditing={onBudgetSave}
-              />
-              <Text className='font-ibm-regular text-sm text-brown/60'>원</Text>
+              <Text
+                className='font-ibm-bold text-xs'
+                style={{ color: badgeText }}
+              >
+                {isExpense
+                  ? over
+                    ? `초과 ${formatAmount(totalAmount - budget)}원`
+                    : `절약 +${formatAmount(budget - totalAmount)}원`
+                  : over
+                    ? `초과달성 +${formatAmount(totalAmount - budget)}원`
+                    : `미달 -${formatAmount(budget - totalAmount)}원`}
+              </Text>
             </View>
-            {isSavingBudget && (
-              <Text className='font-ibm-regular text-xs text-brown/50'>
-                저장중...
-              </Text>
-            )}
           </View>
-
-          {/* 프로그레스 바 */}
-          {category.budget_amount > 0 && (
-            <>
-              <View className='bg-brown/15 rounded-full h-2 mb-1'>
-                <View
-                  className='h-2 rounded-full'
-                  style={{
-                    width: `${ratio * 100}%`,
-                    backgroundColor: over ? Colors.peach : category.color,
-                  }}
-                />
-              </View>
-              <Text className='font-ibm-semibold text-xs text-brown/70'>
-                {over
-                  ? `${formatAmount(totalAmount - category.budget_amount)}원 초과`
-                  : `${formatAmount(category.budget_amount - totalAmount)}원 남음`}
-              </Text>
-            </>
-          )}
-        </>
-      ) : (
-        <>
-          <Text className='font-ibm-regular text-xs text-brown/70 mb-1'>
-            이번달 수입
-          </Text>
-          <Text className='font-ibm-bold text-2xl text-brown'>
-            {formatAmount(totalAmount)}원
-          </Text>
-        </>
+          <View
+            className='rounded-full overflow-hidden'
+            style={{ height: 8, backgroundColor: '#D4C9B0' }}
+          >
+            <View
+              className='rounded-full h-full'
+              style={{ width: `${ratio * 100}%`, backgroundColor: barColor }}
+            />
+          </View>
+        </View>
       )}
+
+      {/* 예산/예상 수입 인풋 */}
+      <View className='flex-row items-center gap-3'>
+        <Text
+          className='font-ibm-semibold text-xs w-14'
+          style={{ color: '#8C7A5E' }}
+        >
+          {inputLabel}
+        </Text>
+        <View
+          className='flex-1 flex-row items-center rounded-xl px-3 bg-white'
+          style={{ height: 40, ...Shadows.soft }}
+        >
+          <TextInput
+            className='flex-1 font-ibm-semibold text-sm text-neutral-700'
+            value={budgetInput}
+            onChangeText={v => onBudgetChange(v.replace(/[^0-9]/g, ''))}
+            keyboardType='numeric'
+            placeholder='설정 안 함'
+            placeholderTextColor='#BDBDBD'
+            onBlur={onBudgetSave}
+            returnKeyType='done'
+            onSubmitEditing={onBudgetSave}
+          />
+          {budgetInput.length > 0 && (
+            <Text className='font-ibm-regular text-sm text-neutral-400'>
+              원
+            </Text>
+          )}
+        </View>
+        {isSavingBudget && (
+          <Text
+            className='font-ibm-regular text-xs'
+            style={{ color: '#8C7A5E' }}
+          >
+            저장중...
+          </Text>
+        )}
+      </View>
     </View>
   );
 }

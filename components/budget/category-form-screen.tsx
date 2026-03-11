@@ -11,7 +11,7 @@ import { X, Check } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { SaveButton } from '@/components/ui/save-button';
 import { SegmentControl } from '@/components/ui/segment-control';
-import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
+import { ModalTextInput } from '@/components/ui/modal-inputs';
 import { ICON_MAP } from '@/constants/icon-map';
 
 export const COLOR_OPTIONS = [
@@ -48,14 +48,12 @@ export type CategoryFormData = {
   name: string;
   icon: string;
   color: string;
-  budget_amount: string;
 };
 
 export const INITIAL_CATEGORY_FORM: CategoryFormData = {
   name: '',
   icon: 'shopping',
   color: COLOR_OPTIONS[0],
-  budget_amount: '',
 };
 
 type Props = {
@@ -66,7 +64,6 @@ type Props = {
   onChange: (form: CategoryFormData) => void;
   onSave: () => void;
   onDelete?: () => void;
-  mode?: 'budget' | 'category';
   categoryType?: 'expense' | 'income';
   onTypeChange?: (type: 'expense' | 'income') => void;
 };
@@ -79,11 +76,9 @@ export function CategoryFormScreen({
   onChange,
   onSave,
   onDelete,
-  mode = 'category',
   categoryType = 'expense',
   onTypeChange,
 }: Props) {
-  const isBudgetMode = mode === 'budget';
   const isIncome = categoryType === 'income';
   const title = editingId
     ? isIncome
@@ -140,23 +135,6 @@ export function CategoryFormScreen({
             maxLength={10}
             className='mb-6'
           />
-
-          {/* 예산 (budget 모드) */}
-          {isBudgetMode && (
-            <>
-              <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                {isIncome ? '목표 수입 (선택)' : '월 예산'}
-              </Text>
-              <AmountInput
-                value={form.budget_amount}
-                onChangeText={v => onChange({ ...form, budget_amount: v })}
-                placeholder={
-                  isIncome ? '목표 수입 금액 (선택)' : '예산 금액을 입력하세요'
-                }
-                className='mb-6'
-              />
-            </>
-          )}
 
           {/* 아이콘 */}
           <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>

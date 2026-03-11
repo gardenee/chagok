@@ -47,7 +47,7 @@ export default function CategoryDetailScreen() {
   const category = categories.find(c => c.id === id);
 
   const [budgetInput, setBudgetInput] = useState<string>(
-    category ? String(category.budget_amount) : '',
+    category && category.budget_amount ? String(category.budget_amount) : '',
   );
   const [isSavingBudget, setIsSavingBudget] = useState(false);
 
@@ -76,11 +76,10 @@ export default function CategoryDetailScreen() {
 
   async function saveBudget() {
     if (!category) return;
-    const amount = parseInt(budgetInput.replace(/[^0-9]/g, ''), 10);
-    if (!amount || amount <= 0) {
-      Alert.alert('입력 오류', '예산을 올바르게 입력해주세요');
-      return;
-    }
+    const raw = budgetInput.replace(/[^0-9]/g, '');
+    const amount = raw === '' ? 0 : parseInt(raw, 10);
+    const currentBudget = category.budget_amount ?? 0;
+    if (amount === currentBudget) return;
     try {
       setIsSavingBudget(true);
       await updateCategory.mutateAsync({
@@ -97,7 +96,7 @@ export default function CategoryDetailScreen() {
 
   if (catLoading) {
     return (
-      <SafeAreaView className='flex-1 bg-cream'>
+      <SafeAreaView className='flex-1 bg-white'>
         <LoadingState />
       </SafeAreaView>
     );
@@ -105,7 +104,7 @@ export default function CategoryDetailScreen() {
 
   if (!category) {
     return (
-      <SafeAreaView className='flex-1 bg-cream'>
+      <SafeAreaView className='flex-1 bg-white'>
         <View className='px-6 pt-6'>
           <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
             <ArrowLeft size={22} color={Colors.brownDarker} strokeWidth={2.5} />
@@ -121,7 +120,7 @@ export default function CategoryDetailScreen() {
   }
 
   return (
-    <SafeAreaView className='flex-1 bg-cream'>
+    <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}

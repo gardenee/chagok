@@ -23,6 +23,7 @@ export type TxModalState = {
   form: TxFormData;
   view: 'tx' | 'catMgmt' | 'catForm' | 'pmMgmt' | 'pmForm';
   catEditingId: string | null;
+  catCategoryType: 'expense' | 'income';
   catForm: CategoryFormData;
   catFormSource: 'tx' | 'catMgmt';
   pmEditingId: string | null;

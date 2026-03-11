@@ -14,6 +14,7 @@ import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { SegmentControl } from '@/components/ui/segment-control';
 import { CategoryFormScreen } from '@/components/budget/category-form-screen';
+import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
 import { ICON_MAP } from '@/constants/icon-map';
 import {
   PaymentMethodFormScreen,
@@ -44,13 +45,7 @@ interface TransactionFormSheetProps {
   onTxSave: () => void;
   onTxDelete: (id: string) => void;
   onCatCreate: () => void;
-  onCatEdit: (c: {
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-    budget_amount: number;
-  }) => void;
+  onCatEdit: (c: Category) => void;
   onCatSave: () => void;
   onCatDelete: (id: string) => void;
   onPmSave: () => void;
@@ -382,75 +377,14 @@ export function TransactionFormSheet({
         animationType='none'
         onRequestClose={() => setTxModal(s => ({ ...s, view: 'tx' }))}
       >
-        <SafeAreaView className='flex-1 bg-white'>
-          <View className='flex-row items-center justify-between px-6 pt-5 mb-5'>
-            <TouchableOpacity
-              onPress={() => setTxModal(s => ({ ...s, view: 'tx' }))}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <ChevronLeft size={22} color={Colors.brown} strokeWidth={2.5} />
-            </TouchableOpacity>
-            <Text className='font-ibm-bold text-lg text-neutral-800'>
-              카테고리 관리
-            </Text>
-            <TouchableOpacity
-              onPress={onCatCreate}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              activeOpacity={0.7}
-            >
-              <Plus size={22} color={Colors.brown} strokeWidth={2.5} />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 40 }}
-          >
-            {categories.filter(c => c.type === txModal.form.type).length ===
-            0 ? (
-              <View className='py-16 items-center gap-2'>
-                <Text className='font-ibm-semibold text-sm text-neutral-400'>
-                  카테고리가 없어요
-                </Text>
-              </View>
-            ) : (
-              <View className='gap-2'>
-                {categories
-                  .filter(c => c.type === txModal.form.type)
-                  .map(c => {
-                    const Icon = ICON_MAP[c.icon] ?? Wallet;
-                    return (
-                      <TouchableOpacity
-                        key={c.id}
-                        onPress={() => onCatEdit(c)}
-                        activeOpacity={0.8}
-                      >
-                        <View className='flex-row items-center gap-3 bg-neutral-50 rounded-2xl px-4 py-3'>
-                          <View
-                            className='w-10 h-10 rounded-xl items-center justify-center'
-                            style={{ backgroundColor: c.color + '55' }}
-                          >
-                            <Icon size={18} color={c.color} strokeWidth={2.5} />
-                          </View>
-                          <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
-                            {c.name}
-                          </Text>
-                          <Text className='font-ibm-regular text-xs text-neutral-400'>
-                            {c.budget_amount.toLocaleString('ko-KR')}원
-                          </Text>
-                          <ChevronRight
-                            size={16}
-                            color='#D4D4D4'
-                            strokeWidth={2}
-                          />
-                        </View>
-                      </TouchableOpacity>
-                    );
-                  })}
-              </View>
-            )}
-          </ScrollView>
-        </SafeAreaView>
+        <CategoryManagementScreen
+          categories={categories}
+          filterType={txModal.form.type}
+          onBack={() => setTxModal(s => ({ ...s, view: 'tx' }))}
+          onCreate={onCatCreate}
+          onEdit={onCatEdit}
+          onDelete={onCatDelete}
+        />
       </Modal>
 
       {/* 카테고리 추가/수정 모달 */}
@@ -465,6 +399,7 @@ export function TransactionFormSheet({
           editingId={txModal.catEditingId}
           form={txModal.catForm}
           isSaving={isCatSaving}
+          categoryType={txModal.catCategoryType}
           onBack={() => setTxModal(s => ({ ...s, view: s.catFormSource }))}
           onChange={catForm => setTxModal(s => ({ ...s, catForm }))}
           onSave={onCatSave}
@@ -472,6 +407,9 @@ export function TransactionFormSheet({
             txModal.catEditingId
               ? () => onCatDelete(txModal.catEditingId!)
               : undefined
+          }
+          onTypeChange={type =>
+            setTxModal(s => ({ ...s, catCategoryType: type }))
           }
         />
       </Modal>

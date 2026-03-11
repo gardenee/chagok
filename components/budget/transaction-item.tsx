@@ -16,24 +16,33 @@ type Props = {
 };
 
 export function TransactionItem({ transaction: t }: Props) {
+  const hasMemo = t.memo && t.memo.trim().length > 0;
+
   return (
     <View
-      className='bg-white rounded-3xl px-4 py-4 flex-row items-center gap-3'
+      className='bg-white rounded-3xl px-4 py-3.5 flex-row items-center gap-2.5'
       style={Shadows.soft}
     >
-      <View className='flex-1'>
-        <View className='flex-row items-center gap-2 mb-0.5'>
-          <Text className='font-ibm-regular text-xs text-neutral-400'>
-            {t.date.slice(5).replace('-', '.')}
-          </Text>
-          <TagPill tag={t.tag} label={TAG_LABELS[t.tag] ?? t.tag} />
-        </View>
-        <Text className='font-ibm-semibold text-sm text-neutral-700'>
-          {t.memo ?? '메모 없음'}
-        </Text>
-      </View>
+      {/* 날짜 */}
+      <Text className='font-ibm-regular text-xs text-neutral-400 w-9 shrink-0'>
+        {t.date.slice(5).replace('-', '.')}
+      </Text>
+
+      {/* 메모 (거래 이름) */}
       <Text
-        className='font-ibm-bold text-base'
+        className='font-ibm-semibold text-sm flex-1'
+        style={{ color: hasMemo ? '#404040' : '#BDBDBD' }}
+        numberOfLines={1}
+      >
+        {hasMemo ? t.memo : '—'}
+      </Text>
+
+      {/* 태그 */}
+      <TagPill tag={t.tag} label={TAG_LABELS[t.tag] ?? t.tag} />
+
+      {/* 금액 */}
+      <Text
+        className='font-ibm-bold text-sm shrink-0'
         style={{
           color: t.type === 'income' ? Colors.oliveDark : Colors.brownDarker,
         }}

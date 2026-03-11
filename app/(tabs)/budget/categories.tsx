@@ -1,31 +1,19 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  Modal,
-  Alert,
-} from 'react-native';
+import { Alert, Modal } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Plus, Wallet, TrendingUp } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '@/constants/colors';
 import {
   useCategories,
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
 } from '@/hooks/use-categories';
-import { LoadingState } from '@/components/ui/loading-state';
-import { EmptyState } from '@/components/ui/empty-state';
-import { CategoryRow } from '@/components/budget/category-row';
 import {
   CategoryFormScreen,
   CategoryFormData,
   INITIAL_CATEGORY_FORM,
 } from '@/components/budget/category-form-screen';
+import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
 import type { Category } from '@/types/database';
 
 type ModalState = {
@@ -44,7 +32,7 @@ const INITIAL_MODAL: ModalState = {
 
 export default function CategoriesScreen() {
   const router = useRouter();
-  const { data: categories = [], isLoading } = useCategories();
+  const { data: categories = [] } = useCategories();
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
@@ -53,7 +41,6 @@ export default function CategoriesScreen() {
 
   const expenseCategories = categories.filter(c => c.type === 'expense');
   const incomeCategories = categories.filter(c => c.type === 'income');
-
   const isSaving = createCategory.isPending || updateCategory.isPending;
 
   function openCreate(type: 'expense' | 'income') {
@@ -71,34 +58,17 @@ export default function CategoriesScreen() {
       visible: true,
       editingId: c.id,
       categoryType: c.type,
-      form: {
-        name: c.name,
-        icon: c.icon,
-        color: c.color,
-        budget_amount:
-          c.type === 'income' && c.budget_amount === 0
-            ? ''
-            : String(c.budget_amount),
-      },
+      form: { name: c.name, icon: c.icon, color: c.color },
     });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 
   async function handleSave() {
     const name = modal.form.name.trim();
-    const isIncome = modal.categoryType === 'income';
-    const amount =
-      parseInt(modal.form.budget_amount.replace(/[^0-9]/g, ''), 10) || 0;
-
     if (!name) {
       Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
       return;
     }
-    if (!isIncome && (!amount || amount <= 0)) {
-      Alert.alert('입력 오류', '예산을 올바르게 입력해주세요');
-      return;
-    }
-
     try {
       if (modal.editingId) {
         await updateCategory.mutateAsync({
@@ -106,7 +76,6 @@ export default function CategoriesScreen() {
           name,
           icon: modal.form.icon,
           color: modal.form.color,
-          budget_amount: amount,
         });
       } else {
         const list =
@@ -117,7 +86,7 @@ export default function CategoriesScreen() {
           name,
           icon: modal.form.icon,
           color: modal.form.color,
-          budget_amount: amount,
+          budget_amount: 0,
           sort_order: list.length,
           type: modal.categoryType,
         });
@@ -149,92 +118,15 @@ export default function CategoriesScreen() {
   }
 
   return (
-    <SafeAreaView className='flex-1 bg-white'>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      >
-        {/* 헤더 */}
-        <View className='flex-row items-center gap-3 px-6 pt-6 pb-2'>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            activeOpacity={0.7}
-          >
-            <ArrowLeft size={22} color={Colors.brownDarker} strokeWidth={2.5} />
-          </TouchableOpacity>
-          <Text className='font-ibm-bold text-xl text-brown-darker flex-1'>
-            카테고리 관리
-          </Text>
-          <TouchableOpacity
-            onPress={() => openCreate('expense')}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            activeOpacity={0.7}
-          >
-            <Plus size={22} color={Colors.brownDarker} strokeWidth={2.5} />
-          </TouchableOpacity>
-        </View>
+    <>
+      <CategoryManagementScreen
+        categories={categories}
+        onBack={() => router.back()}
+        onCreate={() => openCreate('expense')}
+        onEdit={openEdit}
+        onDelete={handleDelete}
+      />
 
-        {isLoading ? (
-          <LoadingState />
-        ) : (
-          <>
-            {/* 지출 섹션 */}
-            <View className='mx-4 mt-4 mb-6'>
-              <Text className='font-ibm-bold text-base text-neutral-700 mb-3'>
-                지출
-              </Text>
-
-              {expenseCategories.length === 0 ? (
-                <EmptyState
-                  icon={Wallet}
-                  title='지출 카테고리가 없어요'
-                  description='우상단 + 버튼으로 만들어보세요'
-                />
-              ) : (
-                <View className='gap-2.5'>
-                  {expenseCategories.map(c => (
-                    <CategoryRow
-                      key={c.id}
-                      c={c}
-                      onEdit={openEdit}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
-
-            {/* 수입 섹션 */}
-            <View className='mx-4'>
-              <Text className='font-ibm-bold text-base text-neutral-700 mb-3'>
-                수입
-              </Text>
-
-              {incomeCategories.length === 0 ? (
-                <EmptyState
-                  icon={TrendingUp}
-                  title='수입 카테고리가 없어요'
-                  description='우상단 + 버튼으로 만들어보세요'
-                />
-              ) : (
-                <View className='gap-2.5'>
-                  {incomeCategories.map(c => (
-                    <CategoryRow
-                      key={c.id}
-                      c={c}
-                      onEdit={openEdit}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
-          </>
-        )}
-      </ScrollView>
-
-      {/* 카테고리 추가/수정 모달 */}
       <Modal
         visible={modal.visible}
         animationType='slide'
@@ -244,7 +136,6 @@ export default function CategoriesScreen() {
           editingId={modal.editingId}
           form={modal.form}
           isSaving={isSaving}
-          mode='budget'
           categoryType={modal.categoryType}
           onBack={() => setModal(INITIAL_MODAL)}
           onChange={form => setModal(s => ({ ...s, form }))}
@@ -261,6 +152,6 @@ export default function CategoriesScreen() {
           }
         />
       </Modal>
-    </SafeAreaView>
+    </>
   );
 }
