@@ -17,40 +17,26 @@ import {
   ChevronRight,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '../../../constants/colors';
-import { Shadows } from '../../../constants/shadows';
+import { Colors } from '@/constants/colors';
+import { Shadows } from '@/constants/shadows';
 import {
   useCategories,
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
-} from '../../../hooks/use-categories';
-import { IconBox } from '../../../components/ui/icon-box';
-import { LoadingState } from '../../../components/ui/loading-state';
-import { EmptyState } from '../../../components/ui/empty-state';
-import { SwipeableDeleteRow } from '../../../components/ui/swipeable-delete-row';
+} from '@/hooks/use-categories';
+import { IconBox } from '@/components/ui/icon-box';
+import { LoadingState } from '@/components/ui/loading-state';
+import { EmptyState } from '@/components/ui/empty-state';
+import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
+import { CategoryIcon } from '@/components/budget/category-icon';
 import {
   CategoryFormScreen,
-  ICON_MAP,
   CategoryFormData,
   INITIAL_CATEGORY_FORM,
-} from '../../../components/ui/category-form-screen';
-import { formatAmount } from '../../../utils/format';
-import type { Category } from '../../../types/database';
-import type { LucideIcon } from 'lucide-react-native';
-
-function CategoryIcon({
-  iconKey,
-  color,
-  size = 18,
-}: {
-  iconKey: string;
-  color: string;
-  size?: number;
-}) {
-  const Icon: LucideIcon = ICON_MAP[iconKey] ?? Wallet;
-  return <Icon size={size} color={color} strokeWidth={2.5} />;
-}
+} from '@/components/budget/category-form-screen';
+import { formatAmount } from '@/utils/format';
+import type { Category } from '@/types/database';
 
 type ModalState = {
   visible: boolean;
