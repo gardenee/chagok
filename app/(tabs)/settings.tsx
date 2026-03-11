@@ -16,73 +16,24 @@ import {
   User,
   Bell,
   LogOut,
-  ChevronRight,
   Users,
   Link,
   X,
 } from 'lucide-react-native';
 import Constants from 'expo-constants';
-import {
-  BottomSheet,
-  BottomSheetHeader,
-} from '../../components/ui/bottom-sheet';
-import { SaveButton } from '../../components/ui/save-button';
-import { ModalTextInput } from '../../components/ui/modal-inputs';
+import { BottomSheet, BottomSheetHeader } from '@/components/ui/bottom-sheet';
+import { SaveButton } from '@/components/ui/save-button';
+import { ModalTextInput } from '@/components/ui/modal-inputs';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '../../constants/colors';
-import { useAuthStore } from '../../store/auth';
-import { useNotificationSettingsStore } from '../../store/notification-settings';
-import { supabase } from '../../lib/supabase';
-import { useCouple, useUpdateBookName } from '../../hooks/use-couple';
-import { useCoupleMembers } from '../../hooks/use-couple-members';
-import { useUpdateNickname } from '../../hooks/use-user';
-
-type SettingsRowProps = {
-  icon: React.ReactNode;
-  label: string;
-  value?: string;
-  onPress?: () => void;
-  showChevron?: boolean;
-  rightElement?: React.ReactNode;
-  disabled?: boolean;
-};
-
-function SettingsRow({
-  icon,
-  label,
-  value,
-  onPress,
-  showChevron = true,
-  rightElement,
-  disabled = false,
-}: SettingsRowProps) {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={!onPress || disabled}
-      activeOpacity={onPress && !disabled ? 0.6 : 1}
-      className='flex-row items-center px-4 py-4 bg-cream'
-    >
-      <View className='w-8 h-8 rounded-xl bg-cream-dark/70 items-center justify-center mr-3'>
-        {icon}
-      </View>
-      <Text
-        className={`flex-1 font-ibm-semibold text-sm ${disabled ? 'text-neutral-400' : 'text-neutral-800'}`}
-      >
-        {label}
-      </Text>
-      {value ? (
-        <Text className='font-ibm-regular text-sm text-neutral-500 mr-1.5'>
-          {value}
-        </Text>
-      ) : null}
-      {rightElement ?? null}
-      {showChevron && onPress && !disabled ? (
-        <ChevronRight size={16} color='#A3A3A3' strokeWidth={2} />
-      ) : null}
-    </TouchableOpacity>
-  );
-}
+import { Colors } from '@/constants/colors';
+import { useAuthStore } from '@/store/auth';
+import { useNotificationSettingsStore } from '@/store/notification-settings';
+import { supabase } from '@/lib/supabase';
+import { useCouple, useUpdateBookName } from '@/hooks/use-couple';
+import { useCoupleMembers } from '@/hooks/use-couple-members';
+import { useUpdateNickname } from '@/hooks/use-user';
+import { SettingsRow } from '@/components/settings/settings-row';
+import { SettingsCard, Divider } from '@/components/settings/settings-card';
 
 type EditModalProps = {
   visible: boolean;
@@ -137,26 +88,6 @@ function EditModal({
       />
     </BottomSheet>
   );
-}
-
-function SettingsCard({ children }: { children: React.ReactNode }) {
-  return (
-    <View
-      className='mx-4 bg-cream rounded-3xl overflow-hidden'
-      style={{
-        shadowColor: '#000',
-        shadowOpacity: 0.04,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 1 },
-      }}
-    >
-      {children}
-    </View>
-  );
-}
-
-function Divider() {
-  return <View className='h-px bg-cream-dark mx-4' />;
 }
 
 export default function SettingsScreen() {
