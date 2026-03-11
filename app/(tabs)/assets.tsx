@@ -7,38 +7,38 @@ import {
   ShieldCheck,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 import {
   useAssets,
   useCreateAsset,
   useUpdateAsset,
   useDeleteAsset,
-} from '../../hooks/use-assets';
+} from '@/hooks/use-assets';
 import {
   usePaymentMethods,
   useCreatePaymentMethod,
   useUpdatePaymentMethod,
   useDeletePaymentMethod,
-} from '../../hooks/use-payment-methods';
+} from '@/hooks/use-payment-methods';
 import {
   AssetPaymentFormScreen,
   ASSET_TYPE_OPTIONS,
   getAssetTypeOption,
   type UnifiedFormData,
-} from '../../components/asset/asset-payment-form-screen';
+} from '@/components/assets/asset-payment-form-screen';
 import {
   getPmColor,
   PM_TYPE_OPTIONS,
-} from '../../components/asset/payment-method-form-screen';
-import { EmptyState } from '../../components/ui/empty-state';
-import { ScreenHeader } from '../../components/ui/screen-header';
-import { SummaryCard } from '../../components/ui/summary-card';
-import { ItemCard } from '../../components/ui/item-card';
-import { LoadingState } from '../../components/ui/loading-state';
-import { SwipeableDeleteRow } from '../../components/ui/swipeable-delete-row';
-import { IconBox } from '../../components/ui/icon-box';
-import { formatAmount } from '../../utils/format';
-import type { Asset, PaymentMethod } from '../../types/database';
+} from '@/components/assets/payment-method-form-screen';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ScreenHeader } from '@/components/ui/screen-header';
+import { SummaryCard } from '@/components/ui/summary-card';
+import { ItemCard } from '@/components/ui/item-card';
+import { LoadingState } from '@/components/ui/loading-state';
+import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
+import { IconBox } from '@/components/ui/icon-box';
+import { formatAmount } from '@/utils/format';
+import type { Asset, PaymentMethod } from '@/types/database';
 
 function getPaymentMethodType(key: PaymentMethod['type']) {
   return (
