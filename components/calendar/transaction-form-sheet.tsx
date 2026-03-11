@@ -16,7 +16,7 @@ import { SegmentControl } from '@/components/ui/segment-control';
 import {
   CategoryFormScreen,
   ICON_MAP,
-} from '@/components/ui/category-form-screen';
+} from '@/components/budget/category-form-screen';
 import {
   PaymentMethodFormScreen,
   PM_TYPE_OPTIONS,

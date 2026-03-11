@@ -1,4 +1,4 @@
-import type { CategoryFormData } from '@/components/ui/category-form-screen';
+import type { CategoryFormData } from '@/components/budget/category-form-screen';
 import type { PaymentMethodFormData } from '@/components/asset/payment-method-form-screen';
 
 export type TxFormData = {

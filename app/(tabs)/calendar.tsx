@@ -17,11 +17,11 @@ import {
   Wallet,
   Clock,
 } from 'lucide-react-native';
-import { ICON_MAP } from '@/components/ui/category-form-screen';
+import { ICON_MAP } from '@/components/budget/category-form-screen';
 import {
   INITIAL_CATEGORY_FORM,
   type CategoryFormData,
-} from '@/components/ui/category-form-screen';
+} from '@/components/budget/category-form-screen';
 import {
   INITIAL_PM_FORM,
   getPmColor,
