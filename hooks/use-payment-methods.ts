@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../store/auth';
+import { useAuthStore } from '@/store/auth';
 import {
   fetchPaymentMethods,
   createPaymentMethod,
   updatePaymentMethod,
   deletePaymentMethod,
   type PaymentMethodInput,
-} from '../services/payment-methods';
-import type { PaymentMethod } from '../types/database';
+} from '@/services/payment-methods';
+import type { PaymentMethod } from '@/types/database';
 
 export type { PaymentMethodInput };
 

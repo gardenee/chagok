@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 
 // 개발 환경에서만 접근 가능한 화면 미리보기
 // 프로덕션 빌드(__DEV__ === false)에서는 렌더링되지 않음

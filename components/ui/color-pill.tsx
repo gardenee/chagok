@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 
 type ColorPillProps = {
   label: string;

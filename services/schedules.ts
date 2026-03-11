@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import type { Schedule } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import type { Schedule } from '@/types/database';
 
 export type ScheduleInput = {
   title: string;

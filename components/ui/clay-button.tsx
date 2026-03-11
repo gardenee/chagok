@@ -1,6 +1,6 @@
 import { View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
-import { Shadows } from '../../constants/shadows';
-import { Colors } from '../../constants/colors';
+import { Shadows } from '@/constants/shadows';
+import { Colors } from '@/constants/colors';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';

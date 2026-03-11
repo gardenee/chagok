@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Plus } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 
 type ScreenHeaderProps = {
   title: string;

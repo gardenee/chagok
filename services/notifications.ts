@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
-import { supabase } from '../lib/supabase';
-import type { FixedExpense } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import type { FixedExpense } from '@/types/database';
 
 function isExpoPushToken(token: string): boolean {
   return (

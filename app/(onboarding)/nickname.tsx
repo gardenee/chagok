@@ -1,10 +1,10 @@
 import { View, Text, Alert } from 'react-native';
 import { useState } from 'react';
-import { useAuthStore } from '../../store/auth';
-import { useCreateUserProfile } from '../../hooks/use-user';
-import { ClayButton } from '../../components/ui/clay-button';
-import { ClayInput } from '../../components/ui/clay-input';
-import { FadeInButton } from '../../components/ui/fade-in-button';
+import { useAuthStore } from '@/store/auth';
+import { useCreateUserProfile } from '@/hooks/use-user';
+import { ClayButton } from '@/components/ui/clay-button';
+import { ClayInput } from '@/components/ui/clay-input';
+import { FadeInButton } from '@/components/ui/fade-in-button';
 
 const VALID_PATTERN = /^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z]*$/;
 

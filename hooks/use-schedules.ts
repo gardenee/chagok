@@ -1,15 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuthStore } from '../store/auth';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/store/auth';
 import {
   fetchMonthSchedules,
   createSchedule,
   updateSchedule,
   deleteSchedule,
   type ScheduleInput,
-} from '../services/schedules';
-import type { Schedule } from '../types/database';
+} from '@/services/schedules';
+import type { Schedule } from '@/types/database';
 
 export function useMonthSchedules(year: number, month: number) {
   const { userProfile } = useAuthStore();

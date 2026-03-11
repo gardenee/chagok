@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import type { FixedExpense } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import type { FixedExpense } from '@/types/database';
 
 export type FixedExpenseInput = {
   name: string;

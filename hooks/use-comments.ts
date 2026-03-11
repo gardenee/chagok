@@ -1,15 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuthStore } from '../store/auth';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/store/auth';
 import {
   fetchTransactionComments,
   createComment,
   deleteComment,
   type CommentRow,
-} from '../services/comments';
-import { sendPartnerCommentPush } from '../services/notifications';
-import { useNotificationSettingsStore } from '../store/notification-settings';
+} from '@/services/comments';
+import { sendPartnerCommentPush } from '@/services/notifications';
+import { useNotificationSettingsStore } from '@/store/notification-settings';
 
 export type { CommentRow };
 

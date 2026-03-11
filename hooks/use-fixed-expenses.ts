@@ -1,16 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { useAuthStore } from '../store/auth';
+import { useAuthStore } from '@/store/auth';
 import {
   fetchFixedExpenses,
   createFixedExpense,
   updateFixedExpense,
   deleteFixedExpense,
   type FixedExpenseInput,
-} from '../services/fixed-expenses';
-import { scheduleFixedExpenseReminders } from '../services/notifications';
-import { useNotificationSettingsStore } from '../store/notification-settings';
-import type { FixedExpense } from '../types/database';
+} from '@/services/fixed-expenses';
+import { scheduleFixedExpenseReminders } from '@/services/notifications';
+import { useNotificationSettingsStore } from '@/store/notification-settings';
+import type { FixedExpense } from '@/types/database';
 
 export type { FixedExpenseInput };
 

@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import type { Couple } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import type { Couple } from '@/types/database';
 
 const INVITE_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ1234567890';
 

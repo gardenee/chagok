@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import type { Transaction } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import type { Transaction } from '@/types/database';
 
 export type TransactionRow = Transaction & {
   categories: { name: string; icon: string; color: string } | null;

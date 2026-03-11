@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import { useAuthStore } from '../store/auth';
+import { useAuthStore } from '@/store/auth';
 import {
   createUserProfile,
   getUserProfile,
   updateNickname,
-} from '../services/user';
+} from '@/services/user';
 
 export function useCreateUserProfile() {
   return useMutation({

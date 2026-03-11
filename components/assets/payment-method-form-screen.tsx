@@ -17,10 +17,10 @@ import {
   ChevronLeft,
   type LucideIcon,
 } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
-import { SaveButton } from '../ui/save-button';
-import { ModalTextInput } from '../ui/modal-inputs';
-import type { PaymentMethod } from '../../types/database';
+import { Colors } from '@/constants/colors';
+import { SaveButton } from '@/components/ui/save-button';
+import { ModalTextInput } from '@/components/ui/modal-inputs';
+import type { PaymentMethod } from '@/types/database';
 
 export type PaymentMethodFormData = {
   name: string;

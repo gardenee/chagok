@@ -1,5 +1,5 @@
 import { View, TouchableOpacity } from 'react-native';
-import { Shadows } from '../../constants/shadows';
+import { Shadows } from '@/constants/shadows';
 
 type ItemCardProps = {
   onPress?: () => void;

@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 
 type EmptyStateProps = {
   icon: LucideIcon;

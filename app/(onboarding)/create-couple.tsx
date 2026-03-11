@@ -2,16 +2,16 @@ import { View, Text, Alert, Share } from 'react-native';
 import { useState } from 'react';
 import { Check, Copy, Share2 } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
-import { useAuthStore } from '../../store/auth';
-import { Colors } from '../../constants/colors';
-import { TopBar } from '../../components/ui/top-bar';
-import { Shadows } from '../../constants/shadows';
-import { ClayButton } from '../../components/ui/clay-button';
-import { ClayInput } from '../../components/ui/clay-input';
-import { FadeInButton } from '../../components/ui/fade-in-button';
-import { useCreateCouple } from '../../hooks/use-couple';
-import { useGetUserProfile } from '../../hooks/use-user';
-import type { UserProfile } from '../../types/database';
+import { useAuthStore } from '@/store/auth';
+import { Colors } from '@/constants/colors';
+import { TopBar } from '@/components/ui/top-bar';
+import { Shadows } from '@/constants/shadows';
+import { ClayButton } from '@/components/ui/clay-button';
+import { ClayInput } from '@/components/ui/clay-input';
+import { FadeInButton } from '@/components/ui/fade-in-button';
+import { useCreateCouple } from '@/hooks/use-couple';
+import { useGetUserProfile } from '@/hooks/use-user';
+import type { UserProfile } from '@/types/database';
 
 type Step = 'name' | 'invite';
 

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuthStore } from '../store/auth';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from '@/store/auth';
 import {
   fetchMonthTransactions,
   createTransaction,
@@ -9,9 +9,9 @@ import {
   deleteTransaction,
   type TransactionRow,
   type TransactionInput,
-} from '../services/transactions';
-import { sendPartnerTransactionPush } from '../services/notifications';
-import { useNotificationSettingsStore } from '../store/notification-settings';
+} from '@/services/transactions';
+import { sendPartnerTransactionPush } from '@/services/notifications';
+import { useNotificationSettingsStore } from '@/store/notification-settings';
 
 export type { TransactionRow, TransactionInput };
 

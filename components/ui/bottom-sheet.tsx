@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { X, Trash2 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 
 type BottomSheetProps = {
   visible: boolean;

@@ -17,64 +17,64 @@ import {
   Wallet,
   Clock,
 } from 'lucide-react-native';
-import { ICON_MAP } from '../../components/ui/category-form-screen';
+import { ICON_MAP } from '@/components/ui/category-form-screen';
 import {
   INITIAL_CATEGORY_FORM,
   type CategoryFormData,
-} from '../../components/ui/category-form-screen';
+} from '@/components/ui/category-form-screen';
 import {
   INITIAL_PM_FORM,
   getPmColor,
   type PaymentMethodFormData,
-} from '../../components/asset/payment-method-form-screen';
+} from '@/components/asset/payment-method-form-screen';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '../../constants/colors';
-import { useAuthStore } from '../../store/auth';
+import { Colors } from '@/constants/colors';
+import { useAuthStore } from '@/store/auth';
 import {
   useMonthTransactions,
   useCreateTransaction,
   useUpdateTransaction,
   useDeleteTransaction,
   type TransactionRow,
-} from '../../hooks/use-transactions';
+} from '@/hooks/use-transactions';
 import {
   useMonthSchedules,
   useCreateSchedule,
   useUpdateSchedule,
   useDeleteSchedule,
-} from '../../hooks/use-schedules';
+} from '@/hooks/use-schedules';
 import {
   useTransactionComments,
   useCreateComment,
   useDeleteComment,
-} from '../../hooks/use-comments';
-import { useCoupleMembers } from '../../hooks/use-couple-members';
+} from '@/hooks/use-comments';
+import { useCoupleMembers } from '@/hooks/use-couple-members';
 import {
   useFixedExpenses,
   useCreateFixedExpense,
   useUpdateFixedExpense,
-} from '../../hooks/use-fixed-expenses';
+} from '@/hooks/use-fixed-expenses';
 import {
   useCategories,
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
-} from '../../hooks/use-categories';
+} from '@/hooks/use-categories';
 import {
   usePaymentMethods,
   useCreatePaymentMethod,
   useUpdatePaymentMethod,
   useDeletePaymentMethod,
-} from '../../hooks/use-payment-methods';
-import { useAssets } from '../../hooks/use-assets';
-import { LoadingState } from '../../components/ui/loading-state';
-import { SegmentControl } from '../../components/ui/segment-control';
-import { ItemCard } from '../../components/ui/item-card';
-import { EmptyState } from '../../components/ui/empty-state';
-import { IconBox } from '../../components/ui/icon-box';
-import { ColorPill, TagPill } from '../../components/ui/color-pill';
-import { formatAmount } from '../../utils/format';
-import type { Schedule, FixedExpense, Asset } from '../../types/database';
+} from '@/hooks/use-payment-methods';
+import { useAssets } from '@/hooks/use-assets';
+import { LoadingState } from '@/components/ui/loading-state';
+import { SegmentControl } from '@/components/ui/segment-control';
+import { ItemCard } from '@/components/ui/item-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { IconBox } from '@/components/ui/icon-box';
+import { ColorPill, TagPill } from '@/components/ui/color-pill';
+import { formatAmount } from '@/utils/format';
+import type { Schedule, FixedExpense, Asset } from '@/types/database';
 
 import {
   formatDateStr,
@@ -85,13 +85,13 @@ import {
   type ScheduleModalState,
   type FixedModalState,
   type DayCell,
-} from '../../components/calendar/types';
-import { CalendarGrid } from '../../components/calendar/calendar-grid';
-import { TransactionDetailModal } from '../../components/calendar/transaction-detail-modal';
-import { TransactionFormSheet } from '../../components/calendar/transaction-form-sheet';
-import { ScheduleFormSheet } from '../../components/calendar/schedule-form-sheet';
-import { YearMonthPicker } from '../../components/calendar/year-month-picker';
-import { FixedExpenseFormSheet } from '../../components/calendar/fixed-expense-form-sheet';
+} from '@/components/calendar/types';
+import { CalendarGrid } from '@/components/calendar/calendar-grid';
+import { TransactionDetailModal } from '@/components/calendar/transaction-detail-modal';
+import { TransactionFormSheet } from '@/components/calendar/transaction-form-sheet';
+import { ScheduleFormSheet } from '@/components/calendar/schedule-form-sheet';
+import { YearMonthPicker } from '@/components/calendar/year-month-picker';
+import { FixedExpenseFormSheet } from '@/components/calendar/fixed-expense-form-sheet';
 
 export default function CalendarTab() {
   const todayDate = new Date();

@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import type { PaymentMethod } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import type { PaymentMethod } from '@/types/database';
 
 export type PaymentMethodInput = {
   name: string;

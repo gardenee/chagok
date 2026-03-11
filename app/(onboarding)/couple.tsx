@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Plus, Key } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
-import { useAuthStore } from '../../store/auth';
-import { ClayButton } from '../../components/ui/clay-button';
+import { Colors } from '@/constants/colors';
+import { useAuthStore } from '@/store/auth';
+import { ClayButton } from '@/components/ui/clay-button';
 
 export default function CoupleScreen() {
   const router = useRouter();

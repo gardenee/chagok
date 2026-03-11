@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
-import type { UserProfile } from '../types/database';
-import { useAuthStore } from '../store/auth';
+import { supabase } from '@/lib/supabase';
+import type { UserProfile } from '@/types/database';
+import { useAuthStore } from '@/store/auth';
 
 export function useCoupleMembers() {
   const { userProfile } = useAuthStore();

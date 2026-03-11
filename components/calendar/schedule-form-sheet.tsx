@@ -1,9 +1,9 @@
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { ChevronUp, ChevronDown, Clock, X } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
-import { BottomSheet, BottomSheetHeader } from '../ui/bottom-sheet';
-import { SaveButton } from '../ui/save-button';
-import { ModalTextInput } from '../ui/modal-inputs';
+import { Colors } from '@/constants/colors';
+import { BottomSheet, BottomSheetHeader } from '@/components/ui/bottom-sheet';
+import { SaveButton } from '@/components/ui/save-button';
+import { ModalTextInput } from '@/components/ui/modal-inputs';
 import type { ScheduleModalState, TagOption } from './types';
 
 interface ScheduleFormSheetProps {

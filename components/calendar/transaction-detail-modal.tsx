@@ -13,12 +13,12 @@ import {
 } from 'react-native';
 import { useRef } from 'react';
 import { Trash2, Send } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
-import { formatAmount } from '../../utils/format';
-import { TagPill } from '../ui/color-pill';
+import { Colors } from '@/constants/colors';
+import { formatAmount } from '@/utils/format';
+import { TagPill } from '@/components/ui/color-pill';
 import { formatTime } from './types';
-import type { TransactionRow } from '../../hooks/use-transactions';
-import type { CommentRow } from '../../hooks/use-comments';
+import type { TransactionRow } from '@/hooks/use-transactions';
+import type { CommentRow } from '@/hooks/use-comments';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;

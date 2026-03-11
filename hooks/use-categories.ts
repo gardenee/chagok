@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../store/auth';
+import { useAuthStore } from '@/store/auth';
 import {
   fetchCategories,
   createCategory,
   updateCategory,
   deleteCategory,
   type CategoryInput,
-} from '../services/categories';
-import type { Category } from '../types/database';
+} from '@/services/categories';
+import type { Category } from '@/types/database';
 
 export type { CategoryInput };
 

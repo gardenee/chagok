@@ -8,26 +8,29 @@ import {
 } from 'react-native';
 import { ChevronLeft, ChevronRight, Plus, Wallet } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '../../constants/colors';
-import { BottomSheet, BottomSheetHeader } from '../ui/bottom-sheet';
-import { SaveButton } from '../ui/save-button';
-import { ModalTextInput, AmountInput } from '../ui/modal-inputs';
-import { SegmentControl } from '../ui/segment-control';
-import { CategoryFormScreen, ICON_MAP } from '../ui/category-form-screen';
+import { Colors } from '@/constants/colors';
+import { BottomSheet, BottomSheetHeader } from '@/components/ui/bottom-sheet';
+import { SaveButton } from '@/components/ui/save-button';
+import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
+import { SegmentControl } from '@/components/ui/segment-control';
+import {
+  CategoryFormScreen,
+  ICON_MAP,
+} from '@/components/ui/category-form-screen';
 import {
   PaymentMethodFormScreen,
   PM_TYPE_OPTIONS,
   INITIAL_PM_FORM,
   type PaymentMethodFormData,
   type PmTypeOption,
-} from '../asset/payment-method-form-screen';
-import { getAssetTypeOption } from '../asset/asset-payment-form-screen';
+} from '@/components/asset/payment-method-form-screen';
+import { getAssetTypeOption } from '@/components/asset/asset-payment-form-screen';
 import {
   getSelectedDateLabel,
   type TxModalState,
   type TagOption,
 } from './types';
-import type { Category, PaymentMethod, Asset } from '../../types/database';
+import type { Category, PaymentMethod, Asset } from '@/types/database';
 
 interface TransactionFormSheetProps {
   txModal: TxModalState;

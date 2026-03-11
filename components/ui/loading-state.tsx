@@ -1,5 +1,5 @@
 import { View, ActivityIndicator } from 'react-native';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 
 type LoadingStateProps = {
   className?: string;

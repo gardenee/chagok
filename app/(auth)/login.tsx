@@ -8,8 +8,8 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { Chrome, MessageCircle, Apple } from 'lucide-react-native';
-import { signInWithOAuth, signInWithApple } from '../../lib/auth-helpers';
-import { Colors } from '../../constants/colors';
+import { signInWithOAuth, signInWithApple } from '@/lib/auth-helpers';
+import { Colors } from '@/constants/colors';
 
 type LoadingState = 'kakao' | 'google' | 'apple' | null;
 

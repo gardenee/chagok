@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowRight } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 
 export default function OnboardingScreen() {
   const router = useRouter();

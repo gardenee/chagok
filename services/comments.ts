@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import type { Comment } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import type { Comment } from '@/types/database';
 
 export type CommentRow = Comment & {
   users: { nickname: string } | null;

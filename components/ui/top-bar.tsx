@@ -1,7 +1,7 @@
 import { View, TouchableOpacity, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 
 interface TopBarProps {
   title?: string;

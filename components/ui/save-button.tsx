@@ -1,6 +1,6 @@
 import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 
 type SaveButtonProps = {
   onPress: () => void;

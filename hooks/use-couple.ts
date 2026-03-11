@@ -4,8 +4,8 @@ import {
   joinCouple,
   getCoupleInfo,
   updateBookName,
-} from '../services/couple';
-import { useAuthStore } from '../store/auth';
+} from '@/services/couple';
+import { useAuthStore } from '@/store/auth';
 
 export function useCreateCouple() {
   return useMutation({

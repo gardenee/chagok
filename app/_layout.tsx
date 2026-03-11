@@ -11,9 +11,9 @@ import {
   IBMPlexSansKR_600SemiBold,
   IBMPlexSansKR_700Bold,
 } from '@expo-google-fonts/ibm-plex-sans-kr';
-import { useAuthStore } from '../store/auth';
-import { supabase } from '../lib/supabase';
-import { registerMyPushToken } from '../services/notifications';
+import { useAuthStore } from '@/store/auth';
+import { supabase } from '@/lib/supabase';
+import { registerMyPushToken } from '@/services/notifications';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

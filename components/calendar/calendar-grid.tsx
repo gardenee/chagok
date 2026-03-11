@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { formatAmountShort } from '../../utils/format';
+import { formatAmountShort } from '@/utils/format';
 import { WEEKDAYS, getTagBgColor, type DayCell } from './types';
-import type { Schedule } from '../../types/database';
+import type { Schedule } from '@/types/database';
 
 interface CalendarGridProps {
   calendarDays: DayCell[];

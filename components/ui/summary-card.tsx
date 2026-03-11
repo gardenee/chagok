@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native';
-import { Shadows } from '../../constants/shadows';
+import { Shadows } from '@/constants/shadows';
 
 type SummaryCardProps = {
   label: string;

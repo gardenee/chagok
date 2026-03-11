@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import type { UserProfile } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import type { UserProfile } from '@/types/database';
 
 export async function createUserProfile(
   userId: string,

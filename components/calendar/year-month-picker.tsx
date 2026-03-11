@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '../../constants/colors';
-import { BottomSheet } from '../ui/bottom-sheet';
+import { Colors } from '@/constants/colors';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
 
 interface YearMonthPickerProps {
   visible: boolean;

@@ -21,11 +21,11 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react-native';
-import { Colors } from '../../constants/colors';
-import { SaveButton } from '../ui/save-button';
-import { ModalTextInput, AmountInput } from '../ui/modal-inputs';
+import { Colors } from '@/constants/colors';
+import { SaveButton } from '@/components/ui/save-button';
+import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { PM_TYPE_OPTIONS } from './payment-method-form-screen';
-import type { Asset, PaymentMethod } from '../../types/database';
+import type { Asset, PaymentMethod } from '@/types/database';
 
 export type AssetTypeOption = {
   key: string;

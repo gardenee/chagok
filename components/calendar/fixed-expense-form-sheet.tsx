@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
-import { BottomSheet, BottomSheetHeader } from '../ui/bottom-sheet';
-import { SaveButton } from '../ui/save-button';
-import { ModalTextInput, AmountInput } from '../ui/modal-inputs';
+import { BottomSheet, BottomSheetHeader } from '@/components/ui/bottom-sheet';
+import { SaveButton } from '@/components/ui/save-button';
+import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import type { FixedModalState } from './types';
 
 interface FixedExpenseFormSheetProps {

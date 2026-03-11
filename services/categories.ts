@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import type { Category } from '../types/database';
+import { supabase } from '@/lib/supabase';
+import type { Category } from '@/types/database';
 
 export type CategoryInput = {
   name: string;
