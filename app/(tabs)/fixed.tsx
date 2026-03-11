@@ -1,15 +1,7 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  Alert,
-} from 'react-native';
+import { View, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useState } from 'react';
-import { Repeat, Wallet } from 'lucide-react-native';
+import { Repeat } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { Colors } from '@/constants/colors';
 import {
   useFixedExpenses,
   useCreateFixedExpense,
@@ -18,29 +10,16 @@ import {
 } from '@/hooks/use-fixed-expenses';
 import { useExpenseCategories } from '@/hooks/use-categories';
 import { EmptyState } from '@/components/ui/empty-state';
-import { BottomSheet, BottomSheetHeader } from '@/components/ui/bottom-sheet';
-import { SaveButton } from '@/components/ui/save-button';
-import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SummaryCard } from '@/components/ui/summary-card';
 import { LoadingState } from '@/components/ui/loading-state';
-import { ICON_MAP } from '@/constants/icon-map';
 import { FixedExpenseItem } from '@/components/fixed/fixed-expense-item';
+import {
+  FixedExpenseForm,
+  type FormData,
+  INITIAL_FORM,
+} from '@/components/fixed/fixed-expense-form';
 import type { FixedExpense } from '@/types/database';
-
-type FormData = {
-  name: string;
-  amount: string;
-  due_day: number;
-  category_id: string | null;
-};
-
-const INITIAL_FORM: FormData = {
-  name: '',
-  amount: '',
-  due_day: 1,
-  category_id: null,
-};
 
 export default function FixedScreen() {
   const [modal, setModal] = useState<{
@@ -175,144 +154,16 @@ export default function FixedScreen() {
       </ScrollView>
 
       {/* ── 추가 / 수정 모달 ── */}
-      <BottomSheet visible={modal.visible} onClose={closeModal}>
-        <BottomSheetHeader
-          title={modal.editingId ? '고정지출 수정' : '고정지출 추가'}
-          onClose={closeModal}
-          className='mb-6'
-        />
-
-        <ModalTextInput
-          value={modal.form.name}
-          onChangeText={v =>
-            setModal(s => ({ ...s, form: { ...s.form, name: v } }))
-          }
-          placeholder='항목 이름 (예: 월세, 넷플릭스)'
-          maxLength={20}
-          autoFocus={!modal.editingId}
-          className='mb-4'
-        />
-
-        <AmountInput
-          value={modal.form.amount}
-          onChangeText={v =>
-            setModal(s => ({ ...s, form: { ...s.form, amount: v } }))
-          }
-          className='mb-4'
-        />
-
-        {/* 카테고리 선택 */}
-        {categories.length > 0 && (
-          <View className='mb-4'>
-            <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-              카테고리
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyboardShouldPersistTaps='handled'
-            >
-              <View className='flex-row gap-2 pr-2'>
-                <TouchableOpacity
-                  onPress={() =>
-                    setModal(s => ({
-                      ...s,
-                      form: { ...s.form, category_id: null },
-                    }))
-                  }
-                  className={`items-center gap-1`}
-                  activeOpacity={0.7}
-                >
-                  <View
-                    className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100'
-                    style={{
-                      borderWidth: modal.form.category_id === null ? 2 : 0,
-                      borderColor: Colors.brown,
-                    }}
-                  >
-                    <Wallet size={20} color='#A3A3A3' strokeWidth={2.5} />
-                  </View>
-                  <Text className='font-ibm-semibold text-[10px] text-neutral-500'>
-                    없음
-                  </Text>
-                </TouchableOpacity>
-                {categories.map(c => {
-                  const Icon = ICON_MAP[c.icon] ?? Wallet;
-                  const isSelected = modal.form.category_id === c.id;
-                  return (
-                    <TouchableOpacity
-                      key={c.id}
-                      onPress={() => {
-                        setModal(s => ({
-                          ...s,
-                          form: {
-                            ...s.form,
-                            category_id: isSelected ? null : c.id,
-                          },
-                        }));
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }}
-                      className='items-center gap-1'
-                      activeOpacity={0.7}
-                    >
-                      <View
-                        className='w-12 h-12 rounded-2xl items-center justify-center'
-                        style={{
-                          backgroundColor: c.color + '30',
-                          borderWidth: isSelected ? 2 : 0,
-                          borderColor: isSelected ? c.color : 'transparent',
-                        }}
-                      >
-                        <Icon size={20} color={c.color} strokeWidth={2.5} />
-                      </View>
-                      <Text
-                        className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                      >
-                        {c.name}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </ScrollView>
-          </View>
-        )}
-
-        {/* 납부일 */}
-        <View className='mb-6'>
-          <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-            납부일
-          </Text>
-          <View className='flex-row flex-wrap gap-1.5'>
-            {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
-              const isSelected = modal.form.due_day === day;
-              return (
-                <TouchableOpacity
-                  key={day}
-                  onPress={() =>
-                    setModal(s => ({ ...s, form: { ...s.form, due_day: day } }))
-                  }
-                  className={`rounded-xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                  style={{ width: 38, height: 36 }}
-                  activeOpacity={0.7}
-                >
-                  <Text
-                    className={`${isSelected ? 'font-ibm-bold' : 'font-ibm-semibold'} text-xs ${isSelected ? 'text-neutral-700' : 'text-neutral-500'}`}
-                  >
-                    {day}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        <SaveButton
-          onPress={handleSave}
-          isSaving={isSaving}
-          label={modal.editingId ? '수정 완료' : '저장'}
-        />
-      </BottomSheet>
+      <FixedExpenseForm
+        visible={modal.visible}
+        editingId={modal.editingId}
+        form={modal.form}
+        isSaving={isSaving}
+        categories={categories}
+        onChange={form => setModal(s => ({ ...s, form }))}
+        onClose={closeModal}
+        onSave={handleSave}
+      />
     </SafeAreaView>
   );
 }
