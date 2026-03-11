@@ -1,11 +1,6 @@
 import { View, Text, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useState } from 'react';
-import {
-  Landmark,
-  CreditCard,
-  CircleMinus,
-  ShieldCheck,
-} from 'lucide-react-native';
+import { CreditCard } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import {
@@ -22,7 +17,6 @@ import {
 } from '@/hooks/use-payment-methods';
 import {
   AssetPaymentFormScreen,
-  ASSET_TYPE_OPTIONS,
   getAssetTypeOption,
   type UnifiedFormData,
 } from '@/components/assets/asset-payment-form-screen';
@@ -30,6 +24,7 @@ import {
   getPmColor,
   PM_TYPE_OPTIONS,
 } from '@/components/assets/payment-method-form-screen';
+import { AssetGroups } from '@/components/assets/asset-groups';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SummaryCard } from '@/components/ui/summary-card';
@@ -68,7 +63,6 @@ export default function AssetsTab() {
     a => a.type !== 'loan' && a.type !== 'insurance',
   );
   const loanAssets = assets.filter(a => a.type === 'loan');
-  const insuranceAssets = assets.filter(a => a.type === 'insurance');
 
   const totalAssets = regularAssets.reduce((s, a) => s + (a.amount ?? 0), 0);
   const totalLoans = loanAssets.reduce((s, a) => s + (a.amount ?? 0), 0);
@@ -201,16 +195,6 @@ export default function AssetsTab() {
     ]);
   }
 
-  // 자산 그룹핑 (대출/보험 제외)
-  const assetGroups = ASSET_TYPE_OPTIONS.filter(
-    t => t.key !== 'loan' && t.key !== 'insurance',
-  )
-    .map(t => ({
-      ...t,
-      items: regularAssets.filter(a => a.type === t.key),
-    }))
-    .filter(g => g.items.length > 0);
-
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
@@ -226,149 +210,12 @@ export default function AssetsTab() {
         />
 
         {/* 자산 */}
-        {isLoading ? (
-          <LoadingState className='py-16' />
-        ) : assets.length === 0 ? (
-          <EmptyState
-            icon={Landmark}
-            title='등록된 자산이 없어요'
-            description='+ 버튼으로 추가해보세요'
-            containerClassName='mx-4 mt-5'
-          />
-        ) : (
-          <View className='mx-4 mt-5 gap-5'>
-            {/* 자산 섹션 */}
-            {assetGroups.length > 0 && (
-              <View>
-                <Text className='font-ibm-bold text-base text-neutral-700 mb-2'>
-                  자산
-                </Text>
-                <View className='gap-2'>
-                  {assetGroups.map(group => {
-                    const groupTotal = group.items.reduce(
-                      (s, a) => s + (a.amount ?? 0),
-                      0,
-                    );
-                    return (
-                      <View key={group.key}>
-                        <View className='flex-row items-center justify-between mb-1.5'>
-                          <Text className='font-ibm-semibold text-xs text-neutral-500'>
-                            {group.label}
-                          </Text>
-                          <Text className='font-ibm-semibold text-xs text-neutral-500'>
-                            {formatAmount(groupTotal)}원
-                          </Text>
-                        </View>
-                        <View className='gap-2'>
-                          {group.items.map(a => (
-                            <SwipeableDeleteRow
-                              key={a.id}
-                              onDelete={() => handleDeleteAsset(a.id)}
-                            >
-                              <ItemCard onPress={() => openEditAsset(a)}>
-                                <IconBox color={group.color} size='md'>
-                                  <group.Icon
-                                    size={20}
-                                    color={Colors.brown}
-                                    strokeWidth={2.5}
-                                  />
-                                </IconBox>
-                                <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
-                                  {a.name}
-                                </Text>
-                                <Text className='font-ibm-bold text-base text-neutral-800'>
-                                  {a.amount != null
-                                    ? `${formatAmount(a.amount)}원`
-                                    : ''}
-                                </Text>
-                              </ItemCard>
-                            </SwipeableDeleteRow>
-                          ))}
-                        </View>
-                      </View>
-                    );
-                  })}
-                </View>
-              </View>
-            )}
-
-            {/* 부채 섹션 */}
-            {loanAssets.length > 0 && (
-              <View>
-                <Text className='font-ibm-bold text-base text-neutral-700 mb-2'>
-                  부채
-                </Text>
-                <View className='gap-2'>
-                  {loanAssets.map(a => (
-                    <SwipeableDeleteRow
-                      key={a.id}
-                      onDelete={() => handleDeleteAsset(a.id)}
-                    >
-                      <ItemCard onPress={() => openEditAsset(a)}>
-                        <IconBox
-                          color={getAssetTypeOption('loan').color}
-                          size='md'
-                        >
-                          <CircleMinus
-                            size={20}
-                            color={Colors.brown}
-                            strokeWidth={2.5}
-                          />
-                        </IconBox>
-                        <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
-                          {a.name}
-                        </Text>
-                        <Text className='font-ibm-bold text-base text-peach-dark'>
-                          {a.amount != null
-                            ? `-${formatAmount(a.amount)}원`
-                            : ''}
-                        </Text>
-                      </ItemCard>
-                    </SwipeableDeleteRow>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {/* 보험 섹션 */}
-            {insuranceAssets.length > 0 && (
-              <View>
-                <Text className='font-ibm-bold text-base text-neutral-700 mb-2'>
-                  보험
-                </Text>
-                <View className='gap-2'>
-                  {insuranceAssets.map(a => (
-                    <SwipeableDeleteRow
-                      key={a.id}
-                      onDelete={() => handleDeleteAsset(a.id)}
-                    >
-                      <ItemCard onPress={() => openEditAsset(a)}>
-                        <IconBox
-                          color={getAssetTypeOption('insurance').color}
-                          size='md'
-                        >
-                          <ShieldCheck
-                            size={20}
-                            color={Colors.brown}
-                            strokeWidth={2.5}
-                          />
-                        </IconBox>
-                        <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
-                          {a.name}
-                        </Text>
-                        <Text className='font-ibm-bold text-base text-neutral-800'>
-                          {a.amount != null
-                            ? `${formatAmount(a.amount)}원`
-                            : ''}
-                        </Text>
-                      </ItemCard>
-                    </SwipeableDeleteRow>
-                  ))}
-                </View>
-              </View>
-            )}
-          </View>
-        )}
+        <AssetGroups
+          assets={assets}
+          isLoading={isLoading}
+          onEdit={openEditAsset}
+          onDelete={handleDeleteAsset}
+        />
 
         {/* 결제수단 섹션 */}
         <View className='mx-4 mt-8'>
