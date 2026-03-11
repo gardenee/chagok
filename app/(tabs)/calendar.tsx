@@ -1000,6 +1000,7 @@ export default function CalendarTab() {
         onCommentDelete={handleCommentDelete}
         isCommentSending={createComment.isPending}
         resolveTagLabel={resolveTagLabel}
+        resolveTagColor={resolveTagColor}
       />
     </SafeAreaView>
   );
