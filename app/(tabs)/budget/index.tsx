@@ -6,13 +6,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useState, useMemo } from 'react';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
-  Wallet,
-  TrendingUp,
-} from 'lucide-react-native';
+import { Pencil, Wallet, TrendingUp } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
@@ -24,6 +18,7 @@ import { formatAmount } from '@/utils/format';
 import { BudgetSummaryCards } from '@/components/budget/budget-summary-cards';
 import { ExpenseCard } from '@/components/budget/expense-card';
 import { IncomeCard } from '@/components/budget/income-card';
+import { MonthNavigator } from '@/components/budget/month-navigator';
 
 export default function BudgetIndex() {
   const router = useRouter();
@@ -112,23 +107,12 @@ export default function BudgetIndex() {
         </View>
 
         {/* 월 네비게이터 */}
-        <View className='flex-row items-center justify-center gap-5 px-6 pt-1 pb-4'>
-          <TouchableOpacity
-            onPress={prevMonth}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <ChevronLeft size={20} color='#404040' strokeWidth={2.5} />
-          </TouchableOpacity>
-          <Text className='font-ibm-semibold text-base text-neutral-700 w-24 text-center'>
-            {year}년 {month + 1}월
-          </Text>
-          <TouchableOpacity
-            onPress={nextMonth}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <ChevronRight size={20} color='#404040' strokeWidth={2.5} />
-          </TouchableOpacity>
-        </View>
+        <MonthNavigator
+          year={year}
+          month={month}
+          onPrev={prevMonth}
+          onNext={nextMonth}
+        />
 
         {isLoading ? (
           <LoadingState />

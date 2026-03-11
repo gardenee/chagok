@@ -9,33 +9,23 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import {
-  ArrowLeft,
-  Plus,
-  Wallet,
-  TrendingUp,
-  ChevronRight,
-} from 'lucide-react-native';
+import { ArrowLeft, Plus, Wallet, TrendingUp } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
-import { Shadows } from '@/constants/shadows';
 import {
   useCategories,
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
 } from '@/hooks/use-categories';
-import { IconBox } from '@/components/ui/icon-box';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
-import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
-import { CategoryIcon } from '@/components/budget/category-icon';
+import { CategoryRow } from '@/components/budget/category-row';
 import {
   CategoryFormScreen,
   CategoryFormData,
   INITIAL_CATEGORY_FORM,
 } from '@/components/budget/category-form-screen';
-import { formatAmount } from '@/utils/format';
 import type { Category } from '@/types/database';
 
 type ModalState = {
@@ -158,34 +148,6 @@ export default function CategoriesScreen() {
     ]);
   }
 
-  function CategoryRow({ c }: { c: Category }) {
-    return (
-      <SwipeableDeleteRow onDelete={() => handleDelete(c.id)}>
-        <TouchableOpacity onPress={() => openEdit(c)} activeOpacity={0.8}>
-          <View
-            className='bg-white rounded-3xl px-4 py-3.5 flex-row items-center gap-3'
-            style={Shadows.primary}
-          >
-            <IconBox color={c.color}>
-              <CategoryIcon iconKey={c.icon} color={c.color} />
-            </IconBox>
-            <View className='flex-1'>
-              <Text className='font-ibm-semibold text-sm text-neutral-800'>
-                {c.name}
-              </Text>
-              {c.type === 'expense' && c.budget_amount > 0 && (
-                <Text className='font-ibm-regular text-xs text-neutral-400'>
-                  예산 {formatAmount(c.budget_amount)}원
-                </Text>
-              )}
-            </View>
-            <ChevronRight size={16} color='#A3A3A3' strokeWidth={2} />
-          </View>
-        </TouchableOpacity>
-      </SwipeableDeleteRow>
-    );
-  }
-
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
@@ -232,7 +194,12 @@ export default function CategoriesScreen() {
               ) : (
                 <View className='gap-2.5'>
                   {expenseCategories.map(c => (
-                    <CategoryRow key={c.id} c={c} />
+                    <CategoryRow
+                      key={c.id}
+                      c={c}
+                      onEdit={openEdit}
+                      onDelete={handleDelete}
+                    />
                   ))}
                 </View>
               )}
@@ -253,7 +220,12 @@ export default function CategoriesScreen() {
               ) : (
                 <View className='gap-2.5'>
                   {incomeCategories.map(c => (
-                    <CategoryRow key={c.id} c={c} />
+                    <CategoryRow
+                      key={c.id}
+                      c={c}
+                      onEdit={openEdit}
+                      onDelete={handleDelete}
+                    />
                   ))}
                 </View>
               )}
