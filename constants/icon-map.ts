@@ -31,6 +31,7 @@ import {
   TrendingUp,
   Coins,
   Building2,
+  PartyPopper,
   type LucideIcon,
 } from 'lucide-react-native';
 
@@ -67,4 +68,5 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   dividend: TrendingUp,
   allowance: Coins,
   rental: Building2,
+  party: PartyPopper,
 };

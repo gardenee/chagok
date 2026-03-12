@@ -1,9 +1,8 @@
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Repeat, Wallet } from 'lucide-react-native';
+import { Repeat } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
-import { ICON_MAP } from '@/constants/icon-map';
 import { IconBox } from '@/components/ui/icon-box';
-import { ColorPill } from '@/components/ui/color-pill';
+import { CategoryIcon } from '@/components/budget/category-icon';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
 import { formatAmount } from '@/utils/format';
 import type { FixedExpense, Category } from '@/types/database';
@@ -20,7 +19,7 @@ function ordinalDay(day: number): string {
 }
 
 export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
-  const CatIcon = category ? (ICON_MAP[category.icon] ?? Wallet) : null;
+  const iconColor = category?.color ?? Colors.peach;
 
   return (
     <SwipeableDeleteRow onDelete={() => onDelete(item.id, item.name)}>
@@ -35,8 +34,16 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
           }}
         >
           {/* 아이콘 */}
-          <IconBox color={Colors.peach} size='md'>
-            <Repeat size={19} color={Colors.peach} strokeWidth={2.5} />
+          <IconBox color={iconColor} size='md'>
+            {category ? (
+              <CategoryIcon
+                iconKey={category.icon}
+                color={iconColor}
+                size={19}
+              />
+            ) : (
+              <Repeat size={19} color={iconColor} strokeWidth={2.5} />
+            )}
           </IconBox>
 
           {/* 이름 + 날짜 + 카테고리 */}
@@ -48,12 +55,10 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
               <Text className='font-ibm-regular text-xs text-neutral-500'>
                 {ordinalDay(item.due_day)}
               </Text>
-              {category && CatIcon && (
-                <ColorPill
-                  label={category.name}
-                  color={category.color}
-                  icon={CatIcon}
-                />
+              {category && (
+                <Text className='font-ibm-regular text-xs text-neutral-400'>
+                  · {category.name}
+                </Text>
               )}
             </View>
           </View>
