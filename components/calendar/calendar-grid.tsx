@@ -11,6 +11,7 @@ interface CalendarGridProps {
   activeTab: 'ledger' | 'schedule';
   dailyTotals: Record<string, { expense: number; income: number }>;
   schedulesByDate: Record<string, Schedule[]>;
+  holidaysByDate: Record<string, string>;
 }
 
 export function CalendarGrid({
@@ -20,6 +21,7 @@ export function CalendarGrid({
   activeTab,
   dailyTotals,
   schedulesByDate,
+  holidaysByDate,
 }: CalendarGridProps) {
   return (
     <View
@@ -48,15 +50,26 @@ export function CalendarGrid({
         {calendarDays.map((item, index) => {
           const isSelected = item.date === selectedDate;
           const col = index % 7;
+          const isHoliday = !!holidaysByDate[item.date];
           const dayTotals = dailyTotals[item.date];
           const dayExpense = dayTotals?.expense ?? 0;
           const dayIncome = dayTotals?.income ?? 0;
           const daySchedules = schedulesByDate[item.date] ?? [];
-          const hasExtraDots = daySchedules.length > 6;
-          const visibleDots = hasExtraDots
-            ? daySchedules.slice(0, 5)
-            : daySchedules;
-          const extraDotCount = hasExtraDots ? daySchedules.length - 5 : 0;
+
+          // 공휴일 점 + 일정 점 통합 (공휴일이 항상 첫 번째)
+          type DotItem = { id: string; color: string };
+          const allDots: DotItem[] = [
+            ...(item.isCurrentMonth && isHoliday
+              ? [{ id: '__holiday__', color: '#C8562E' }]
+              : []),
+            ...daySchedules.map(s => ({
+              id: s.id,
+              color: getTagBgColor(s.tag),
+            })),
+          ];
+          const hasExtraDots = allDots.length > 6;
+          const visibleDots = hasExtraDots ? allDots.slice(0, 5) : allDots;
+          const extraDotCount = hasExtraDots ? allDots.length - 5 : 0;
           const dotRow1 = visibleDots.slice(0, 3);
           const dotRow2 = visibleDots.slice(3);
 
@@ -91,8 +104,8 @@ export function CalendarGrid({
                   className={`font-ibm-semibold text-sm ${
                     isSelected
                       ? 'text-brown-darker'
-                      : col === 0
-                        ? 'text-peach-dark'
+                      : col === 0 || isHoliday
+                        ? 'text-peach-darker'
                         : 'text-neutral-800'
                   }`}
                 >
@@ -134,14 +147,14 @@ export function CalendarGrid({
                       className='flex-row justify-center'
                       style={{ gap: 3 }}
                     >
-                      {dotRow1.map(s => (
+                      {dotRow1.map(dot => (
                         <View
-                          key={s.id}
+                          key={dot.id}
                           style={{
                             width: 7,
                             height: 7,
                             borderRadius: 3.5,
-                            backgroundColor: getTagBgColor(s.tag),
+                            backgroundColor: dot.color,
                           }}
                         />
                       ))}
@@ -153,14 +166,14 @@ export function CalendarGrid({
                         className='flex-row justify-center items-center'
                         style={{ gap: 3 }}
                       >
-                        {dotRow2.map(s => (
+                        {dotRow2.map(dot => (
                           <View
-                            key={s.id}
+                            key={dot.id}
                             style={{
                               width: 7,
                               height: 7,
                               borderRadius: 3.5,
-                              backgroundColor: getTagBgColor(s.tag),
+                              backgroundColor: dot.color,
                             }}
                           />
                         ))}

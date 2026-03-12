@@ -303,6 +303,23 @@ export interface Database {
         };
         Relationships: never[];
       };
+      holidays: {
+        Row: {
+          date: string;
+          name: string;
+          is_substitute: boolean;
+        };
+        Insert: {
+          date: string;
+          name: string;
+          is_substitute?: boolean;
+        };
+        Update: {
+          name?: string;
+          is_substitute?: boolean;
+        };
+        Relationships: never[];
+      };
     };
     Functions: {
       create_couple: {
@@ -333,6 +350,7 @@ export type FixedExpense =
 export type Asset = Database['public']['Tables']['assets']['Row'];
 export type PaymentMethod =
   Database['public']['Tables']['payment_methods']['Row'];
+export type Holiday = Database['public']['Tables']['holidays']['Row'];
 
 export type TransactionType = Transaction['type'];
 export type Tag = Transaction['tag'];

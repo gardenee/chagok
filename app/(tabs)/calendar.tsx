@@ -56,6 +56,7 @@ import {
   useCreateFixedExpense,
   useUpdateFixedExpense,
 } from '@/hooks/use-fixed-expenses';
+import { useMonthHolidays } from '@/hooks/use-holidays';
 import {
   useCategories,
   useCreateCategory,
@@ -148,6 +149,7 @@ export default function CalendarTab() {
   const [pickerYear, setPickerYear] = useState(todayDate.getFullYear());
 
   // ── 데이터 ──
+  const { holidaysByDate } = useMonthHolidays(currentYear, currentMonth);
   const { data: transactions = [], isLoading: txLoading } =
     useMonthTransactions(currentYear, currentMonth);
   const { data: schedules = [], isLoading: scheduleLoading } =
@@ -761,6 +763,7 @@ export default function CalendarTab() {
           activeTab={activeTab}
           dailyTotals={dailyTotals}
           schedulesByDate={schedulesByDate}
+          holidaysByDate={holidaysByDate}
         />
 
         {/* 선택일 요약 (가계부 탭만) */}
@@ -889,10 +892,31 @@ export default function CalendarTab() {
           {activeTab === 'schedule' &&
             (scheduleLoading ? (
               <LoadingState className='py-6' />
-            ) : selectedSchedules.length === 0 ? (
+            ) : selectedSchedules.length === 0 &&
+              !holidaysByDate[selectedDate] ? (
               <EmptyState icon={CalendarDays} title='등록된 일정이 없어요' />
             ) : (
               <View className='gap-2.5'>
+                {/* 공휴일 */}
+                {holidaysByDate[selectedDate] && (
+                  <ItemCard>
+                    <View className='w-10 h-10 rounded-2xl items-center justify-center bg-peach-light'>
+                      <CalendarDays
+                        size={18}
+                        color={Colors.peachDarker}
+                        strokeWidth={2.5}
+                      />
+                    </View>
+                    <View className='flex-1'>
+                      <Text className='font-ibm-semibold text-sm text-peach-darker'>
+                        {holidaysByDate[selectedDate]}
+                      </Text>
+                      <Text className='font-ibm-regular text-xs text-neutral-400 mt-0.5'>
+                        공휴일
+                      </Text>
+                    </View>
+                  </ItemCard>
+                )}
                 {selectedSchedules.map(s => (
                   <ItemCard key={s.id} onPress={() => openScheduleEdit(s)}>
                     <View
