@@ -21,73 +21,77 @@ export function BudgetSummaryCards({
 
   return (
     <View className='mx-4 mb-4'>
-      <View className='flex-row gap-3 mb-3'>
-        {/* 총 수입 카드 */}
-        <View
-          className='flex-1 bg-olive-light rounded-3xl p-4'
-          style={Shadows.primary}
-        >
-          <View className='flex-row items-center gap-2 mb-1'>
-            <TrendingUp size={16} color={Colors.oliveDark} strokeWidth={2.5} />
-            <Text className='font-ibm-semibold text-xs text-neutral-500'>
-              총 수입
-            </Text>
-          </View>
-          <Text
-            className='font-ibm-bold text-base'
-            style={{ color: Colors.oliveDark }}
-          >
-            {formatAmount(totalIncome)}원
-          </Text>
-        </View>
-
-        {/* 총 지출 카드 */}
-        <View
-          className='flex-1 bg-peach-light rounded-3xl p-4'
-          style={Shadows.primary}
-        >
-          <View className='flex-row items-center gap-2 mb-1'>
-            <Wallet
-              size={16}
-              color={isOver ? Colors.peachDark : '#a3a3a3'}
-              strokeWidth={2.5}
-            />
-            <Text className='font-ibm-semibold text-xs text-neutral-500'>
-              총 지출
-            </Text>
-          </View>
-          <Text
-            className='font-ibm-bold text-base'
-            style={{ color: isOver ? Colors.peachDark : '#404040' }}
-          >
-            {formatAmount(totalSpent)}원
-          </Text>
-        </View>
-      </View>
-
       {/* 결산 카드 */}
       <View className='bg-white rounded-3xl px-4 py-3' style={Shadows.primary}>
         <View className='flex-row items-center justify-between'>
           <View className='flex-row items-center gap-2'>
             <Scale
               size={16}
-              color={isPositive ? Colors.oliveDark : Colors.peachDark}
+              color={Colors.brownDark}
               strokeWidth={2.5}
             />
-            <Text className='font-ibm-semibold text-sm text-neutral-600'>
+            <Text className='font-ibm-semibold text-sm text-neutral-800'>
               이번달 결산
             </Text>
           </View>
           <Text
             className='font-ibm-bold text-base'
             style={{
-              color: isPositive ? Colors.oliveDark : Colors.peachDark,
+              color: isPositive ? Colors.oliveDarker : Colors.peachDarker,
             }}
           >
             {isPositive
               ? `+${formatAmount(balance)}원`
               : `-${formatAmount(Math.abs(balance))}원`}
           </Text>
+        </View>
+      </View>
+
+      <View className='flex-row gap-3 mt-3'>
+        {/* 총 수입 카드 */}
+        <View
+          className='flex-1 bg-olive rounded-3xl p-4'
+          style={Shadows.primary}
+        >
+          <View className='flex-row items-center gap-2 mb-1'>
+            <TrendingUp size={16} color={Colors.oliveDarker} strokeWidth={2.5} />
+            <Text className='font-ibm-semibold text-sm text-neutral-800'>
+              총 수입
+            </Text>
+          </View>
+          <View className='flex-1 flex-row justify-end items-center px-2 gap-0.5'>
+            <Text
+              className='font-ibm-bold text-2xl text-olive-darker'
+            >
+              {formatAmount(totalIncome)}
+            </Text>
+            <Text className='font-ibm-semibold text-sm text-neutral-700'>원</Text>
+          </View>
+        </View>
+
+        {/* 총 지출 카드 */}
+        <View
+          className='flex-1 bg-peach rounded-3xl p-4'
+          style={Shadows.primary}
+        >
+          <View className='flex-row items-center gap-2 mb-1'>
+            <Wallet
+              size={16}
+              color={Colors.peachDarker}
+              strokeWidth={2.5}
+            />
+            <Text className='font-ibm-semibold text-sm text-neutral-800'>
+              총 지출
+            </Text>
+          </View>
+          <View className='flex-1 flex-row justify-end items-center px-2 gap-0.5'>
+            <Text
+              className='font-ibm-bold text-2xl text-peach-darker'
+            >
+              {formatAmount(totalSpent)}
+            </Text>
+            <Text className='font-ibm-semibold text-sm text-neutral-700'>원</Text>
+          </View>
         </View>
       </View>
     </View>
