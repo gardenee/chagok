@@ -67,6 +67,10 @@ export default function BudgetIndex() {
     (s, c) => s + (incomeByCategory[c.id] ?? 0),
     0,
   );
+  const totalIncomeBudget = incomeCategories.reduce(
+    (s, c) => s + c.budget_amount,
+    0,
+  );
   const isOver = totalSpent > totalBudget && totalBudget > 0;
 
   function prevMonth() {
@@ -125,6 +129,7 @@ export default function BudgetIndex() {
             {/* 요약 카드 */}
             <BudgetSummaryCards
               totalIncome={totalIncome}
+              totalIncomeBudget={totalIncomeBudget}
               totalSpent={totalSpent}
               totalBudget={totalBudget}
             />
