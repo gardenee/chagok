@@ -38,6 +38,7 @@ type Props = {
   onChange: (form: FormData) => void;
   onClose: () => void;
   onSave: () => void;
+  onDelete?: () => void;
   onCatCreate: () => void;
   onCatMgmt: () => void;
 };
@@ -50,6 +51,7 @@ export function FixedExpenseForm({
   onChange,
   onClose,
   onSave,
+  onDelete,
   onCatCreate,
   onCatMgmt,
 }: Props) {
@@ -197,9 +199,29 @@ export function FixedExpenseForm({
         </ScrollView>
 
         <View
-          className='px-6 pb-6 pt-3'
+          className='px-6 pb-6 pt-3 gap-3'
           style={{ borderTopWidth: 1, borderTopColor: Colors.cream }}
         >
+          {editingId && onDelete && (
+            <TouchableOpacity
+              onPress={onDelete}
+              activeOpacity={0.8}
+              className='rounded-2xl items-center'
+              style={{
+                backgroundColor: Colors.cream,
+                borderWidth: 1.5,
+                borderColor: Colors.peachDark,
+                paddingVertical: 14,
+              }}
+            >
+              <Text
+                className='font-ibm-semibold text-base'
+                style={{ color: Colors.peachDark }}
+              >
+                고정지출 삭제
+              </Text>
+            </TouchableOpacity>
+          )}
           <SaveButton
             onPress={onSave}
             isSaving={isSaving}

@@ -218,6 +218,7 @@ export default function FixedScreen() {
           try {
             await remove.mutateAsync(id);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            closeAll();
           } catch {
             Alert.alert('오류', '삭제 중 문제가 발생했어요');
           }
@@ -284,6 +285,11 @@ export default function FixedScreen() {
           onChange={form => setState(s => ({ ...s, form }))}
           onClose={closeAll}
           onSave={handleSave}
+          onDelete={
+            state.editingId
+              ? () => handleDelete(state.editingId!, state.form.name)
+              : undefined
+          }
           onCatCreate={openCatCreate}
           onCatMgmt={() => setState(s => ({ ...s, view: 'catMgmt' }))}
         />
