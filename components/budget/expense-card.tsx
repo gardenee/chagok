@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Colors } from '@/constants/colors';
+import { resolveColor } from '@/constants/color-map';
 import { Shadows } from '@/constants/shadows';
 import { IconBox } from '@/components/ui/icon-box';
 import { CategoryIcon } from '@/components/budget/category-icon';
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function ExpenseCard({ c, spent, onPress }: Props) {
+  const color = resolveColor(c.color);
   const hasBudget = c.budget_amount > 0;
   const over = hasBudget && spent > c.budget_amount;
   const diff = hasBudget ? c.budget_amount - spent : 0;
@@ -31,8 +33,8 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
       <View className='bg-white rounded-3xl p-3' style={Shadows.primary}>
         {/* 1행: 아이콘 + 카테고리명 + 목표·사용 수치 */}
         <View className='flex-row items-center gap-2 mb-2'>
-          <IconBox color={c.color}>
-            <CategoryIcon iconKey={c.icon} color={c.color} />
+          <IconBox color={color}>
+            <CategoryIcon iconKey={c.icon} color={color} />
           </IconBox>
           <Text
             className='font-ibm-semibold text-sm text-neutral-700 flex-1'
@@ -63,11 +65,11 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
             </View>
           ) : (
             <View className='flex-row items-baseline gap-1'>
+              <Text className='font-ibm-regular text-xs text-neutral-400'>
+                사용
+              </Text>
               <Text className='font-ibm-bold text-sm text-neutral-700'>
                 {formatAmount(spent)}원
-              </Text>
-              <Text className='font-ibm-regular text-xs text-neutral-400'>
-                이번달 사용
               </Text>
             </View>
           )}

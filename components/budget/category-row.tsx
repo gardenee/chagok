@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
 import { Shadows } from '@/constants/shadows';
+import { resolveColor } from '@/constants/color-map';
 import { IconBox } from '@/components/ui/icon-box';
 import { CategoryIcon } from '@/components/budget/category-icon';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function CategoryRow({ c, onEdit, onDelete }: Props) {
+  const color = resolveColor(c.color);
   return (
     <SwipeableDeleteRow onDelete={() => onDelete(c.id)}>
       <TouchableOpacity onPress={() => onEdit(c)} activeOpacity={0.8}>
@@ -20,8 +22,8 @@ export function CategoryRow({ c, onEdit, onDelete }: Props) {
           className='bg-white rounded-3xl px-4 py-3.5 flex-row items-center gap-3'
           style={Shadows.primary}
         >
-          <IconBox color={c.color}>
-            <CategoryIcon iconKey={c.icon} color={c.color} />
+          <IconBox color={color}>
+            <CategoryIcon iconKey={c.icon} color={color} />
           </IconBox>
           <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
             {c.name}

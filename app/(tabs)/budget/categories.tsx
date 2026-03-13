@@ -13,6 +13,7 @@ import {
   CategoryFormData,
   INITIAL_CATEGORY_FORM,
 } from '@/components/budget/category-form-screen';
+import { resolveColor } from '@/constants/color-map';
 import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
 import type { Category } from '@/types/database';
 
@@ -75,7 +76,7 @@ export default function CategoriesScreen() {
           id: modal.editingId,
           name,
           icon: modal.form.icon,
-          color: modal.form.color,
+          color: resolveColor(modal.form.color),
         });
       } else {
         const list =
@@ -85,7 +86,7 @@ export default function CategoriesScreen() {
         await createCategory.mutateAsync({
           name,
           icon: modal.form.icon,
-          color: modal.form.color,
+          color: resolveColor(modal.form.color),
           budget_amount: 0,
           sort_order: list.length,
           type: modal.categoryType,
@@ -93,7 +94,8 @@ export default function CategoriesScreen() {
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setModal(INITIAL_MODAL);
-    } catch {
+    } catch (err) {
+      console.error('[handleSave]', err);
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
   }

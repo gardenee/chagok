@@ -30,26 +30,37 @@ import {
   INITIAL_CATEGORY_FORM,
   type CategoryFormData,
 } from '@/components/budget/category-form-screen';
+import { resolveColor } from '@/constants/color-map';
 import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
 import type { FixedExpense, Category } from '@/types/database';
 
-type CatView = 'catForm' | 'catMgmt';
+type FixedView = 'main' | 'catMgmt' | 'catForm';
+
+type State = {
+  visible: boolean;
+  view: FixedView;
+  editingId: string | null;
+  form: FormData;
+  catEditingId: string | null;
+  catForm: CategoryFormData;
+  catFormSource: 'main' | 'catMgmt';
+};
+
+const INITIAL_STATE: State = {
+  visible: false,
+  view: 'main',
+  editingId: null,
+  form: INITIAL_FORM,
+  catEditingId: null,
+  catForm: INITIAL_CATEGORY_FORM,
+  catFormSource: 'main',
+};
 
 export default function FixedScreen() {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
 
-  const [modal, setModal] = useState<{
-    visible: boolean;
-    editingId: string | null;
-    form: FormData;
-  }>({ visible: false, editingId: null, form: INITIAL_FORM });
-
-  const [catModal, setCatModal] = useState<{
-    view: CatView | null;
-    editingId: string | null;
-    form: CategoryFormData;
-  }>({ view: null, editingId: null, form: INITIAL_CATEGORY_FORM });
+  const [state, setState] = useState<State>(INITIAL_STATE);
 
   const { data: fixedExpenses = [], isLoading } = useFixedExpenses();
   const { data: categories = [] } = useExpenseCategories();
@@ -65,12 +76,13 @@ export default function FixedScreen() {
   const totalAmount = fixedExpenses.reduce((sum, f) => sum + f.amount, 0);
 
   function openCreate() {
-    setModal({ visible: true, editingId: null, form: INITIAL_FORM });
+    setState({ ...INITIAL_STATE, visible: true });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 
   function openEdit(item: FixedExpense) {
-    setModal({
+    setState({
+      ...INITIAL_STATE,
       visible: true,
       editingId: item.id,
       form: {
@@ -83,13 +95,13 @@ export default function FixedScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 
-  function closeModal() {
-    setModal(s => ({ ...s, visible: false }));
+  function closeAll() {
+    setState(INITIAL_STATE);
   }
 
   async function handleSave() {
-    const name = modal.form.name.trim();
-    const amount = parseInt(modal.form.amount.replace(/[^0-9]/g, ''), 10);
+    const name = state.form.name.trim();
+    const amount = parseInt(state.form.amount.replace(/[^0-9]/g, ''), 10);
 
     if (!name) {
       Alert.alert('입력 오류', '항목 이름을 입력해주세요');
@@ -103,69 +115,80 @@ export default function FixedScreen() {
     const payload = {
       name,
       amount,
-      due_day: modal.form.due_day,
-      category_id: modal.form.category_id,
+      due_day: state.form.due_day,
+      category_id: state.form.category_id,
     };
     try {
-      if (modal.editingId) {
-        await update.mutateAsync({ id: modal.editingId, ...payload });
+      if (state.editingId) {
+        await update.mutateAsync({ id: state.editingId, ...payload });
       } else {
         await create.mutateAsync(payload);
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      closeModal();
+      closeAll();
     } catch {
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
   }
 
   function openCatCreate() {
-    setCatModal({
+    setState(s => ({
+      ...s,
       view: 'catForm',
-      editingId: null,
-      form: INITIAL_CATEGORY_FORM,
-    });
+      catEditingId: null,
+      catForm: INITIAL_CATEGORY_FORM,
+      catFormSource: s.view === 'catMgmt' ? 'catMgmt' : 'main',
+    }));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
+
   function openCatEdit(c: Category) {
-    setCatModal({
+    setState(s => ({
+      ...s,
       view: 'catForm',
-      editingId: c.id,
-      form: { name: c.name, icon: c.icon, color: c.color },
-    });
+      catEditingId: c.id,
+      catForm: { name: c.name, icon: c.icon, color: c.color },
+      catFormSource: 'catMgmt',
+    }));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
+
+  function backFromCatForm() {
+    setState(s => ({ ...s, view: s.catFormSource }));
+  }
+
   async function handleCatSave() {
-    const name = catModal.form.name.trim();
+    const name = state.catForm.name.trim();
     if (!name) {
       Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
       return;
     }
     try {
-      if (catModal.editingId) {
+      if (state.catEditingId) {
         await updateCategory.mutateAsync({
-          id: catModal.editingId,
+          id: state.catEditingId,
           name,
-          icon: catModal.form.icon,
-          color: catModal.form.color,
+          icon: state.catForm.icon,
+          color: resolveColor(state.catForm.color),
         });
-        setCatModal(s => ({ ...s, view: 'catMgmt', editingId: null }));
+        setState(s => ({ ...s, view: 'catMgmt', catEditingId: null }));
       } else {
         await createCategory.mutateAsync({
           name,
-          icon: catModal.form.icon,
-          color: catModal.form.color,
+          icon: state.catForm.icon,
+          color: resolveColor(state.catForm.color),
           budget_amount: 0,
           sort_order: categories.length,
           type: 'expense',
         });
-        setCatModal(s => ({ ...s, view: null }));
+        setState(s => ({ ...s, view: s.catFormSource }));
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
   }
+
   function handleCatDelete(id: string) {
     Alert.alert('카테고리 삭제', '삭제하면 관련 예산도 사라져요. 삭제할까요?', [
       { text: '취소', style: 'cancel' },
@@ -176,7 +199,7 @@ export default function FixedScreen() {
           try {
             await deleteCategory.mutateAsync(id);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setCatModal(s => ({ ...s, view: 'catMgmt', editingId: null }));
+            setState(s => ({ ...s, view: 'catMgmt', catEditingId: null }));
           } catch {
             Alert.alert('오류', '삭제 중 문제가 발생했어요');
           }
@@ -247,30 +270,35 @@ export default function FixedScreen() {
         </View>
       </ScrollView>
 
-      {/* ── 추가 / 수정 모달 ── */}
-      <FixedExpenseForm
-        visible={modal.visible}
-        editingId={modal.editingId}
-        form={modal.form}
-        isSaving={isSaving}
-        categories={categories}
-        onChange={form => setModal(s => ({ ...s, form }))}
-        onClose={closeModal}
-        onSave={handleSave}
-        onCatCreate={openCatCreate}
-        onCatMgmt={() => setCatModal(s => ({ ...s, view: 'catMgmt' }))}
-      />
+      {/* ── 고정지출 추가/수정 (풀스크린) ── */}
+      <Modal
+        visible={state.visible && state.view === 'main'}
+        animationType='slide'
+        onRequestClose={closeAll}
+      >
+        <FixedExpenseForm
+          editingId={state.editingId}
+          form={state.form}
+          isSaving={isSaving}
+          categories={categories}
+          onChange={form => setState(s => ({ ...s, form }))}
+          onClose={closeAll}
+          onSave={handleSave}
+          onCatCreate={openCatCreate}
+          onCatMgmt={() => setState(s => ({ ...s, view: 'catMgmt' }))}
+        />
+      </Modal>
 
       {/* 카테고리 관리 모달 */}
       <Modal
-        visible={catModal.view === 'catMgmt'}
+        visible={state.visible && state.view === 'catMgmt'}
         animationType='none'
-        onRequestClose={() => setCatModal(s => ({ ...s, view: null }))}
+        onRequestClose={() => setState(s => ({ ...s, view: 'main' }))}
       >
         <CategoryManagementScreen
           categories={categories}
           filterType='expense'
-          onBack={() => setCatModal(s => ({ ...s, view: null }))}
+          onBack={() => setState(s => ({ ...s, view: 'main' }))}
           onCreate={openCatCreate}
           onEdit={openCatEdit}
           onDelete={handleCatDelete}
@@ -279,31 +307,21 @@ export default function FixedScreen() {
 
       {/* 카테고리 추가/수정 모달 */}
       <Modal
-        visible={catModal.view === 'catForm'}
+        visible={state.visible && state.view === 'catForm'}
         animationType='none'
-        onRequestClose={() =>
-          setCatModal(s => ({
-            ...s,
-            view: s.editingId ? 'catMgmt' : null,
-          }))
-        }
+        onRequestClose={backFromCatForm}
       >
         <CategoryFormScreen
-          editingId={catModal.editingId}
-          form={catModal.form}
+          editingId={state.catEditingId}
+          form={state.catForm}
           isSaving={isCatSaving}
           categoryType='expense'
-          onBack={() =>
-            setCatModal(s => ({
-              ...s,
-              view: s.editingId ? 'catMgmt' : null,
-            }))
-          }
-          onChange={form => setCatModal(s => ({ ...s, form }))}
+          onBack={backFromCatForm}
+          onChange={catForm => setState(s => ({ ...s, catForm }))}
           onSave={handleCatSave}
           onDelete={
-            catModal.editingId
-              ? () => handleCatDelete(catModal.editingId!)
+            state.catEditingId
+              ? () => handleCatDelete(state.catEditingId!)
               : undefined
           }
           onTypeChange={() => {}}

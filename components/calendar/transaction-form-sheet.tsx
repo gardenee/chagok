@@ -9,6 +9,7 @@ import {
 import { ChevronLeft, ChevronRight, Plus, Wallet } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
+import { resolveColor } from '@/constants/color-map';
 import { BottomSheet, BottomSheetHeader } from '@/components/ui/bottom-sheet';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
@@ -156,6 +157,7 @@ export function TransactionFormSheet({
                 .map(c => {
                   const Icon = ICON_MAP[c.icon] ?? Wallet;
                   const isSelected = txModal.form.category_id === c.id;
+                  const cColor = resolveColor(c.color);
                   return (
                     <TouchableOpacity
                       key={c.id}
@@ -175,12 +177,12 @@ export function TransactionFormSheet({
                       <View
                         className='w-12 h-12 rounded-2xl items-center justify-center'
                         style={{
-                          backgroundColor: c.color + '30',
+                          backgroundColor: cColor + '30',
                           borderWidth: isSelected ? 2 : 0,
-                          borderColor: isSelected ? c.color : 'transparent',
+                          borderColor: isSelected ? cColor : 'transparent',
                         }}
                       >
-                        <Icon size={20} color={c.color} strokeWidth={2.5} />
+                        <Icon size={20} color={cColor} strokeWidth={2.5} />
                       </View>
                       <Text
                         className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}

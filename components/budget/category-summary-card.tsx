@@ -63,8 +63,8 @@ export function CategorySummaryCard({
         {formatAmount(totalAmount)}원
       </Text>
 
-      {/* 프로그레스 바 (예산/목표 설정 시) */}
-      {budget > 0 && (
+      {/* 프로그레스 바 (지출 예산 설정 시) */}
+      {isExpense && budget > 0 && (
         <View className='mb-4'>
           <View className='flex-row justify-between mb-1.5'>
             <Text
@@ -103,44 +103,46 @@ export function CategorySummaryCard({
         </View>
       )}
 
-      {/* 예산/예상 수입 인풋 */}
-      <View className='flex-row items-center gap-3'>
-        <Text
-          className='font-ibm-semibold text-xs w-14'
-          style={{ color: '#8C7A5E' }}
-        >
-          {inputLabel}
-        </Text>
-        <View
-          className='flex-1 flex-row items-center rounded-xl px-3 bg-white'
-          style={{ height: 40, ...Shadows.soft }}
-        >
-          <TextInput
-            className='flex-1 font-ibm-semibold text-sm text-neutral-700'
-            value={budgetInput}
-            onChangeText={v => onBudgetChange(v.replace(/[^0-9]/g, ''))}
-            keyboardType='numeric'
-            placeholder='설정 안 함'
-            placeholderTextColor='#BDBDBD'
-            onBlur={onBudgetSave}
-            returnKeyType='done'
-            onSubmitEditing={onBudgetSave}
-          />
-          {budgetInput.length > 0 && (
-            <Text className='font-ibm-regular text-sm text-neutral-400'>
-              원
+      {/* 예산 인풋 (지출만) */}
+      {isExpense && (
+        <View className='flex-row items-center gap-3'>
+          <Text
+            className='font-ibm-semibold text-xs w-14'
+            style={{ color: '#8C7A5E' }}
+          >
+            {inputLabel}
+          </Text>
+          <View
+            className='flex-1 flex-row items-center rounded-xl px-3 bg-white'
+            style={{ height: 40, ...Shadows.soft }}
+          >
+            <TextInput
+              className='flex-1 font-ibm-semibold text-sm text-neutral-700'
+              value={budgetInput}
+              onChangeText={v => onBudgetChange(v.replace(/[^0-9]/g, ''))}
+              keyboardType='numeric'
+              placeholder='설정 안 함'
+              placeholderTextColor='#BDBDBD'
+              onBlur={onBudgetSave}
+              returnKeyType='done'
+              onSubmitEditing={onBudgetSave}
+            />
+            {budgetInput.length > 0 && (
+              <Text className='font-ibm-regular text-sm text-neutral-400'>
+                원
+              </Text>
+            )}
+          </View>
+          {isSavingBudget && (
+            <Text
+              className='font-ibm-regular text-xs'
+              style={{ color: '#8C7A5E' }}
+            >
+              저장중...
             </Text>
           )}
         </View>
-        {isSavingBudget && (
-          <Text
-            className='font-ibm-regular text-xs'
-            style={{ color: '#8C7A5E' }}
-          >
-            저장중...
-          </Text>
-        )}
-      </View>
+      )}
     </View>
   );
 }

@@ -6,7 +6,6 @@ import { formatAmount, formatAmountShort } from '@/utils/format';
 
 type Props = {
   totalIncome: number;
-  totalIncomeBudget: number;
   totalSpent: number;
   totalBudget: number;
 };
@@ -24,14 +23,12 @@ function DiffTag({ diff, positive }: { diff: number; positive: boolean }) {
 
 export function BudgetSummaryCards({
   totalIncome,
-  totalIncomeBudget,
   totalSpent,
   totalBudget,
 }: Props) {
   const balance = totalIncome - totalSpent;
   const isPositive = balance >= 0;
 
-  const incomeDiff = totalIncome - totalIncomeBudget;
   const expenseDiff = totalBudget - totalSpent;
 
   return (
@@ -75,9 +72,6 @@ export function BudgetSummaryCards({
                 총 수입
               </Text>
             </View>
-            {totalIncomeBudget > 0 && (
-              <DiffTag diff={incomeDiff} positive={incomeDiff >= 0} />
-            )}
           </View>
           <View className='flex-1 flex-row justify-end items-center px-2 gap-0.5'>
             <Text className='font-ibm-bold text-2xl text-olive-darker'>

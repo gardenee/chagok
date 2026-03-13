@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
+import { Colors } from '@/constants/colors';
 
 type Props = {
   icon: React.ReactNode;
@@ -36,13 +37,13 @@ export function SettingsRow({
         {label}
       </Text>
       {value ? (
-        <Text className='font-ibm-regular text-sm text-neutral-500 mr-1.5'>
+        <Text className='font-ibm-regular text-sm text-neutral-800 mr-1.5'>
           {value}
         </Text>
       ) : null}
       {rightElement ?? null}
       {showChevron && onPress && !disabled ? (
-        <ChevronRight size={16} color='#A3A3A3' strokeWidth={2} />
+        <ChevronRight size={16} color={Colors.neutralDark} strokeWidth={2} />
       ) : null}
     </TouchableOpacity>
   );

@@ -15,4 +15,10 @@ export const Colors = {
   black: '#000000',
   blackSoft: '#1A1A1A',
   blackWarm: '#1A1208',
+  neutral: '#737373',
+  neutralDark: '#595959',
+  neutralDarker: '#3F3F3F',
+  neutralLight: '#8C8C8C',
+  neutralLighter: '#A3A3A3',
+  neutralLightest: '#C6C6C6',
 } as const;

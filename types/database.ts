@@ -161,6 +161,7 @@ export interface Database {
           category_id: string | null;
           payment_method_id: string | null;
           asset_id: string | null;
+          fixed_expense_id: string | null;
           amount: number;
           type: 'expense' | 'income';
           tag: 'me' | 'partner' | 'together';
@@ -175,6 +176,7 @@ export interface Database {
           category_id?: string | null;
           payment_method_id?: string | null;
           asset_id?: string | null;
+          fixed_expense_id?: string | null;
           amount: number;
           type: 'expense' | 'income';
           tag: 'me' | 'partner' | 'together';
@@ -186,6 +188,7 @@ export interface Database {
           category_id?: string | null;
           payment_method_id?: string | null;
           asset_id?: string | null;
+          fixed_expense_id?: string | null;
           amount?: number;
           type?: 'expense' | 'income';
           tag?: 'me' | 'partner' | 'together';

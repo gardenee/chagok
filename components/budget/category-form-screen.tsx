@@ -9,40 +9,13 @@ import {
 } from 'react-native';
 import { X, Check } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
+import { COLOR_MAP } from '@/constants/color-map';
 import { SaveButton } from '@/components/ui/save-button';
 import { SegmentControl } from '@/components/ui/segment-control';
 import { ModalTextInput } from '@/components/ui/modal-inputs';
 import { ICON_MAP } from '@/constants/icon-map';
 
-export const COLOR_OPTIONS = [
-  // 핑크/피치/레드
-  '#FFCCD5', // baby pink
-  '#F0C5D5', // pink
-  '#F7B8A0', // peach
-  '#FFD4B8', // light peach
-  '#F4A0A0', // coral
-  '#E8A0C0', // rose
-  // 보라/라벤더
-  '#EAD8FC', // lilac
-  '#D4C5F0', // lavender
-  '#C5A8E8', // violet
-  '#C8B8F0', // purple light
-  // 블루
-  '#C8D8F8', // periwinkle
-  '#B5C8E8', // sky blue
-  '#A0D8E8', // cyan
-  '#B8E0F0', // light blue
-  // 그린/민트
-  '#A8D8B0', // mint
-  '#B8E8C8', // light mint
-  '#C5E8D5', // sage
-  '#D0E8B5', // lime
-  // 옐로/버터
-  '#FAD97A', // butter
-  '#FFE8A0', // pale yellow
-  '#F5D0A0', // apricot
-  '#F5C070', // amber
-];
+export const COLOR_OPTIONS = Object.keys(COLOR_MAP);
 
 export type CategoryFormData = {
   name: string;
@@ -53,7 +26,7 @@ export type CategoryFormData = {
 export const INITIAL_CATEGORY_FORM: CategoryFormData = {
   name: '',
   icon: 'shopping',
-  color: COLOR_OPTIONS[0],
+  color: 'baby-pink',
 };
 
 type Props = {
@@ -165,15 +138,16 @@ export function CategoryFormScreen({
             색상
           </Text>
           <View className='flex-row flex-wrap gap-2 mb-6'>
-            {COLOR_OPTIONS.map(color => {
-              const isSelected = form.color === color;
+            {COLOR_OPTIONS.map(key => {
+              const hex = COLOR_MAP[key];
+              const isSelected = form.color === key;
               return (
                 <TouchableOpacity
-                  key={color}
-                  onPress={() => onChange({ ...form, color })}
+                  key={key}
+                  onPress={() => onChange({ ...form, color: key })}
                   className='w-9 h-9 rounded-full items-center justify-center'
                   style={{
-                    backgroundColor: color,
+                    backgroundColor: hex,
                     borderWidth: isSelected ? 2.5 : 0,
                     borderColor: Colors.brown,
                   }}

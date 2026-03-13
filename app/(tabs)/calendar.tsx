@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  Modal,
 } from 'react-native';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -19,9 +20,11 @@ import {
   Wallet,
   Clock,
 } from 'lucide-react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import { ICON_MAP } from '@/constants/icon-map';
 import {
   INITIAL_CATEGORY_FORM,
+  CategoryFormScreen,
   type CategoryFormData,
 } from '@/components/budget/category-form-screen';
 import {
@@ -31,6 +34,7 @@ import {
 } from '@/components/assets/payment-method-form-screen';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
+import { resolveColor } from '@/constants/color-map';
 import { useAuthStore } from '@/store/auth';
 import {
   useMonthTransactions,
@@ -53,7 +57,6 @@ import {
 import { useCoupleMembers } from '@/hooks/use-couple-members';
 import {
   useFixedExpenses,
-  useCreateFixedExpense,
   useUpdateFixedExpense,
 } from '@/hooks/use-fixed-expenses';
 import { useMonthHolidays } from '@/hooks/use-holidays';
@@ -70,6 +73,8 @@ import {
   useDeletePaymentMethod,
 } from '@/hooks/use-payment-methods';
 import { useAssets } from '@/hooks/use-assets';
+import { useMaterializeFixedExpenses } from '@/hooks/use-materialize-fixed-expenses';
+import { updateLinkedTransactions } from '@/services/transactions';
 import { LoadingState } from '@/components/ui/loading-state';
 import { SegmentControl } from '@/components/ui/segment-control';
 import { ItemCard } from '@/components/ui/item-card';
@@ -86,7 +91,6 @@ import {
   INITIAL_SCHEDULE_FORM,
   type TxModalState,
   type ScheduleModalState,
-  type FixedModalState,
   type DayCell,
 } from '@/components/calendar/types';
 import { CalendarGrid } from '@/components/calendar/calendar-grid';
@@ -94,7 +98,34 @@ import { TransactionDetailModal } from '@/components/calendar/transaction-detail
 import { TransactionFormSheet } from '@/components/calendar/transaction-form-sheet';
 import { ScheduleFormSheet } from '@/components/calendar/schedule-form-sheet';
 import { YearMonthPicker } from '@/components/calendar/year-month-picker';
-import { FixedExpenseFormSheet } from '@/components/calendar/fixed-expense-form-sheet';
+import {
+  FixedExpenseForm,
+  type FormData as FixedFormData,
+  INITIAL_FORM as INITIAL_FIXED_FORM,
+} from '@/components/fixed/fixed-expense-form';
+import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
+
+type FixedEditView = 'form' | 'catMgmt' | 'catForm';
+
+type FixedEditState = {
+  visible: boolean;
+  view: FixedEditView;
+  editingId: string | null;
+  form: FixedFormData;
+  catEditingId: string | null;
+  catForm: CategoryFormData;
+  catFormSource: 'form' | 'catMgmt';
+};
+
+const INITIAL_FIXED_EDIT: FixedEditState = {
+  visible: false,
+  view: 'form',
+  editingId: null,
+  form: INITIAL_FIXED_FORM,
+  catEditingId: null,
+  catForm: INITIAL_CATEGORY_FORM,
+  catFormSource: 'form',
+};
 
 export default function CalendarTab() {
   const todayDate = new Date();
@@ -104,6 +135,7 @@ export default function CalendarTab() {
   const scrollRef = useRef<ScrollView>(null);
   const navigation = useNavigation();
   useScrollToTop(scrollRef);
+  const queryClient = useQueryClient();
 
   const [currentYear, setCurrentYear] = useState(todayDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(todayDate.getMonth());
@@ -131,6 +163,7 @@ export default function CalendarTab() {
     catFormSource: 'tx',
     pmEditingId: null,
     pmForm: INITIAL_PM_FORM,
+    detachFixed: false,
   });
   const [scheduleModal, setScheduleModal] = useState<ScheduleModalState>({
     visible: false,
@@ -139,11 +172,8 @@ export default function CalendarTab() {
   });
   const [detailTx, setDetailTx] = useState<TransactionRow | null>(null);
   const [commentText, setCommentText] = useState('');
-  const [fixedModal, setFixedModal] = useState<FixedModalState>({
-    visible: false,
-    editingId: null,
-    form: { name: '', amount: '', due_day: 1 },
-  });
+  const [fixedEditState, setFixedEditState] =
+    useState<FixedEditState>(INITIAL_FIXED_EDIT);
   const [activeTab, setActiveTab] = useState<'ledger' | 'schedule'>('ledger');
   const [yearMonthModal, setYearMonthModal] = useState(false);
   const [pickerYear, setPickerYear] = useState(todayDate.getFullYear());
@@ -161,12 +191,15 @@ export default function CalendarTab() {
   const bankCashAssets = allAssets.filter(
     (a: Asset) => a.type === 'bank' || a.type === 'cash',
   );
+  const expenseCategories = categories.filter(c => c.type === 'expense');
   const createPaymentMethod = useCreatePaymentMethod();
   const updatePaymentMethod = useUpdatePaymentMethod();
   const deletePaymentMethod = useDeletePaymentMethod();
   const { data: comments = [], isLoading: commentsLoading } =
     useTransactionComments(detailTx?.id ?? '');
   const { data: members = [] } = useCoupleMembers();
+
+  useMaterializeFixedExpenses(currentYear, currentMonth);
 
   const myNickname = userProfile?.nickname ?? '나';
   const partner = members.find(m => m.id !== myId);
@@ -199,7 +232,6 @@ export default function CalendarTab() {
     { value: 'together' as const, label: '함께' },
   ];
 
-  const createFixedExpense = useCreateFixedExpense();
   const updateFixedExpense = useUpdateFixedExpense();
   const createTx = useCreateTransaction();
   const updateTx = useUpdateTransaction();
@@ -284,7 +316,7 @@ export default function CalendarTab() {
   const isScheduleSaving = createSchedule.isPending || updateSchedule.isPending;
   const isCatSaving = createCategory.isPending || updateCategory.isPending;
 
-  // ── 카테고리 핸들러 ──
+  // ── 카테고리 핸들러 (거래 폼용) ──
   function openCatCreate() {
     setTxModal(s => ({
       ...s,
@@ -319,13 +351,13 @@ export default function CalendarTab() {
           id: txModal.catEditingId,
           name,
           icon: txModal.catForm.icon,
-          color: txModal.catForm.color,
+          color: resolveColor(txModal.catForm.color),
         });
       } else {
         await createCategory.mutateAsync({
           name,
           icon: txModal.catForm.icon,
-          color: txModal.catForm.color,
+          color: resolveColor(txModal.catForm.color),
           budget_amount: 0,
           sort_order: categories.length,
           type: txModal.catCategoryType,
@@ -333,7 +365,8 @@ export default function CalendarTab() {
       }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setTxModal(s => ({ ...s, view: s.catFormSource }));
-    } catch {
+    } catch (err) {
+      console.error('[handleCatSave]', err);
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
   }
@@ -354,6 +387,161 @@ export default function CalendarTab() {
         },
       },
     ]);
+  }
+
+  // ── 고정지출 템플릿 수정 핸들러 ──
+  function openFixedTemplateEdit(fixedExpenseId: string) {
+    const fe = fixedExpenses.find((f: FixedExpense) => f.id === fixedExpenseId);
+    if (!fe) return;
+    setFixedEditState({
+      visible: true,
+      view: 'form',
+      editingId: fe.id,
+      form: {
+        name: fe.name,
+        amount: String(fe.amount),
+        due_day: fe.due_day,
+        category_id: fe.category_id ?? null,
+      },
+      catEditingId: null,
+      catForm: INITIAL_CATEGORY_FORM,
+      catFormSource: 'form',
+    });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+
+  function closeFixedEdit() {
+    setFixedEditState(INITIAL_FIXED_EDIT);
+  }
+
+  function openFixedCatCreate() {
+    setFixedEditState(s => ({
+      ...s,
+      view: 'catForm',
+      catEditingId: null,
+      catForm: INITIAL_CATEGORY_FORM,
+      catFormSource: s.view === 'catMgmt' ? 'catMgmt' : 'form',
+    }));
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+
+  function openFixedCatEdit(c: Category) {
+    setFixedEditState(s => ({
+      ...s,
+      view: 'catForm',
+      catEditingId: c.id,
+      catForm: { name: c.name, icon: c.icon, color: c.color },
+      catFormSource: 'catMgmt',
+    }));
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+
+  function backFromFixedCatForm() {
+    setFixedEditState(s => ({ ...s, view: s.catFormSource }));
+  }
+
+  async function handleFixedCatSave() {
+    const name = fixedEditState.catForm.name.trim();
+    if (!name) {
+      Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
+      return;
+    }
+    try {
+      if (fixedEditState.catEditingId) {
+        await updateCategory.mutateAsync({
+          id: fixedEditState.catEditingId,
+          name,
+          icon: fixedEditState.catForm.icon,
+          color: resolveColor(fixedEditState.catForm.color),
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setFixedEditState(s => ({
+          ...s,
+          view: s.catFormSource,
+          catEditingId: null,
+        }));
+      } else {
+        const created = await createCategory.mutateAsync({
+          name,
+          icon: fixedEditState.catForm.icon,
+          color: resolveColor(fixedEditState.catForm.color),
+          budget_amount: 0,
+          sort_order: expenseCategories.length,
+          type: 'expense',
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setFixedEditState(s => ({
+          ...s,
+          view: s.catFormSource,
+          catEditingId: null,
+          form: { ...s.form, category_id: created.id },
+        }));
+      }
+    } catch (err) {
+      console.error('[handleFixedCatSave]', err);
+      Alert.alert('오류', '저장 중 문제가 발생했어요');
+    }
+  }
+
+  function handleFixedCatDelete(id: string) {
+    Alert.alert('카테고리 삭제', '삭제하면 관련 예산도 사라져요. 삭제할까요?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteCategory.mutateAsync(id);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            setFixedEditState(s => ({
+              ...s,
+              view: s.catFormSource,
+              catEditingId: null,
+            }));
+          } catch {
+            Alert.alert('오류', '삭제 중 문제가 발생했어요');
+          }
+        },
+      },
+    ]);
+  }
+
+  async function handleFixedTemplateSave() {
+    const name = fixedEditState.form.name.trim();
+    const amount = parseInt(
+      fixedEditState.form.amount.replace(/[^0-9]/g, ''),
+      10,
+    );
+    if (!name) {
+      Alert.alert('입력 오류', '항목 이름을 입력해주세요');
+      return;
+    }
+    if (!amount || amount <= 0) {
+      Alert.alert('입력 오류', '금액을 올바르게 입력해주세요');
+      return;
+    }
+    try {
+      await updateFixedExpense.mutateAsync({
+        id: fixedEditState.editingId!,
+        name,
+        amount,
+        due_day: fixedEditState.form.due_day,
+        category_id: fixedEditState.form.category_id,
+      });
+      // Update all linked transactions from current month onward
+      const fromDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+      await updateLinkedTransactions(
+        fixedEditState.editingId!,
+        { name, amount, category_id: fixedEditState.form.category_id },
+        fromDate,
+      );
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      closeFixedEdit();
+    } catch (err) {
+      console.error('[handleFixedTemplateSave]', err);
+      Alert.alert('오류', '저장 중 문제가 발생했어요');
+    }
   }
 
   // ── 월 이동 ──
@@ -427,18 +615,8 @@ export default function CalendarTab() {
       if (t.type === 'expense') map[t.date].expense += t.amount;
       else map[t.date].income += t.amount;
     }
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    for (const fe of fixedExpenses) {
-      if (fe.due_day <= daysInMonth) {
-        const m = String(currentMonth + 1).padStart(2, '0');
-        const d = String(fe.due_day).padStart(2, '0');
-        const dateStr = `${currentYear}-${m}-${d}`;
-        if (!map[dateStr]) map[dateStr] = { expense: 0, income: 0 };
-        map[dateStr].expense += fe.amount;
-      }
-    }
     return map;
-  }, [transactions, fixedExpenses, currentYear, currentMonth]);
+  }, [transactions]);
 
   const schedulesByDate = useMemo(() => {
     const map: Record<string, Schedule[]> = {};
@@ -461,10 +639,6 @@ export default function CalendarTab() {
       return 0;
     });
   }, [schedulesByDate, selectedDate]);
-  const selectedDay = parseInt(selectedDate.split('-')[2], 10);
-  const selectedFixedExpenses = fixedExpenses.filter(
-    fe => fe.due_day === selectedDay,
-  );
   const totalExpense = selectedTransactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -480,26 +654,60 @@ export default function CalendarTab() {
       editingId: null,
       form: INITIAL_TX_FORM,
       view: 'tx',
+      detachFixed: false,
     }));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   function openTxEdit(t: TransactionRow) {
-    setTxModal(s => ({
-      ...s,
-      visible: true,
-      editingId: t.id,
-      form: {
-        amount: String(t.amount),
-        type: t.type,
-        tag: t.tag,
-        memo: t.memo ?? '',
-        category_id: t.category_id ?? null,
-        payment_method_id: t.payment_method_id ?? null,
-        asset_id: t.asset_id ?? null,
-      },
-      view: 'tx',
-    }));
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (t.fixed_expense_id) {
+      Alert.alert('수정 방법', '어떻게 수정할까요?', [
+        {
+          text: '이 내역만',
+          onPress: () => {
+            setTxModal(s => ({
+              ...s,
+              visible: true,
+              editingId: t.id,
+              detachFixed: true,
+              form: {
+                amount: String(t.amount),
+                type: t.type,
+                tag: t.tag,
+                memo: t.memo ?? '',
+                category_id: t.category_id ?? null,
+                payment_method_id: t.payment_method_id ?? null,
+                asset_id: t.asset_id ?? null,
+              },
+              view: 'tx',
+            }));
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          },
+        },
+        {
+          text: '이후 전체 수정',
+          onPress: () => openFixedTemplateEdit(t.fixed_expense_id!),
+        },
+        { text: '취소', style: 'cancel' },
+      ]);
+    } else {
+      setTxModal(s => ({
+        ...s,
+        visible: true,
+        editingId: t.id,
+        detachFixed: false,
+        form: {
+          amount: String(t.amount),
+          type: t.type,
+          tag: t.tag,
+          memo: t.memo ?? '',
+          category_id: t.category_id ?? null,
+          payment_method_id: t.payment_method_id ?? null,
+          asset_id: t.asset_id ?? null,
+        },
+        view: 'tx',
+      }));
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
   }
   async function handleTxSave() {
     const amount = parseInt(txModal.form.amount.replace(/[^0-9]/g, ''), 10);
@@ -516,13 +724,19 @@ export default function CalendarTab() {
       payment_method_id: txModal.form.payment_method_id,
       asset_id: txModal.form.asset_id,
       date: selectedDate,
+      ...(txModal.detachFixed ? { fixed_expense_id: null } : {}),
     };
     try {
       if (txModal.editingId)
         await updateTx.mutateAsync({ id: txModal.editingId, ...payload });
       else await createTx.mutateAsync(payload);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setTxModal(s => ({ ...s, visible: false, view: 'tx' }));
+      setTxModal(s => ({
+        ...s,
+        visible: false,
+        view: 'tx',
+        detachFixed: false,
+      }));
     } catch {
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
@@ -543,55 +757,6 @@ export default function CalendarTab() {
         },
       },
     ]);
-  }
-
-  // ── 고정지출 핸들러 ──
-  function openFixedCreate() {
-    setFixedModal({
-      visible: true,
-      editingId: null,
-      form: { name: '', amount: '', due_day: selectedDay },
-    });
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  }
-  function openFixedEdit(fe: FixedExpense) {
-    setFixedModal({
-      visible: true,
-      editingId: fe.id,
-      form: { name: fe.name, amount: String(fe.amount), due_day: fe.due_day },
-    });
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  }
-  async function handleFixedSave() {
-    const amount = parseInt(fixedModal.form.amount.replace(/[^0-9]/g, ''), 10);
-    if (!fixedModal.form.name.trim()) {
-      Alert.alert('입력 오류', '이름을 입력해주세요');
-      return;
-    }
-    if (!amount || amount <= 0) {
-      Alert.alert('입력 오류', '금액을 올바르게 입력해주세요');
-      return;
-    }
-    try {
-      if (fixedModal.editingId) {
-        await updateFixedExpense.mutateAsync({
-          id: fixedModal.editingId,
-          name: fixedModal.form.name.trim(),
-          amount,
-          due_day: fixedModal.form.due_day,
-        });
-      } else {
-        await createFixedExpense.mutateAsync({
-          name: fixedModal.form.name.trim(),
-          amount,
-          due_day: fixedModal.form.due_day,
-        });
-      }
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setFixedModal(s => ({ ...s, visible: false }));
-    } catch {
-      Alert.alert('오류', '저장 중 문제가 발생했어요');
-    }
   }
 
   // ── 일정 핸들러 ──
@@ -818,23 +983,28 @@ export default function CalendarTab() {
           {activeTab === 'ledger' &&
             (txLoading ? (
               <LoadingState className='py-6' />
-            ) : selectedTransactions.length === 0 &&
-              selectedFixedExpenses.length === 0 ? (
+            ) : selectedTransactions.length === 0 ? (
               <EmptyState icon={CalendarX} title='거래 내역이 없어요' />
             ) : (
               <View className='gap-2.5'>
                 {selectedTransactions.map(t => {
                   const cat = categories.find(c => c.id === t.category_id);
-                  const CatIcon = cat ? (ICON_MAP[cat.icon] ?? Wallet) : Wallet;
+                  const isFixed = !!t.fixed_expense_id;
+                  const CatIcon = cat
+                    ? (ICON_MAP[cat.icon] ?? Wallet)
+                    : isFixed
+                      ? Repeat
+                      : Wallet;
+                  const catColor = cat
+                    ? resolveColor(cat.color)
+                    : isFixed
+                      ? Colors.peach
+                      : '#A3A3A3';
                   const isExpense = t.type === 'expense';
                   return (
                     <ItemCard key={t.id} onPress={() => setDetailTx(t)}>
-                      <IconBox color={cat?.color ?? '#A3A3A3'}>
-                        <CatIcon
-                          size={18}
-                          color={cat ? cat.color : '#A3A3A3'}
-                          strokeWidth={2.5}
-                        />
+                      <IconBox color={catColor}>
+                        <CatIcon size={18} color={catColor} strokeWidth={2.5} />
                       </IconBox>
                       <View className='flex-1'>
                         <Text
@@ -844,14 +1014,20 @@ export default function CalendarTab() {
                           {t.memo ?? cat?.name ?? '기타'}
                         </Text>
                         <View className='flex-row items-center gap-1.5 mt-0.5'>
-                          {cat && (
-                            <ColorPill label={cat.name} color={cat.color} />
+                          {isFixed ? (
+                            <ColorPill label='고정지출' color={Colors.peach} />
+                          ) : (
+                            <>
+                              {cat && (
+                                <ColorPill label={cat.name} color={catColor} />
+                              )}
+                              <TagPill
+                                tag={t.tag}
+                                label={resolveTagLabel(t.tag, t.user_id)}
+                                bgColor={resolveTagColor(t.tag, t.user_id)}
+                              />
+                            </>
                           )}
-                          <TagPill
-                            tag={t.tag}
-                            label={resolveTagLabel(t.tag, t.user_id)}
-                            bgColor={resolveTagColor(t.tag, t.user_id)}
-                          />
                         </View>
                       </View>
                       <Text
@@ -863,28 +1039,6 @@ export default function CalendarTab() {
                     </ItemCard>
                   );
                 })}
-                {selectedFixedExpenses.map(fe => (
-                  <ItemCard key={fe.id} onPress={() => openFixedEdit(fe)}>
-                    <View className='w-10 h-10 rounded-2xl items-center justify-center bg-peach/30'>
-                      <Repeat
-                        size={18}
-                        color={Colors.peach}
-                        strokeWidth={2.5}
-                      />
-                    </View>
-                    <View className='flex-1'>
-                      <Text className='font-ibm-semibold text-sm text-neutral-800'>
-                        {fe.name}
-                      </Text>
-                      <View className='flex-row items-center mt-0.5'>
-                        <ColorPill label='고정지출' color={Colors.peach} />
-                      </View>
-                    </View>
-                    <Text className='font-ibm-bold text-sm text-neutral-800'>
-                      {formatAmount(fe.amount)}원
-                    </Text>
-                  </ItemCard>
-                ))}
               </View>
             ))}
 
@@ -1018,15 +1172,6 @@ export default function CalendarTab() {
         }}
       />
 
-      {/* 고정지출 수정 */}
-      <FixedExpenseFormSheet
-        fixedModal={fixedModal}
-        onClose={() => setFixedModal(s => ({ ...s, visible: false }))}
-        onChange={form => setFixedModal(s => ({ ...s, form }))}
-        onSave={handleFixedSave}
-        isSaving={createFixedExpense.isPending || updateFixedExpense.isPending}
-      />
-
       {/* 거래 상세 + 댓글 */}
       <TransactionDetailModal
         detailTx={detailTx}
@@ -1043,6 +1188,64 @@ export default function CalendarTab() {
         resolveTagLabel={resolveTagLabel}
         resolveTagColor={resolveTagColor}
       />
+
+      {/* ── 이후 전체 수정: 고정지출 폼 ── */}
+      <Modal
+        visible={fixedEditState.visible && fixedEditState.view === 'form'}
+        animationType='slide'
+        onRequestClose={closeFixedEdit}
+      >
+        <FixedExpenseForm
+          editingId={fixedEditState.editingId}
+          form={fixedEditState.form}
+          isSaving={updateFixedExpense.isPending}
+          categories={expenseCategories}
+          onChange={form => setFixedEditState(s => ({ ...s, form }))}
+          onClose={closeFixedEdit}
+          onSave={handleFixedTemplateSave}
+          onCatCreate={openFixedCatCreate}
+          onCatMgmt={() => setFixedEditState(s => ({ ...s, view: 'catMgmt' }))}
+        />
+      </Modal>
+
+      {/* ── 이후 전체 수정: 카테고리 관리 ── */}
+      <Modal
+        visible={fixedEditState.visible && fixedEditState.view === 'catMgmt'}
+        animationType='none'
+        onRequestClose={() => setFixedEditState(s => ({ ...s, view: 'form' }))}
+      >
+        <CategoryManagementScreen
+          categories={expenseCategories}
+          filterType='expense'
+          onBack={() => setFixedEditState(s => ({ ...s, view: 'form' }))}
+          onCreate={openFixedCatCreate}
+          onEdit={openFixedCatEdit}
+          onDelete={handleFixedCatDelete}
+        />
+      </Modal>
+
+      {/* ── 이후 전체 수정: 카테고리 추가/수정 ── */}
+      <Modal
+        visible={fixedEditState.visible && fixedEditState.view === 'catForm'}
+        animationType='none'
+        onRequestClose={backFromFixedCatForm}
+      >
+        <CategoryFormScreen
+          editingId={fixedEditState.catEditingId}
+          form={fixedEditState.catForm}
+          isSaving={isCatSaving}
+          categoryType='expense'
+          onBack={backFromFixedCatForm}
+          onChange={catForm => setFixedEditState(s => ({ ...s, catForm }))}
+          onSave={handleFixedCatSave}
+          onDelete={
+            fixedEditState.catEditingId
+              ? () => handleFixedCatDelete(fixedEditState.catEditingId!)
+              : undefined
+          }
+          onTypeChange={() => {}}
+        />
+      </Modal>
     </SafeAreaView>
   );
 }
