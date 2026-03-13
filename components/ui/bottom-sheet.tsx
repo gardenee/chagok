@@ -42,7 +42,7 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
           className='bg-white rounded-t-3xl px-6 pt-5'
           style={{
             paddingBottom: Math.max(insets.bottom, 24),
-            shadowColor: '#000',
+            shadowColor: Colors.black,
             shadowOpacity: 0.1,
             shadowRadius: 24,
             shadowOffset: { width: 0, height: -4 },
@@ -77,14 +77,14 @@ export function BottomSheetHeader({
             onPress={onDelete}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Trash2 size={18} color='#A3A3A3' strokeWidth={2} />
+            <Trash2 size={18} color={Colors.neutral} strokeWidth={2} />
           </TouchableOpacity>
         )}
         <TouchableOpacity
           onPress={onClose}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <X size={22} color='#A3A3A3' strokeWidth={2} />
+          <X size={22} color={Colors.neutral} strokeWidth={2} />
         </TouchableOpacity>
       </View>
     </View>

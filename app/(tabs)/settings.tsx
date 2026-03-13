@@ -125,7 +125,9 @@ export default function SettingsScreen() {
 
         <SettingsCard>
           <SettingsRow
-            icon={<User size={16} color={Colors.neutralDarker} strokeWidth={2} />}
+            icon={
+              <User size={16} color={Colors.neutralDarker} strokeWidth={2} />
+            }
             label='닉네임'
             value={userProfile?.nickname ?? '-'}
             onPress={() => openEdit('nickname')}
@@ -135,7 +137,13 @@ export default function SettingsScreen() {
         <View className='mt-3'>
           <SettingsCard>
             <SettingsRow
-              icon={<BookOpen size={16} color={Colors.brownDarker} strokeWidth={2} />}
+              icon={
+                <BookOpen
+                  size={16}
+                  color={Colors.brownDarker}
+                  strokeWidth={2}
+                />
+              }
               label='가계부 이름'
               value={coupleLoading ? '...' : (couple?.book_name ?? '-')}
               onPress={() => openEdit('bookName')}
@@ -144,14 +152,26 @@ export default function SettingsScreen() {
             {isLinked ? (
               <>
                 <SettingsRow
-                  icon={<Users size={16} color={Colors.neutralDarker} strokeWidth={2} />}
+                  icon={
+                    <Users
+                      size={16}
+                      color={Colors.neutralDarker}
+                      strokeWidth={2}
+                    />
+                  }
                   label='짝꿍'
                   value={partner?.nickname ?? '-'}
                   showChevron={false}
                 />
                 <Divider />
                 <SettingsRow
-                  icon={<Hash size={16} color={Colors.neutralDarker} strokeWidth={2} />}
+                  icon={
+                    <Hash
+                      size={16}
+                      color={Colors.neutralDarker}
+                      strokeWidth={2}
+                    />
+                  }
                   label='초대코드'
                   value=''
                   showChevron={false}
@@ -168,14 +188,26 @@ export default function SettingsScreen() {
             ) : (
               <>
                 <SettingsRow
-                  icon={<Hash size={16} color={Colors.neutralDarker} strokeWidth={2} />}
+                  icon={
+                    <Hash
+                      size={16}
+                      color={Colors.neutralDarker}
+                      strokeWidth={2}
+                    />
+                  }
                   label='초대코드'
                   value={coupleLoading ? '...' : (couple?.invite_code ?? '-')}
                   onPress={handleShareInviteCode}
                 />
                 <Divider />
                 <SettingsRow
-                  icon={<Users size={16} color={Colors.neutralDarker} strokeWidth={2} />}
+                  icon={
+                    <Users
+                      size={16}
+                      color={Colors.neutralDarker}
+                      strokeWidth={2}
+                    />
+                  }
                   label='짝꿍'
                   value='아직 연동 전'
                   showChevron={false}
@@ -192,7 +224,13 @@ export default function SettingsScreen() {
         <View className='mt-3'>
           <SettingsCard>
             <SettingsRow
-                icon={<LogOut size={16} color={Colors.neutralDarker} strokeWidth={2} />}
+              icon={
+                <LogOut
+                  size={16}
+                  color={Colors.neutralDarker}
+                  strokeWidth={2}
+                />
+              }
               label='로그아웃'
               onPress={handleLogout}
             />

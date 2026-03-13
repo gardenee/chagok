@@ -24,15 +24,7 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
   return (
     <SwipeableDeleteRow onDelete={() => onDelete(item.id, item.name)}>
       <TouchableOpacity onPress={() => onEdit(item)} activeOpacity={0.8}>
-        <View
-          className='bg-white rounded-3xl px-4 py-3.5 flex-row items-center gap-3'
-          style={{
-            shadowColor: Colors.brown,
-            shadowOpacity: 0.07,
-            shadowRadius: 10,
-            shadowOffset: { width: 0, height: 2 },
-          }}
-        >
+        <View className='bg-white rounded-3xl px-4 py-3.5 flex-row items-center gap-3'>
           {/* 아이콘 */}
           <IconBox color={iconColor} size='md'>
             {category ? (

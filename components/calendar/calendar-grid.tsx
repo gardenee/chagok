@@ -3,6 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { formatAmountShort } from '@/utils/format';
 import { WEEKDAYS, getTagBgColor, type DayCell } from './types';
 import type { Schedule } from '@/types/database';
+import { Shadows } from '@/constants/shadows';
 
 interface CalendarGridProps {
   calendarDays: DayCell[];
@@ -26,13 +27,7 @@ export function CalendarGrid({
   return (
     <View
       className='mx-4 mt-3 bg-white rounded-3xl p-4'
-      style={{
-        shadowColor: '#000',
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 4,
-      }}
+      style={Shadows.primary}
     >
       <View className='flex-row mb-1'>
         {WEEKDAYS.map((day, i) => (

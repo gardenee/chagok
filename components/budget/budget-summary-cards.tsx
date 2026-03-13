@@ -14,8 +14,7 @@ function DiffTag({ diff, positive }: { diff: number; positive: boolean }) {
   return (
     <View className='bg-white/40 rounded-full px-2 py-0.5'>
       <Text className='font-ibm-semibold text-xs text-neutral-700'>
-        {positive ? '+' : '-'}
-        {formatAmountShort(Math.abs(diff))}원
+        {formatAmountShort(Math.abs(diff))}원{positive ? ' 절약' : ' 초과'}
       </Text>
     </View>
   );
@@ -57,10 +56,7 @@ export function BudgetSummaryCards({
 
       <View className='flex-row gap-3 mt-3'>
         {/* 총 수입 카드 */}
-        <View
-          className='flex-1 bg-olive rounded-3xl p-4'
-          style={Shadows.primary}
-        >
+        <View className='flex-1 bg-olive rounded-3xl p-4' style={Shadows.card}>
           <View className='flex-row justify-between items-center mb-1.5'>
             <View className='flex-row items-center gap-2'>
               <TrendingUp
@@ -73,7 +69,7 @@ export function BudgetSummaryCards({
               </Text>
             </View>
           </View>
-          <View className='flex-1 flex-row justify-end items-center px-2 gap-0.5'>
+          <View className='flex-row justify-end items-center px-2 gap-0.5 mt-1'>
             <Text className='font-ibm-bold text-2xl text-olive-darker'>
               {formatAmount(totalIncome)}
             </Text>
@@ -84,10 +80,7 @@ export function BudgetSummaryCards({
         </View>
 
         {/* 총 지출 카드 */}
-        <View
-          className='flex-1 bg-peach rounded-3xl p-4'
-          style={Shadows.primary}
-        >
+        <View className='flex-1 bg-peach rounded-3xl p-4' style={Shadows.card}>
           <View className='flex-row justify-between items-center mb-1.5'>
             <View className='flex-row items-center gap-2'>
               <Wallet size={16} color={Colors.peachDarker} strokeWidth={2.5} />
@@ -99,7 +92,7 @@ export function BudgetSummaryCards({
               <DiffTag diff={expenseDiff} positive={expenseDiff >= 0} />
             )}
           </View>
-          <View className='flex-1 flex-row justify-end items-center px-2 gap-0.5'>
+          <View className='flex-row justify-end items-center px-2 gap-0.5 mt-1'>
             <Text className='font-ibm-bold text-2xl text-peach-darker'>
               {formatAmount(totalSpent)}
             </Text>

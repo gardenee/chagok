@@ -2,11 +2,11 @@ import { Colors } from './colors';
 
 export const Shadows = {
   primary: {
-    shadowColor: Colors.brown,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 14,
-    elevation: 6,
+    shadowColor: Colors.brownDark,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   secondary: {
     shadowColor: Colors.brown,
@@ -17,9 +17,9 @@ export const Shadows = {
   },
   card: {
     shadowColor: Colors.brown,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
     elevation: 8,
   },
   soft: {

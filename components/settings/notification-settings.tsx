@@ -49,7 +49,9 @@ export function NotificationSettings() {
             <View className='w-8 h-8 rounded-xl bg-cream-dark/70 items-center justify-center mr-3'>
               <Bell
                 size={16}
-                color={item.value ? Colors.neutralDarker : Colors.neutralLighter}
+                color={
+                  item.value ? Colors.neutralDarker : Colors.neutralLighter
+                }
                 strokeWidth={2}
               />
             </View>

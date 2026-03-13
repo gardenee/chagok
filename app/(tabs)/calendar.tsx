@@ -104,6 +104,7 @@ import {
   INITIAL_FORM as INITIAL_FIXED_FORM,
 } from '@/components/fixed/fixed-expense-form';
 import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
+import { Shadows } from '@/constants/shadows';
 
 type FixedEditView = 'form' | 'catMgmt' | 'catForm';
 
@@ -934,19 +935,25 @@ export default function CalendarTab() {
         {/* 선택일 요약 (가계부 탭만) */}
         {activeTab === 'ledger' && (
           <View className='mx-4 mt-4 flex-row gap-3'>
-            <View className='flex-1 bg-peach/70 rounded-2xl px-4 py-3.5'>
-              <Text className='font-ibm-semibold text-xs text-neutral-600'>
+            <View
+              className='flex-1 bg-peach/70 rounded-2xl px-4 py-3.5'
+              style={Shadows.card}
+            >
+              <Text className='font-ibm-semibold text-sm text-neutral-700'>
                 지출
               </Text>
-              <Text className='font-ibm-bold text-base text-brown-darker mt-0.5'>
+              <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
                 {totalExpense > 0 ? `-${formatAmount(totalExpense)}원` : '-'}
               </Text>
             </View>
-            <View className='flex-1 bg-olive/50 rounded-2xl px-4 py-3.5'>
-              <Text className='font-ibm-semibold text-xs text-neutral-600'>
+            <View
+              className='flex-1 bg-olive/50 rounded-2xl px-4 py-3.5'
+              style={Shadows.card}
+            >
+              <Text className='font-ibm-semibold text-sm text-neutral-700'>
                 수입
               </Text>
-              <Text className='font-ibm-bold text-base text-brown-darker mt-0.5'>
+              <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
                 {totalIncome > 0 ? `+${formatAmount(totalIncome)}원` : '-'}
               </Text>
             </View>

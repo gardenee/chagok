@@ -52,11 +52,11 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
   }
 
   return (
-    <View className='mx-4 mt-5 gap-5'>
+    <View className='mx-4 mt-5 gap-6'>
       {/* 자산 섹션 */}
       {assetGroups.length > 0 && (
         <View>
-          <Text className='font-ibm-bold text-base text-neutral-700 mb-2'>
+          <Text className='font-ibm-bold text-lg text-neutral-800 mb-1'>
             자산
           </Text>
           <View className='gap-2'>
@@ -66,12 +66,12 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
                 0,
               );
               return (
-                <View key={group.key}>
-                  <View className='flex-row items-center justify-between mb-1.5'>
-                    <Text className='font-ibm-semibold text-xs text-neutral-500'>
+                <View key={group.key} className='mb-3'>
+                  <View className='flex-row items-center justify-between mb-2'>
+                    <Text className='font-ibm-semibold text-sm text-neutral-700'>
                       {group.label}
                     </Text>
-                    <Text className='font-ibm-semibold text-xs text-neutral-500'>
+                    <Text className='font-ibm-semibold text-sm text-neutral-700'>
                       {formatAmount(groupTotal)}원
                     </Text>
                   </View>

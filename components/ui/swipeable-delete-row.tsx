@@ -2,7 +2,7 @@ import { View, PanResponder, Animated, Pressable, Modal } from 'react-native';
 import type { ReactNode } from 'react';
 import { useRef, useState, useCallback } from 'react';
 import { Trash2 } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
+import { Shadows } from '@/constants/shadows';
 
 type Props = {
   onDelete: () => void;
@@ -74,6 +74,13 @@ export function SwipeableDeleteRow({ onDelete, children }: Props) {
           setBtnLayout(null);
         }
       },
+      onPanResponderTerminate: () => {
+        Animated.spring(translateX, {
+          toValue: isOpen.current ? -DELETE_WIDTH : 0,
+          useNativeDriver: true,
+          bounciness: 0,
+        }).start();
+      },
     }),
   ).current;
 
@@ -89,17 +96,14 @@ export function SwipeableDeleteRow({ onDelete, children }: Props) {
       style={{
         borderRadius: RADIUS,
         backgroundColor: 'white',
-        shadowColor: Colors.brown,
-        shadowOpacity: 0.07,
-        shadowRadius: 10,
-        shadowOffset: { width: 0, height: 2 },
+        overflow: 'visible',
+        ...Shadows.primary,
       }}
     >
       {/* 카드 슬라이드 영역 */}
       <View
         style={{
-          borderTopLeftRadius: RADIUS,
-          borderBottomLeftRadius: RADIUS,
+          borderRadius: RADIUS,
           overflow: 'hidden',
         }}
       >

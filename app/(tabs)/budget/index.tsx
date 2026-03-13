@@ -131,26 +131,9 @@ export default function BudgetIndex() {
 
             {/* 수입 섹션 */}
             <View className='mx-4 mb-6'>
-              <View className='flex-row items-center justify-between mb-3'>
-                <Text className='font-ibm-bold text-base text-neutral-700'>
-                  수입
-                </Text>
-                {totalIncome > 0 && (
-                  <View className='flex-row items-center gap-1'>
-                    <TrendingUp
-                      size={14}
-                      color={Colors.oliveDark}
-                      strokeWidth={2}
-                    />
-                    <Text
-                      className='font-ibm-semibold text-sm'
-                      style={{ color: Colors.oliveDark }}
-                    >
-                      {formatAmount(totalIncome)}원
-                    </Text>
-                  </View>
-                )}
-              </View>
+              <Text className='font-ibm-bold text-base text-neutral-700 mb-3'>
+                수입
+              </Text>
 
               {incomeCategories.length === 0 ? (
                 <EmptyState
@@ -174,26 +157,9 @@ export default function BudgetIndex() {
 
             {/* 지출 섹션 */}
             <View className='mx-4'>
-              <View className='flex-row items-center justify-between mb-3'>
-                <Text className='font-ibm-bold text-base text-neutral-700'>
-                  지출
-                </Text>
-                {totalBudget > 0 && (
-                  <View className='flex-row items-baseline gap-1'>
-                    <Text
-                      className='font-ibm-bold text-sm'
-                      style={{
-                        color: isOver ? Colors.peachDark : Colors.brown,
-                      }}
-                    >
-                      {formatAmount(totalSpent)}원
-                    </Text>
-                    <Text className='font-ibm-regular text-xs text-neutral-400'>
-                      / {formatAmount(totalBudget)}원
-                    </Text>
-                  </View>
-                )}
-              </View>
+              <Text className='font-ibm-bold text-base text-neutral-700 mb-3'>
+                지출
+              </Text>
 
               {expenseCategories.length === 0 ? (
                 <EmptyState
