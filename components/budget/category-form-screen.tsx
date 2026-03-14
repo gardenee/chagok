@@ -25,8 +25,8 @@ export type CategoryFormData = {
 
 export const INITIAL_CATEGORY_FORM: CategoryFormData = {
   name: '',
-  icon: 'shopping',
-  color: 'peach',
+  icon: '',
+  color: '',
 };
 
 type Props = {
@@ -191,6 +191,7 @@ export function CategoryFormScreen({
           <SaveButton
             onPress={onSave}
             isSaving={isSaving}
+            disabled={!form.icon || !form.color}
             label={editingId ? '수정 완료' : '저장'}
           />
         </View>
