@@ -26,6 +26,10 @@ import { supabase } from '@/lib/supabase';
 import { useCouple, useUpdateBookName } from '@/hooks/use-couple';
 import { useCoupleMembers } from '@/hooks/use-couple-members';
 import { useUpdateNickname } from '@/hooks/use-user';
+import {
+  useUnreadCount,
+  useNotificationsSubscription,
+} from '@/hooks/use-notifications';
 import { SettingsRow } from '@/components/settings/settings-row';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
 import { EditModal } from '@/components/settings/edit-modal';
@@ -45,6 +49,8 @@ export default function SettingsScreen() {
     type: 'bookName' | 'nickname' | null;
   }>({ type: null });
   const [notifInboxVisible, setNotifInboxVisible] = useState(false);
+  const { unreadCount } = useUnreadCount();
+  useNotificationsSubscription();
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 
   const partner = members.find(m => m.id !== userProfile?.id);
@@ -119,7 +125,16 @@ export default function SettingsScreen() {
             onPress={() => setNotifInboxVisible(true)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Bell size={22} color={Colors.brownDarker} strokeWidth={2} />
+            <View className='relative'>
+              <Bell size={22} color={Colors.brownDarker} strokeWidth={2} />
+              {unreadCount > 0 && (
+                <View className='absolute -top-1 -right-1 w-4 h-4 rounded-full bg-peach items-center justify-center'>
+                  <Text className='font-ibm-bold text-[9px] text-brown'>
+                    {unreadCount <= 9 ? String(unreadCount) : '9+'}
+                  </Text>
+                </View>
+              )}
+            </View>
           </TouchableOpacity>
         </View>
 

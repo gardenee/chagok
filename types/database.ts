@@ -323,6 +323,36 @@ export interface Database {
         };
         Relationships: never[];
       };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: 'partner_transaction' | 'comment';
+          title: string;
+          body: string;
+          icon: string | null;
+          icon_color: string | null;
+          reference_id: string | null;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: 'partner_transaction' | 'comment';
+          title: string;
+          body: string;
+          icon?: string | null;
+          icon_color?: string | null;
+          reference_id?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          is_read?: boolean;
+        };
+        Relationships: never[];
+      };
     };
     Functions: {
       create_couple: {
@@ -354,6 +384,7 @@ export type Asset = Database['public']['Tables']['assets']['Row'];
 export type PaymentMethod =
   Database['public']['Tables']['payment_methods']['Row'];
 export type Holiday = Database['public']['Tables']['holidays']['Row'];
+export type Notification = Database['public']['Tables']['notifications']['Row'];
 
 export type TransactionType = Transaction['type'];
 export type Tag = Transaction['tag'];
