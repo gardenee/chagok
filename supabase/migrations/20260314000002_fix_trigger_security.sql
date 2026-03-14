@@ -1,40 +1,6 @@
--- 1. notifications 테이블
-create table if not exists notifications (
-  id           uuid primary key default gen_random_uuid(),
-  user_id      uuid not null references users(id) on delete cascade,
-  type         text not null check (type in ('partner_transaction', 'comment')),
-  title        text not null,
-  body         text not null,
-  icon         text,
-  icon_color   text,
-  reference_id uuid,
-  is_read      boolean not null default false,
-  created_at   timestamptz not null default now()
-);
+-- Fix SECURITY DEFINER functions to include search_path and NULL guard in notify_partner_comment
 
--- 2. RLS 활성화
-alter table notifications enable row level security;
-
--- 3. RLS 정책
-create policy "사용자는 자신의 알림만 조회"
-  on notifications for select
-  using (user_id = auth.uid());
-
-create policy "사용자는 자신의 알림만 읽음 처리"
-  on notifications for update
-  using (user_id = auth.uid())
-  with check (user_id = auth.uid());
-
--- 앱에서 직접 INSERT/DELETE 불가 (trigger만 삽입)
-
--- 4. 인덱스 (사용자별 최신순 조회 최적화)
-create index if not exists notifications_user_id_created_at_idx
-  on notifications(user_id, created_at desc);
-
--- 5. Realtime 활성화
-alter publication supabase_realtime add table notifications;
-
--- 파트너 지출 알림 trigger 함수
+-- 파트너 지출 알림 trigger 함수 (수정)
 create or replace function notify_partner_transaction()
 returns trigger language plpgsql
 security definer
@@ -85,11 +51,7 @@ begin
 end;
 $$;
 
-create trigger trg_notify_partner_transaction
-  after insert on transactions
-  for each row execute function notify_partner_transaction();
-
--- 댓글 알림 trigger 함수
+-- 댓글 알림 trigger 함수 (수정: NULL guard 추가)
 create or replace function notify_partner_comment()
 returns trigger language plpgsql
 security definer
@@ -131,7 +93,3 @@ begin
   return NEW;
 end;
 $$;
-
-create trigger trg_notify_partner_comment
-  after insert on comments
-  for each row execute function notify_partner_comment();
