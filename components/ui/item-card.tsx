@@ -8,7 +8,10 @@ type ItemCardProps = {
 
 export function ItemCard({ onPress, children }: ItemCardProps) {
   const content = (
-    <View className='bg-white rounded-lg px-4 py-4 flex-row items-center gap-3' style={Shadows.primary}>
+    <View
+      className='bg-white rounded-lg px-4 py-4 flex-row items-center gap-3'
+      style={Shadows.primary}
+    >
       {children}
     </View>
   );
