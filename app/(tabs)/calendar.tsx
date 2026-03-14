@@ -196,7 +196,7 @@ export default function CalendarTab() {
     useTransactionComments(detailTx?.id ?? '');
   const { data: members = [] } = useCoupleMembers();
 
-  useMaterializeFixedExpenses(currentYear, currentMonth);
+  useMaterializeFixedExpenses();
 
   const myNickname = userProfile?.nickname ?? '나';
   const partner = members.find(m => m.id !== myId);

@@ -126,7 +126,17 @@ export function TransactionFormSheet({
                 ]}
                 value={txModal.form.type}
                 onChange={type =>
-                  setTxModal(s => ({ ...s, form: { ...s.form, type } }))
+                  setTxModal(s => ({
+                    ...s,
+                    form: {
+                      ...s.form,
+                      type,
+                      category_id: null,
+                      ...(type === 'income'
+                        ? { payment_method_id: null, asset_id: null }
+                        : {}),
+                    },
+                  }))
                 }
                 bgClassName='bg-neutral-100 rounded-2xl'
                 className='mb-5'

@@ -16,6 +16,7 @@ export interface Database {
           book_name: string;
           invite_code: string | null;
           created_at: string;
+          last_materialized_month: string | null;
         };
         Insert: {
           id?: string;
@@ -26,6 +27,7 @@ export interface Database {
         Update: {
           book_name?: string;
           invite_code?: string;
+          last_materialized_month?: string | null;
         };
         Relationships: never[];
       };
