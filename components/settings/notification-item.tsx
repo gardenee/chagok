@@ -38,7 +38,11 @@ export function NotificationItem({ notification }: Props) {
         </View>
       ) : (
         <View className='w-10 h-10 rounded-xl bg-lavender items-center justify-center flex-shrink-0'>
-          <MessageCircle size={20} color={Colors.neutralLight} strokeWidth={2.5} />
+          <MessageCircle
+            size={20}
+            color={Colors.neutralLight}
+            strokeWidth={2.5}
+          />
         </View>
       )}
 
