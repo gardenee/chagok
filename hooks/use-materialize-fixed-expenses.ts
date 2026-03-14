@@ -36,16 +36,21 @@ export function useMaterializeFixedExpenses() {
       const [lastY, lastM] = couple.last_materialized_month
         .split('-')
         .map(Number);
-      let y = lastY;
-      let m = lastM; // 1-indexed
-      while (true) {
-        m += 1;
-        if (m > 12) {
-          m = 1;
-          y += 1;
+      // 파싱 실패 시 이번달만 처리
+      if (Number.isNaN(lastY) || Number.isNaN(lastM)) {
+        monthsToProcess.push({ year: currentYear, month: currentMonth });
+      } else {
+        let y = lastY;
+        let m = lastM; // 1-indexed
+        while (true) {
+          m += 1;
+          if (m > 12) {
+            m = 1;
+            y += 1;
+          }
+          monthsToProcess.push({ year: y, month: m - 1 }); // month: 0-indexed
+          if (y === currentYear && m - 1 === currentMonth) break;
         }
-        monthsToProcess.push({ year: y, month: m - 1 }); // month: 0-indexed
-        if (y === currentYear && m - 1 === currentMonth) break;
       }
     }
 
