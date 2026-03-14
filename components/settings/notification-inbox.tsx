@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Bell, X } from 'lucide-react-native';
+import { Colors } from '@/constants/colors';
 
 type Props = {
   visible: boolean;
@@ -27,7 +28,7 @@ export function NotificationInbox({ visible, onClose }: Props) {
             onPress={onClose}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <X size={22} color='#A3A3A3' strokeWidth={2} />
+            <X size={22} color={Colors.neutralLight} strokeWidth={2} />
           </TouchableOpacity>
         </View>
         <View className='flex-1 items-center justify-center gap-2'>

@@ -6,7 +6,7 @@ import { IconBox } from '@/components/ui/icon-box';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingState } from '@/components/ui/loading-state';
-import { PM_TYPE_OPTIONS } from '@/components/assets/payment-method-form-screen';
+import { PM_TYPE_OPTIONS } from '@/constants/payment-method';
 import {
   CREDIT_CARD_COMPANIES,
   DEBIT_CARD_BANKS,

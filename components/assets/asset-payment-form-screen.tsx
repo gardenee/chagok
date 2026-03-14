@@ -9,24 +9,13 @@ import {
   Platform,
   Modal,
 } from 'react-native';
-import {
-  X,
-  Landmark,
-  Banknote,
-  TrendingUp,
-  PiggyBank,
-  Building2,
-  Wallet,
-  CircleMinus,
-  ShieldCheck,
-  Info,
-  type LucideIcon,
-} from 'lucide-react-native';
+import { X, Info } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
-import { PM_TYPE_OPTIONS } from './payment-method-form-screen';
+import { PM_TYPE_OPTIONS } from '@/constants/payment-method';
+import { ASSET_GROUPS } from '@/constants/asset-type';
 import {
   CREDIT_CARD_COMPANIES,
   DEBIT_CARD_BANKS,
@@ -36,52 +25,12 @@ import {
 } from '@/constants/card-companies';
 import type { Asset, PaymentMethod } from '@/types/database';
 
-export type AssetTypeOption = {
-  key: string;
-  label: string;
-  Icon: LucideIcon;
-  color: string;
-};
-
-export const ASSET_TYPE_OPTIONS: AssetTypeOption[] = [
-  { key: 'bank', label: '은행 계좌', Icon: Landmark, color: '#B5D5F0' },
-  { key: 'cash', label: '현금', Icon: Banknote, color: '#A8D8B0' },
-  { key: 'investment', label: '주식/펀드', Icon: TrendingUp, color: '#D4C5F0' },
-  { key: 'saving', label: '적금/예금', Icon: PiggyBank, color: '#FAD97A' },
-  { key: 'real_estate', label: '부동산', Icon: Building2, color: '#F5D0A0' },
-  { key: 'other', label: '기타', Icon: Wallet, color: '#F0C5D5' },
-  { key: 'loan', label: '대출', Icon: CircleMinus, color: '#F4A0A0' },
-  { key: 'insurance', label: '보험', Icon: ShieldCheck, color: '#B5D5F0' },
-];
-
-export function getAssetTypeOption(key: string): AssetTypeOption {
-  return (
-    ASSET_TYPE_OPTIONS.find(t => t.key === key) ??
-    ASSET_TYPE_OPTIONS.find(t => t.key === 'other')!
-  );
-}
-
-const ASSET_GROUPS = [
-  {
-    label: '자산',
-    types: ASSET_TYPE_OPTIONS.filter(
-      t => t.key !== 'loan' && t.key !== 'insurance',
-    ),
-  },
-  { label: '부채', types: ASSET_TYPE_OPTIONS.filter(t => t.key === 'loan') },
-  {
-    label: '보험',
-    types: ASSET_TYPE_OPTIONS.filter(t => t.key === 'insurance'),
-  },
-];
-
 export type UnifiedFormData = {
   category: 'asset' | 'pm';
   type: string;
   name: string;
   amount: string; // 자산: 잔액
   limit: string; // 결제수단: 한도
-  // DB 마이그레이션 후 저장 예정
   card_company: string;
   billing_day: number | null;
   annual_fee: string;
@@ -223,7 +172,7 @@ export function AssetPaymentFormScreen({
               onPress={onClose}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <X size={22} color='#A3A3A3' strokeWidth={2} />
+              <X size={22} color={Colors.neutralLight} strokeWidth={2} />
             </TouchableOpacity>
           </View>
 
@@ -355,10 +304,7 @@ export function AssetPaymentFormScreen({
 
                 {/* 결제일 선택 */}
                 <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  결제일{' '}
-                  <Text className='font-ibm-regular text-neutral-400'>
-                    (선택)
-                  </Text>
+                  결제일
                 </Text>
                 <View className='flex-row flex-wrap gap-1.5 mb-2'>
                   {availableDays.map(day => {
@@ -453,10 +399,7 @@ export function AssetPaymentFormScreen({
 
                 {/* 연결 계좌 */}
                 <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  연결 계좌{' '}
-                  <Text className='font-ibm-regular text-neutral-400'>
-                    (선택)
-                  </Text>
+                  연결 계좌
                 </Text>
                 {bankAssets.length === 0 ? (
                   <View
@@ -584,10 +527,7 @@ export function AssetPaymentFormScreen({
             {form.category === 'asset' && (
               <>
                 <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  금액{' '}
-                  <Text className='font-ibm-regular text-neutral-400'>
-                    (선택)
-                  </Text>
+                  금액
                 </Text>
                 <AmountInput
                   value={form.amount}
@@ -602,10 +542,7 @@ export function AssetPaymentFormScreen({
             {isCreditCard && (
               <>
                 <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  연회비{' '}
-                  <Text className='font-ibm-regular text-neutral-400'>
-                    (선택)
-                  </Text>
+                  연회비
                 </Text>
                 <AmountInput
                   value={form.annual_fee}
@@ -620,10 +557,7 @@ export function AssetPaymentFormScreen({
             {form.category === 'pm' && (
               <>
                 <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  한도{' '}
-                  <Text className='font-ibm-regular text-neutral-400'>
-                    (선택)
-                  </Text>
+                  한도
                 </Text>
                 <AmountInput
                   value={form.limit}

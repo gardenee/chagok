@@ -24,14 +24,14 @@ import { SegmentControl } from '@/components/ui/segment-control';
 import { CategoryFormScreen } from '@/components/budget/category-form-screen';
 import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
 import { ICON_MAP } from '@/constants/icon-map';
+import { PaymentMethodFormScreen } from '@/components/assets/payment-method-form-screen';
 import {
-  PaymentMethodFormScreen,
   PM_TYPE_OPTIONS,
   INITIAL_PM_FORM,
   type PaymentMethodFormData,
   type PmTypeOption,
-} from '@/components/assets/payment-method-form-screen';
-import { getAssetTypeOption } from '@/components/assets/asset-payment-form-screen';
+} from '@/constants/payment-method';
+import { getAssetTypeOption } from '@/constants/asset-type';
 import {
   getSelectedDateLabel,
   type TxModalState,
@@ -107,7 +107,7 @@ export function TransactionFormSheet({
                 onPress={closeTx}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <X size={22} color='#A3A3A3' strokeWidth={2} />
+                <X size={22} color={Colors.neutralLight} strokeWidth={2} />
               </TouchableOpacity>
             </View>
 
@@ -147,7 +147,7 @@ export function TransactionFormSheet({
                 onChangeText={v =>
                   setTxModal(s => ({ ...s, form: { ...s.form, memo: v } }))
                 }
-                placeholder='메모 (선택)'
+                placeholder='메모'
                 maxLength={50}
                 className='mb-4'
               />

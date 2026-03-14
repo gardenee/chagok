@@ -115,7 +115,7 @@ export function TransactionDetailModal({
             {/* 타이틀(메모/카테고리명) + 수정 버튼 */}
             <View className='flex-row items-start justify-between mb-1'>
               <Text
-                className='font-ibm-bold text-xl text-brown flex-1 mr-3'
+                className='font-ibm-bold text-xl text-neutral-800 flex-1 mr-3'
                 numberOfLines={2}
               >
                 {detailTx?.memo ?? detailTx?.categories?.name ?? '내역'}
@@ -129,41 +129,39 @@ export function TransactionDetailModal({
                   }
                 }}
               >
-                <Text className='font-ibm-semibold text-xs text-neutral-400'>
+                <Text className='font-ibm-semibold text-xs text-neutral-600'>
                   수정
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {/* 금액 */}
-            <Text
-              className={`font-ibm-bold text-2xl mb-3 ${isExpense ? 'text-peach-dark' : 'text-olive-dark'}`}
-            >
-              {isExpense ? '-' : '+'}
-              {formatAmount(detailTx?.amount ?? 0)}원
-            </Text>
+            <View className='flex flex-row items-center gap-2'>
+              {/* 금액 */}
+              <Text
+                className={`font-ibm-bold text-2xl mb-3 ${isExpense ? 'text-peach-dark' : 'text-olive-dark'}`}
+              >
+                {isExpense ? '-' : '+'}
+                {formatAmount(detailTx?.amount ?? 0)}원
+              </Text>
 
-            {/* 태그 영역: 소비주체 + 카테고리 */}
-            {detailTx && (
-              <View className='flex-row items-center gap-2'>
-                <TagPill
-                  tag={detailTx.tag}
-                  label={resolveTagLabel(detailTx.tag, detailTx.user_id)}
-                  bgColor={resolveTagColor(detailTx.tag, detailTx.user_id)}
-                  className='px-2.5 py-1'
-                />
-                {detailTx.categories && (
-                  <ColorPill
-                    label={detailTx.categories.name}
-                    color={detailTx.categories.color}
+              {/* 태그 영역: 소비주체 + 카테고리 */}
+              {detailTx && (
+                <View className='flex-row items-center gap-2'>
+                  <TagPill
+                    tag={detailTx.tag}
+                    label={resolveTagLabel(detailTx.tag, detailTx.user_id)}
+                    bgColor={resolveTagColor(detailTx.tag, detailTx.user_id)}
                   />
-                )}
-              </View>
-            )}
+                  {detailTx.categories && (
+                    <ColorPill
+                      label={detailTx.categories.name}
+                      color={detailTx.categories.color}
+                    />
+                  )}
+                </View>
+              )}
+            </View>
           </View>
-
-          {/* 구분선 */}
-          <View className='h-px bg-neutral-100 mx-6' />
 
           {/* 댓글 목록 */}
           <ScrollView
@@ -173,11 +171,11 @@ export function TransactionDetailModal({
             showsVerticalScrollIndicator={false}
           >
             {commentsLoading ? (
-              <View className='py-4 items-center'>
+              <View className='pb-4 items-center'>
                 <ActivityIndicator color={Colors.butter} />
               </View>
             ) : (
-              <View className='gap-2 py-3'>
+              <View className='gap-2 pb-3'>
                 {comments.map(c => {
                   const isMine = c.user_id === myId;
                   return (
@@ -195,14 +193,14 @@ export function TransactionDetailModal({
                           shadowOffset: { width: 0, height: 1 },
                         }}
                       >
-                        <Text className='font-ibm-regular text-sm text-brown'>
+                        <Text className='font-ibm-regular text-sm text-neutral-800'>
                           {c.content}
                         </Text>
                       </View>
 
                       {/* 시간 + 삭제 버튼 (버블 옆, 하단 정렬) */}
                       <View
-                        className={`flex-col items-center gap-1 pb-0.5 ${isMine ? 'items-end' : 'items-start'}`}
+                        className={`flex-row items-center gap-1 pb-0.5 ${isMine ? 'items-end' : 'items-start'}`}
                       >
                         {isMine && (
                           <TouchableOpacity
@@ -211,12 +209,12 @@ export function TransactionDetailModal({
                           >
                             <Trash2
                               size={11}
-                              color={Colors.brown + '35'}
+                              color={Colors.neutralLight}
                               strokeWidth={2}
                             />
                           </TouchableOpacity>
                         )}
-                        <Text className='font-ibm-regular text-[10px] text-brown/30'>
+                        <Text className='font-ibm-regular text-[10px] text-neutral-600'>
                           {formatTime(c.created_at)}
                         </Text>
                       </View>
@@ -233,7 +231,7 @@ export function TransactionDetailModal({
               <TextInput
                 className='font-ibm-regular text-sm text-brown'
                 placeholder='댓글을 입력하세요'
-                placeholderTextColor={Colors.brown + '40'}
+                placeholderTextColor={Colors.neutralLight}
                 value={commentText}
                 onChangeText={onCommentTextChange}
                 maxLength={200}

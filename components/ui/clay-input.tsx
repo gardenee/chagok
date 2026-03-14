@@ -75,7 +75,7 @@ export function ClayInput({
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <View className='bg-brown/20 rounded-full p-1'>
-              <X size={14} color={Colors.brown} strokeWidth={2.5} />
+              <X size={14} color={Colors.neutralLight} strokeWidth={2.5} />
             </View>
           </TouchableOpacity>
         )}

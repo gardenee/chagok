@@ -6,10 +6,7 @@ import { IconBox } from '@/components/ui/icon-box';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingState } from '@/components/ui/loading-state';
-import {
-  getAssetTypeOption,
-  ASSET_TYPE_OPTIONS,
-} from '@/components/assets/asset-payment-form-screen';
+import { getAssetTypeOption, ASSET_TYPE_OPTIONS } from '@/constants/asset-type';
 import { formatAmount } from '@/utils/format';
 import type { Asset } from '@/types/database';
 

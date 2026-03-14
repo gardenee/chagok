@@ -183,7 +183,7 @@ export function ScheduleFormSheet({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               activeOpacity={0.7}
             >
-              <X size={18} color='#a3a3a3' strokeWidth={2} />
+              <X size={18} color={Colors.neutralLight} strokeWidth={2} />
             </TouchableOpacity>
           </View>
         )}

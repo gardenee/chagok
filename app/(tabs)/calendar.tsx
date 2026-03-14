@@ -30,8 +30,7 @@ import {
 import {
   INITIAL_PM_FORM,
   getPmColor,
-  type PaymentMethodFormData,
-} from '@/components/assets/payment-method-form-screen';
+} from '@/constants/payment-method';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { resolveColor } from '@/constants/color-map';

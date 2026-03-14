@@ -955,7 +955,7 @@ import { LoadingState } from '../../components/ui/loading-state';
   <ModalTextInput
     value={txModal.form.memo}
     onChangeText={v => setTxModal(s => ({ ...s, form: { ...s.form, memo: v } }))}
-    placeholder='메모 (선택)'
+    placeholder='메모'
     maxLength={50}
     className='mb-5'
   />

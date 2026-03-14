@@ -2,21 +2,22 @@ import { View, Text } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 
-type ColorPillProps = {
+type PillProps = {
   label: string;
   color: string;
   icon?: LucideIcon;
-  size?: 'sm' | 'xs';
+  solid?: boolean;
+  className?: string;
 };
 
 type TagPillProps = {
   tag: 'me' | 'partner' | 'together';
   label: string;
-  className?: string;
   bgColor?: string;
+  className?: string;
 };
 
-function getTagBgColor(tag: 'me' | 'partner' | 'together'): string {
+function getTagColor(tag: 'me' | 'partner' | 'together'): string {
   return {
     me: Colors.butter,
     partner: Colors.peach,
@@ -24,39 +25,41 @@ function getTagBgColor(tag: 'me' | 'partner' | 'together'): string {
   }[tag];
 }
 
-export function ColorPill({
+export function Pill({
   label,
   color,
   icon: Icon,
-  size = 'xs',
-}: ColorPillProps) {
+  solid = false,
+  className = 'px-1.5 py-0.5',
+}: PillProps) {
   return (
     <View
-      className='flex-row items-center gap-0.5 px-1.5 py-0.5 rounded-full'
-      style={{ backgroundColor: color + '50' }}
+      className={`flex-row items-center gap-0.5 rounded-full ${className}`}
+      style={{ backgroundColor: solid ? color : color + '50' }}
     >
       {Icon && <Icon size={10} color={color} strokeWidth={2.5} />}
-      <Text className={`font-ibm-semibold text-[10px] text-neutral-700`}>
+      <Text className='font-ibm-semibold text-[10px] text-neutral-700'>
         {label}
       </Text>
     </View>
   );
 }
 
-export function TagPill({
-  tag,
+export function ColorPill({
   label,
-  className = 'px-1.5 py-0.5',
-  bgColor,
-}: TagPillProps) {
+  color,
+  icon,
+}: Omit<PillProps, 'className'>) {
+  return <Pill label={label} color={color} icon={icon} />;
+}
+
+export function TagPill({ tag, label, bgColor, className }: TagPillProps) {
   return (
-    <View
-      className={`rounded-full ${className}`}
-      style={{ backgroundColor: bgColor ?? getTagBgColor(tag) }}
-    >
-      <Text className='font-ibm-semibold text-[10px] text-neutral-700'>
-        {label}
-      </Text>
-    </View>
+    <Pill
+      label={label}
+      color={bgColor ?? getTagColor(tag)}
+      solid
+      className={className}
+    />
   );
 }

@@ -98,6 +98,7 @@
 - **폰트**: `StyleSheet`에 `fontFamily` 하드코딩 금지. `tailwind.config.js`에 등록된 `font-ibm-bold` / `font-ibm-semibold` / `font-ibm-regular` 클래스 사용
 - **컬러**: `tailwind.config.js`에 등록된 팔레트(butter, brown, cream, peach, lavender) 외 임의 색상 className 사용 금지
 - **TypeScript 엄격하게**: `any` 금지, 타입 명시
+- **상수/타입은 `constants/`에**: 컴포넌트 파일에 상수·타입·유틸 함수를 함께 두지 않는다. UI와 무관하게 여러 곳에서 쓰이거나 쓰일 수 있는 것은 `constants/` 하위 파일로 분리하고 컴포넌트는 순수 UI만 담는다. (예: `constants/payment-method.ts`, `constants/asset-type.ts`)
 - **컴포넌트 분리 기준**: 논리적 단위(헤더, 카드, 리스트 아이템, 폼, 섹션 등)로 의미 있게 묶이면 분리. 재사용 여부 무관
 - **상태관리**: 서버 상태는 React Query, 클라이언트 전역 상태는 Zustand, 로컬 상태는 useState
 - **에러처리**: 사용자에게 보이는 에러는 반드시 한국어로

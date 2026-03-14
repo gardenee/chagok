@@ -80,7 +80,7 @@ export function CategoryFormScreen({
               onPress={onBack}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <X size={22} color='#A3A3A3' strokeWidth={2} />
+              <X size={22} color={Colors.neutralLight} strokeWidth={2} />
             </TouchableOpacity>
           </View>
 
@@ -98,7 +98,7 @@ export function CategoryFormScreen({
           )}
 
           {/* 이름 */}
-          <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+          <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
             카테고리명
           </Text>
           <ModalTextInput
@@ -110,7 +110,7 @@ export function CategoryFormScreen({
           />
 
           {/* 아이콘 */}
-          <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+          <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
             아이콘
           </Text>
           <View className='flex-row flex-wrap gap-2 mb-6'>
@@ -134,7 +134,7 @@ export function CategoryFormScreen({
           </View>
 
           {/* 색상 */}
-          <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+          <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
             색상
           </Text>
           <View className='flex-row flex-wrap gap-2 mb-6'>
@@ -149,12 +149,16 @@ export function CategoryFormScreen({
                   style={{
                     backgroundColor: hex,
                     borderWidth: isSelected ? 2.5 : 0,
-                    borderColor: Colors.brown,
+                    borderColor: Colors.brownDarker,
                   }}
                   activeOpacity={0.7}
                 >
                   {isSelected && (
-                    <Check size={14} color={Colors.brown} strokeWidth={3} />
+                    <Check
+                      size={14}
+                      color={Colors.brownDarker}
+                      strokeWidth={3}
+                    />
                   )}
                 </TouchableOpacity>
               );

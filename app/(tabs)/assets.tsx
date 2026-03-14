@@ -16,10 +16,10 @@ import {
 } from '@/hooks/use-payment-methods';
 import {
   AssetPaymentFormScreen,
-  getAssetTypeOption,
   type UnifiedFormData,
 } from '@/components/assets/asset-payment-form-screen';
-import { getPmColor } from '@/components/assets/payment-method-form-screen';
+import { getAssetTypeOption } from '@/constants/asset-type';
+import { getPmColor } from '@/constants/payment-method';
 import { AssetGroups } from '@/components/assets/asset-groups';
 import { PaymentMethodList } from '@/components/assets/payment-method-list';
 import { ScreenHeader } from '@/components/ui/screen-header';

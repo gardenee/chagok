@@ -73,7 +73,7 @@ export function YearMonthPicker({
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={{ minWidth: 52, alignItems: 'flex-end' }}
         >
-          <X size={22} color='#A3A3A3' strokeWidth={2} />
+          <X size={22} color={Colors.neutralLight} strokeWidth={2} />
         </TouchableOpacity>
       </View>
 
