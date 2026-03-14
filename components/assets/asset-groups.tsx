@@ -1,6 +1,5 @@
 import { View, Text } from 'react-native';
 import { CircleMinus, ShieldCheck, Landmark } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
 import { ItemCard } from '@/components/ui/item-card';
 import { IconBox } from '@/components/ui/icon-box';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
@@ -82,7 +81,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
                           <IconBox color={group.color} size='md'>
                             <group.Icon
                               size={20}
-                              color={Colors.brown}
+                              color={group.color}
                               strokeWidth={2.5}
                             />
                           </IconBox>
@@ -118,7 +117,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
                   <IconBox color={getAssetTypeOption('loan').color} size='md'>
                     <CircleMinus
                       size={20}
-                      color={Colors.brown}
+                      color={getAssetTypeOption('loan').color}
                       strokeWidth={2.5}
                     />
                   </IconBox>
@@ -151,7 +150,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
                   >
                     <ShieldCheck
                       size={20}
-                      color={Colors.brown}
+                      color={getAssetTypeOption('insurance').color}
                       strokeWidth={2.5}
                     />
                   </IconBox>

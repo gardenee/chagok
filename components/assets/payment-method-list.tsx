@@ -1,6 +1,5 @@
 import { View, Text } from 'react-native';
 import { CreditCard } from 'lucide-react-native';
-import { Colors } from '@/constants/colors';
 import { ItemCard } from '@/components/ui/item-card';
 import { IconBox } from '@/components/ui/icon-box';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
@@ -71,7 +70,7 @@ export function PaymentMethodList({
           <SwipeableDeleteRow key={pm.id} onDelete={() => onDelete(pm.id)}>
             <ItemCard onPress={() => onEdit(pm)}>
               <IconBox color={pmType.color} size='md'>
-                <pmType.Icon size={20} color={Colors.brown} strokeWidth={2.5} />
+                <pmType.Icon size={20} color={pmType.color} strokeWidth={2.5} />
               </IconBox>
               <View className='flex-1'>
                 <Text className='font-ibm-semibold text-sm text-neutral-800'>
