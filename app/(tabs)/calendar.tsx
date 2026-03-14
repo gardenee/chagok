@@ -1060,61 +1060,38 @@ export default function CalendarTab() {
                 {/* 공휴일 */}
                 {holidaysByDate[selectedDate] && (
                   <ItemCard>
-                    <View className='w-10 h-10 rounded-2xl items-center justify-center bg-peach-light'>
-                      <CalendarDays
-                        size={18}
-                        color={Colors.peachDarker}
-                        strokeWidth={2.5}
-                      />
-                    </View>
-                    <View className='flex-1'>
-                      <Text className='font-ibm-semibold text-sm text-peach-darker'>
-                        {holidaysByDate[selectedDate]}
-                      </Text>
-                      <Text className='font-ibm-regular text-xs text-neutral-400 mt-0.5'>
-                        공휴일
-                      </Text>
-                    </View>
+                    <TagPill
+                      tag='holiday'
+                      label='공휴일'
+                      className='px-2 py-1'
+                    />
+                    <Text className='font-ibm-semibold text-base text-peach-darker'>
+                      {holidaysByDate[selectedDate]}
+                    </Text>
                   </ItemCard>
                 )}
                 {selectedSchedules.map(s => (
                   <ItemCard key={s.id} onPress={() => openScheduleEdit(s)}>
-                    <View
-                      className='w-10 h-10 rounded-2xl items-center justify-center'
-                      style={{
-                        backgroundColor:
-                          {
-                            me: '#FAD97A',
-                            partner: '#F7B8A0',
-                            together: '#D4C5F0',
-                          }[s.tag] + '80',
-                      }}
-                    >
-                      <CalendarDays
-                        size={18}
-                        color={Colors.brown}
-                        strokeWidth={2.5}
+                    <View className='flex-row items-center gap-3'>
+                      <TagPill
+                        tag={s.tag}
+                        label={resolveTagLabel(s.tag, s.user_id)}
+                        bgColor={resolveTagColor(s.tag, s.user_id)}
+                        className='px-2 py-1'
                       />
-                    </View>
-                    <View className='flex-1'>
-                      <Text className='font-ibm-semibold text-sm text-neutral-800'>
+                      <Text className='font-ibm-semibold text-base text-neutral-800'>
                         {s.title}
                       </Text>
-                      {s.start_time && (
-                        <View className='flex-row items-center gap-1 mt-0.5'>
-                          <Clock size={10} color='#a3a3a3' strokeWidth={2} />
-                          <Text className='font-ibm-regular text-xs text-neutral-400'>
-                            {s.start_time}
-                          </Text>
-                        </View>
-                      )}
                     </View>
-                    <TagPill
-                      tag={s.tag}
-                      label={resolveTagLabel(s.tag, s.user_id)}
-                      bgColor={resolveTagColor(s.tag, s.user_id)}
-                      className='px-2 py-1'
-                    />
+
+                    {s.start_time && (
+                      <View className='flex-1 justify-end flex-row items-center gap-1 mt-0.5'>
+                        <Clock size={12} color={Colors.neutralLight} strokeWidth={2} />
+                        <Text className='font-ibm-regular text-sm text-neutral-500'>
+                          {s.start_time}
+                        </Text>
+                      </View>
+                    )}
                   </ItemCard>
                 ))}
               </View>

@@ -10,18 +10,21 @@ type PillProps = {
   className?: string;
 };
 
+type TagType = 'me' | 'partner' | 'together' | 'holiday';
+
 type TagPillProps = {
-  tag: 'me' | 'partner' | 'together';
+  tag: TagType;
   label: string;
   bgColor?: string;
   className?: string;
 };
 
-function getTagColor(tag: 'me' | 'partner' | 'together'): string {
+function getTagColor(tag: TagType): string {
   return {
     me: Colors.butter,
     partner: Colors.peach,
     together: Colors.lavender,
+    holiday: Colors.peachDark,
   }[tag];
 }
 
