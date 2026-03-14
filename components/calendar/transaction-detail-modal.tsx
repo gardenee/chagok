@@ -147,17 +147,17 @@ export function TransactionDetailModal({
               {/* 태그 영역: 소비주체 + 카테고리 */}
               {detailTx && (
                 <View className='flex-row items-center gap-1'>
-                  <TagPill
-                    tag={detailTx.tag}
-                    label={resolveTagLabel(detailTx.tag, detailTx.user_id)}
-                    bgColor={resolveTagColor(detailTx.tag, detailTx.user_id)}
-                  />
                   {detailTx.categories && (
                     <ColorPill
                       label={detailTx.categories.name}
                       color={detailTx.categories.color}
                     />
                   )}
+                  <TagPill
+                    tag={detailTx.tag}
+                    label={resolveTagLabel(detailTx.tag, detailTx.user_id)}
+                    bgColor={resolveTagColor(detailTx.tag, detailTx.user_id)}
+                  />
                 </View>
               )}
             </View>
