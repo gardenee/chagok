@@ -8,7 +8,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Bell, X } from 'lucide-react-native';
 import {
   useNotifications,
@@ -23,18 +23,25 @@ type Props = {
 };
 
 export function NotificationInbox({ visible, onClose }: Props) {
-  const { data: notifications = [], isLoading, isSuccess } = useNotifications();
+  const { data: notifications = [], isLoading } = useNotifications();
   const markAllAsRead = useMarkAllNotificationsAsRead();
 
-  // 데이터 로드 완료 후 전체 읽음 처리
-  // visible도 dependency에 포함 → 모달 닫혔다 다시 열릴 때도 재호출 보장
-  // (isSuccess만 넣으면 이미 true인 상태에서 재오픈 시 재호출 안 됨)
-  // markAllAsRead는 useCallback으로 안정화되어 있으므로 dependency 포함 가능
+  // 모달이 닫히거나(visible: true→false) 컴포넌트가 언마운트될 때 전체 읽음 처리
+  const wasVisibleRef = useRef(false);
   useEffect(() => {
-    if (visible && isSuccess) {
+    if (visible) {
+      wasVisibleRef.current = true;
+    } else if (wasVisibleRef.current) {
       markAllAsRead();
+      wasVisibleRef.current = false;
     }
-  }, [visible, isSuccess, markAllAsRead]);
+  }, [visible, markAllAsRead]);
+
+  useEffect(() => {
+    return () => {
+      if (wasVisibleRef.current) markAllAsRead();
+    };
+  }, [markAllAsRead]);
 
   return (
     <Modal
@@ -45,8 +52,8 @@ export function NotificationInbox({ visible, onClose }: Props) {
     >
       <SafeAreaView className='flex-1 bg-cream'>
         {/* 헤더 */}
-        <View className='flex-row items-center justify-between px-6 pt-4 pb-4 border-b border-cream-dark'>
-          <Text className='font-ibm-bold text-xl text-brown'>알림</Text>
+        <View className='flex-row items-center justify-between px-6 pt-8 pb-5'>
+          <Text className='font-ibm-bold text-xl text-neutral-800'>알림</Text>
           <TouchableOpacity
             onPress={onClose}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -72,7 +79,7 @@ export function NotificationInbox({ visible, onClose }: Props) {
             data={notifications}
             keyExtractor={item => item.id}
             renderItem={({ item }) => <NotificationItem notification={item} />}
-            contentContainerStyle={{ padding: 16, gap: 8 }} // FlatList prop은 className 미지원 → inline style 허용
+            contentContainerStyle={{ padding: 16, gap: 12 }}
             showsVerticalScrollIndicator={false}
           />
         )}
