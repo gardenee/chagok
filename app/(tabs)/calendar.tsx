@@ -933,9 +933,9 @@ export default function CalendarTab() {
 
         {/* 선택일 요약 (가계부 탭만) */}
         {activeTab === 'ledger' && (
-          <View className='mx-4 mt-4 flex-row gap-3'>
+          <View className='mx-4 mt-6 flex-row gap-3'>
             <View
-              className='flex-1 bg-peach/70 rounded-2xl px-4 py-3.5'
+              className='flex-1 bg-peach rounded-2xl px-4 py-3.5'
               style={Shadows.card}
             >
               <Text className='font-ibm-semibold text-sm text-neutral-700'>
@@ -946,7 +946,7 @@ export default function CalendarTab() {
               </Text>
             </View>
             <View
-              className='flex-1 bg-olive/50 rounded-2xl px-4 py-3.5'
+              className='flex-1 bg-olive rounded-2xl px-4 py-3.5'
               style={Shadows.card}
             >
               <Text className='font-ibm-semibold text-sm text-neutral-700'>
@@ -1037,7 +1037,7 @@ export default function CalendarTab() {
                         </View>
                       </View>
                       <Text
-                        className={`font-ibm-bold text-sm ${isExpense ? 'text-peach-dark' : 'text-olive-dark'}`}
+                        className={`font-ibm-bold text-sm ${isExpense ? 'text-peach-darker' : 'text-olive-darker'}`}
                       >
                         {isExpense ? '-' : '+'}
                         {formatAmount(t.amount)}원
