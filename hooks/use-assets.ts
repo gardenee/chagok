@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Asset } from '@/types/database';
 import { useAuthStore } from '@/store/auth';
+import { fetchAssets } from '@/services/assets';
 
 type AssetInput = {
   name: string;
@@ -20,13 +21,7 @@ export function useAssets() {
     queryKey: ['assets', coupleId],
     queryFn: async () => {
       if (!coupleId) return [];
-      const { data, error } = await supabase
-        .from('assets')
-        .select('*')
-        .eq('couple_id', coupleId)
-        .order('sort_order', { ascending: true });
-      if (error) throw error;
-      return data;
+      return fetchAssets(coupleId);
     },
     enabled: !!coupleId,
   });

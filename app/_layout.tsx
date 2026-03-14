@@ -5,6 +5,10 @@ import { Slot, useRouter, useSegments, SplashScreen } from 'expo-router';
 import * as Linking from 'expo-linking';
 import * as Notifications from 'expo-notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fetchCategories } from '@/services/categories';
+import { fetchPaymentMethods } from '@/services/payment-methods';
+import { fetchAssets } from '@/services/assets';
+import { fetchFixedExpenses } from '@/services/fixed-expenses';
 import {
   useFonts,
   IBMPlexSansKR_400Regular,
@@ -27,9 +31,11 @@ Notifications.setNotificationHandler({
 
 SplashScreen.preventAutoHideAsync();
 
+const STALE_TIME = 1000 * 60 * 5; // 5분: 불필요한 background refetch 억제
+
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { staleTime: 0, retry: 1 },
+    queries: { staleTime: STALE_TIME, retry: 1 },
   },
 });
 
@@ -153,6 +159,29 @@ function RootLayoutNav() {
       console.warn('푸시 토큰 등록 실패:', error);
     });
   }, [userProfile?.id]);
+
+  // coupleId 확보 시 자주 쓰는 데이터 미리 로드 (모달 진입 시 덜컹거림 방지)
+  useEffect(() => {
+    const coupleId = userProfile?.couple_id;
+    if (!coupleId) return;
+
+    queryClient.prefetchQuery({
+      queryKey: ['categories', coupleId],
+      queryFn: () => fetchCategories(coupleId),
+    });
+    queryClient.prefetchQuery({
+      queryKey: ['payment-methods', coupleId],
+      queryFn: () => fetchPaymentMethods(coupleId),
+    });
+    queryClient.prefetchQuery({
+      queryKey: ['assets', coupleId],
+      queryFn: () => fetchAssets(coupleId),
+    });
+    queryClient.prefetchQuery({
+      queryKey: ['fixed-expenses', coupleId],
+      queryFn: () => fetchFixedExpenses(coupleId),
+    });
+  }, [userProfile?.couple_id]);
 
   // 알림 탭 리스너 (앱 실행 중 / 백그라운드)
   useEffect(() => {

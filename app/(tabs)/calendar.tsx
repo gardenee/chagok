@@ -27,10 +27,7 @@ import {
   CategoryFormScreen,
   type CategoryFormData,
 } from '@/components/budget/category-form-screen';
-import {
-  INITIAL_PM_FORM,
-  getPmColor,
-} from '@/constants/payment-method';
+import { INITIAL_PM_FORM, getPmColor } from '@/constants/payment-method';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { resolveColor } from '@/constants/color-map';
@@ -1086,7 +1083,11 @@ export default function CalendarTab() {
 
                     {s.start_time && (
                       <View className='flex-1 justify-end flex-row items-center gap-1 mt-0.5'>
-                        <Clock size={12} color={Colors.neutralLight} strokeWidth={2} />
+                        <Clock
+                          size={12}
+                          color={Colors.neutralLight}
+                          strokeWidth={2}
+                        />
                         <Text className='font-ibm-regular text-sm text-neutral-500'>
                           {s.start_time}
                         </Text>
