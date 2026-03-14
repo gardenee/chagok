@@ -30,7 +30,7 @@ import {
   INITIAL_CATEGORY_FORM,
   type CategoryFormData,
 } from '@/components/budget/category-form-screen';
-import { resolveColor } from '@/constants/color-map';
+import { resolveColor, resolveColorKey } from '@/constants/color-map';
 import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
 import type { FixedExpense, Category } from '@/types/database';
 
@@ -134,22 +134,22 @@ export default function FixedScreen() {
   function openCatCreate() {
     setState(s => ({
       ...s,
-      view: 'catForm',
       catEditingId: null,
       catForm: INITIAL_CATEGORY_FORM,
       catFormSource: s.view === 'catMgmt' ? 'catMgmt' : 'main',
     }));
+    requestAnimationFrame(() => setState(s => ({ ...s, view: 'catForm' })));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 
   function openCatEdit(c: Category) {
     setState(s => ({
       ...s,
-      view: 'catForm',
       catEditingId: c.id,
-      catForm: { name: c.name, icon: c.icon, color: c.color },
+      catForm: { name: c.name, icon: c.icon, color: resolveColorKey(c.color) },
       catFormSource: 'catMgmt',
     }));
+    requestAnimationFrame(() => setState(s => ({ ...s, view: 'catForm' })));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 

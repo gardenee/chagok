@@ -30,7 +30,7 @@ import {
 import { INITIAL_PM_FORM, getPmColor } from '@/constants/payment-method';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
-import { resolveColor } from '@/constants/color-map';
+import { resolveColor, resolveColorKey } from '@/constants/color-map';
 import { useAuthStore } from '@/store/auth';
 import {
   useMonthTransactions,
@@ -317,23 +317,23 @@ export default function CalendarTab() {
   function openCatCreate() {
     setTxModal(s => ({
       ...s,
-      view: 'catForm',
       catEditingId: null,
       catCategoryType: s.form.type,
       catForm: INITIAL_CATEGORY_FORM,
       catFormSource: s.view as 'tx' | 'catMgmt',
     }));
+    requestAnimationFrame(() => setTxModal(s => ({ ...s, view: 'catForm' })));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   function openCatEdit(c: Category) {
     setTxModal(s => ({
       ...s,
-      view: 'catForm',
       catEditingId: c.id,
       catCategoryType: c.type,
-      catForm: { name: c.name, icon: c.icon, color: c.color },
+      catForm: { name: c.name, icon: c.icon, color: resolveColorKey(c.color) },
       catFormSource: 'catMgmt',
     }));
+    requestAnimationFrame(() => setTxModal(s => ({ ...s, view: 'catForm' })));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   async function handleCatSave() {
@@ -414,22 +414,26 @@ export default function CalendarTab() {
   function openFixedCatCreate() {
     setFixedEditState(s => ({
       ...s,
-      view: 'catForm',
       catEditingId: null,
       catForm: INITIAL_CATEGORY_FORM,
       catFormSource: s.view === 'catMgmt' ? 'catMgmt' : 'form',
     }));
+    requestAnimationFrame(() =>
+      setFixedEditState(s => ({ ...s, view: 'catForm' })),
+    );
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 
   function openFixedCatEdit(c: Category) {
     setFixedEditState(s => ({
       ...s,
-      view: 'catForm',
       catEditingId: c.id,
-      catForm: { name: c.name, icon: c.icon, color: c.color },
+      catForm: { name: c.name, icon: c.icon, color: resolveColorKey(c.color) },
       catFormSource: 'catMgmt',
     }));
+    requestAnimationFrame(() =>
+      setFixedEditState(s => ({ ...s, view: 'catForm' })),
+    );
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 

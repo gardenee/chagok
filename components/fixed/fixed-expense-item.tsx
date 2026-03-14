@@ -44,11 +44,11 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
               {item.name}
             </Text>
             <View className='flex-row items-center gap-1.5 mt-0.5'>
-              <Text className='font-ibm-regular text-xs text-neutral-500'>
+              <Text className='font-ibm-regular text-xs text-neutral-600'>
                 {ordinalDay(item.due_day)}
               </Text>
               {category && (
-                <Text className='font-ibm-regular text-xs text-neutral-400'>
+                <Text className='font-ibm-regular text-xs text-neutral-600'>
                   · {category.name}
                 </Text>
               )}
