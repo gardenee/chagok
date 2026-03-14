@@ -26,7 +26,7 @@ export type CategoryFormData = {
 export const INITIAL_CATEGORY_FORM: CategoryFormData = {
   name: '',
   icon: 'shopping',
-  color: 'baby-pink',
+  color: 'peach',
 };
 
 type Props = {

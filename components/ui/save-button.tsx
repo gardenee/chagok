@@ -1,6 +1,7 @@
 import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import { Check } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
+import { Shadows } from '@/constants/shadows';
 
 type SaveButtonProps = {
   onPress: () => void;
@@ -24,12 +25,7 @@ export function SaveButton({
       className='bg-butter rounded-2xl py-4 items-center flex-row justify-center gap-2'
       style={{
         opacity: isDisabled ? 0.45 : 1,
-        shadowColor: Colors.butter,
-        shadowOpacity: 0.25,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
-        borderTopWidth: 2,
-        borderTopColor: 'rgba(255, 255, 255, 0.65)',
+        ...Shadows.primary,
       }}
     >
       {isSaving ? (

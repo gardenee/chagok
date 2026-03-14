@@ -10,8 +10,11 @@ import { useScrollToTop } from '@react-navigation/native';
 import { Pencil, Wallet, TrendingUp } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { useQueryClient } from '@tanstack/react-query';
 import { Colors } from '@/constants/colors';
 import { useCategories } from '@/hooks/use-categories';
+import { fetchCategories } from '@/services/categories';
+import { useAuthStore } from '@/store/auth';
 import { useMonthTransactions } from '@/hooks/use-transactions';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -23,6 +26,8 @@ import { MonthNavigator } from '@/components/budget/month-navigator';
 
 export default function BudgetIndex() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -102,7 +107,16 @@ export default function BudgetIndex() {
             예산·결산
           </Text>
           <TouchableOpacity
-            onPress={() => router.push('/budget/categories')}
+            onPress={() => {
+              const coupleId = userProfile?.couple_id;
+              if (coupleId) {
+                queryClient.prefetchQuery({
+                  queryKey: ['categories', coupleId],
+                  queryFn: () => fetchCategories(coupleId),
+                });
+              }
+              router.push('/budget/categories');
+            }}
             className='w-10 h-10 rounded-full items-center justify-center'
             activeOpacity={0.6}
           >

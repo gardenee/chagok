@@ -13,7 +13,7 @@ import {
   CategoryFormData,
   INITIAL_CATEGORY_FORM,
 } from '@/components/budget/category-form-screen';
-import { resolveColor } from '@/constants/color-map';
+import { resolveColor, resolveColorKey } from '@/constants/color-map';
 import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
 import type { Category } from '@/types/database';
 
@@ -46,21 +46,23 @@ export default function CategoriesScreen() {
 
   function openCreate(type: 'expense' | 'income') {
     setModal({
-      visible: true,
+      visible: false,
       editingId: null,
       categoryType: type,
       form: INITIAL_CATEGORY_FORM,
     });
+    requestAnimationFrame(() => setModal(s => ({ ...s, visible: true })));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 
   function openEdit(c: Category) {
     setModal({
-      visible: true,
+      visible: false,
       editingId: c.id,
       categoryType: c.type,
-      form: { name: c.name, icon: c.icon, color: c.color },
+      form: { name: c.name, icon: c.icon, color: resolveColorKey(c.color) },
     });
+    requestAnimationFrame(() => setModal(s => ({ ...s, visible: true })));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 

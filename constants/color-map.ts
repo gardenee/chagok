@@ -32,3 +32,9 @@ export const COLOR_MAP: Record<string, string> = {
 export function resolveColor(colorOrKey: string): string {
   return COLOR_MAP[colorOrKey] ?? colorOrKey;
 }
+
+/** hex 값을 color key로 역변환 (없으면 그대로 반환) */
+export function resolveColorKey(hexOrKey: string): string {
+  const entry = Object.entries(COLOR_MAP).find(([, hex]) => hex === hexOrKey);
+  return entry ? entry[0] : hexOrKey;
+}
