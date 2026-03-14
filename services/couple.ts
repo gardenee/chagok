@@ -73,3 +73,14 @@ export async function updateBookName(
     .eq('id', coupleId);
   if (error) throw error;
 }
+
+export async function updateLastMaterializedMonth(
+  coupleId: string,
+  month: string, // 'YYYY-MM'
+): Promise<void> {
+  const { error } = await supabase
+    .from('couples')
+    .update({ last_materialized_month: month })
+    .eq('id', coupleId);
+  if (error) throw error;
+}

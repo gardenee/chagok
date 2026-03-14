@@ -48,16 +48,25 @@ export async function updateFixedExpense(
 }
 
 export async function deleteFixedExpense(id: string): Promise<void> {
-  // 오늘 이후 materialize된 transactions 먼저 삭제
   const today = new Date().toISOString().split('T')[0];
-  const { error: txError } = await supabase
+
+  // 오늘 이후 내역 삭제
+  const { error: deleteFutureError } = await supabase
     .from('transactions')
     .delete()
     .eq('fixed_expense_id', id)
     .gte('date', today);
-  if (txError) throw txError;
+  if (deleteFutureError) throw deleteFutureError;
 
-  // 고정지출 삭제 (과거 내역은 ON DELETE SET NULL으로 fixed_expense_id만 null 처리)
+  // 과거 내역은 fixed_expense_id만 null로 변경 (내역 유지)
+  const { error: unlinkPastError } = await supabase
+    .from('transactions')
+    .update({ fixed_expense_id: null })
+    .eq('fixed_expense_id', id)
+    .lt('date', today);
+  if (unlinkPastError) throw unlinkPastError;
+
+  // 고정지출 삭제
   const { error } = await supabase.from('fixed_expenses').delete().eq('id', id);
   if (error) throw error;
 }
