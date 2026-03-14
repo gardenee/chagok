@@ -101,6 +101,8 @@ export interface Database {
             | 'welfare'
             | 'points'
             | 'prepaid'
+            | 'cash'
+            | 'pay'
             | 'other';
           icon: string;
           color: string;
@@ -123,6 +125,8 @@ export interface Database {
             | 'welfare'
             | 'points'
             | 'prepaid'
+            | 'cash'
+            | 'pay'
             | 'other';
           icon?: string;
           color?: string;
@@ -143,6 +147,8 @@ export interface Database {
             | 'welfare'
             | 'points'
             | 'prepaid'
+            | 'cash'
+            | 'pay'
             | 'other';
           icon?: string;
           color?: string;

@@ -1,12 +1,4 @@
-import {
-  CreditCard,
-  Bus,
-  Gift,
-  Star,
-  Coins,
-  Wallet,
-  type LucideIcon,
-} from 'lucide-react-native';
+import { CreditCard, Bus, Wallet, type LucideIcon } from 'lucide-react-native';
 import type { PaymentMethod } from '@/types/database';
 
 export type PaymentMethodFormData = {
@@ -30,9 +22,6 @@ export const PM_TYPE_OPTIONS: PmTypeOption[] = [
   { key: 'credit_card', label: '신용카드', Icon: CreditCard, color: '#D4C5F0' },
   { key: 'debit_card', label: '체크카드', Icon: CreditCard, color: '#B5D5F0' },
   { key: 'transit', label: '교통카드', Icon: Bus, color: '#A8D8B0' },
-  { key: 'welfare', label: '복지카드', Icon: Gift, color: '#F5D0A0' },
-  { key: 'points', label: '포인트', Icon: Star, color: '#FAD97A' },
-  { key: 'prepaid', label: '선불', Icon: Coins, color: '#F7B8A0' },
   { key: 'other', label: '기타', Icon: Wallet, color: '#F0C5D5' },
 ];
 

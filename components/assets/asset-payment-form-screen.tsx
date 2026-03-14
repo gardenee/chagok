@@ -15,11 +15,9 @@ import { Colors } from '@/constants/colors';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { PM_TYPE_OPTIONS } from '@/constants/payment-method';
-import { ASSET_GROUPS } from '@/constants/asset-type';
+import { ASSET_TYPE_OPTIONS } from '@/constants/asset-type';
 import {
   CREDIT_CARD_COMPANIES,
-  DEBIT_CARD_BANKS,
-  TRANSIT_PROVIDERS,
   DEFAULT_PAYMENT_DAYS,
   getBillingPeriodLabel,
 } from '@/constants/card-companies';
@@ -117,15 +115,14 @@ export function AssetPaymentFormScreen({
   const showPmGroup = !isEditMode || !!editingPm;
 
   const isCreditCard = form.category === 'pm' && form.type === 'credit_card';
-  const isDebitCard = form.category === 'pm' && form.type === 'debit_card';
-  const isTransit = form.category === 'pm' && form.type === 'transit';
+  const isCard =
+    form.category === 'pm' &&
+    (form.type === 'credit_card' ||
+      form.type === 'debit_card' ||
+      form.type === 'transit');
 
   const selectedCreditCompany = CREDIT_CARD_COMPANIES.find(
     c => c.id === form.card_company,
-  );
-  const selectedBank = DEBIT_CARD_BANKS.find(b => b.id === form.card_company);
-  const selectedTransit = TRANSIT_PROVIDERS.find(
-    t => t.id === form.card_company,
   );
 
   const availableDays =
@@ -139,11 +136,7 @@ export function AssetPaymentFormScreen({
   function handleCompanySelect(id: string, name: string) {
     const isSame = form.card_company === id;
     const prevCompanyName =
-      [
-        ...CREDIT_CARD_COMPANIES,
-        ...DEBIT_CARD_BANKS,
-        ...TRANSIT_PROVIDERS,
-      ].find(c => c.id === form.card_company)?.name ?? '';
+      CREDIT_CARD_COMPANIES.find(c => c.id === form.card_company)?.name ?? '';
     const shouldAutoFillName =
       form.name === '' || form.name === prevCompanyName;
     setForm(s => ({
@@ -151,6 +144,23 @@ export function AssetPaymentFormScreen({
       card_company: isSame ? '' : id,
       billing_day: null,
       name: isSame ? s.name : shouldAutoFillName ? name : s.name,
+    }));
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+
+  function handleLinkedAssetSelect(asset: Asset) {
+    const isSelected = form.linked_asset_id === asset.id;
+    const currentLinkedAsset = bankAssets.find(
+      a => a.id === form.linked_asset_id,
+    );
+    // 체크카드만 연결 계좌 선택 시 이름 자동채우기
+    const shouldAutoFillName =
+      form.type === 'debit_card' &&
+      (form.name === '' || form.name === currentLinkedAsset?.name);
+    setForm(s => ({
+      ...s,
+      linked_asset_id: isSelected ? null : asset.id,
+      name: shouldAutoFillName ? (isSelected ? '' : asset.name) : s.name,
     }));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
@@ -182,48 +192,47 @@ export function AssetPaymentFormScreen({
             contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
           >
             {/* ── 유형 선택 ── */}
-            <Text className='font-ibm-semibold text-xs text-neutral-500 mb-3 ml-1'>
+            <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
               유형
             </Text>
 
-            {showAssetGroups &&
-              ASSET_GROUPS.map(group => (
-                <View key={group.label} className='mb-3'>
-                  <Text className='font-ibm-semibold text-xs text-neutral-400 mb-1.5 ml-1'>
-                    {group.label}
-                  </Text>
-                  <View className='flex-row flex-wrap gap-2'>
-                    {group.types.map(({ key, label }) => {
-                      const isSelected =
-                        form.category === 'asset' && form.type === key;
-                      return (
-                        <TouchableOpacity
-                          key={`asset-${key}`}
-                          onPress={() =>
-                            setForm(s => ({
-                              ...s,
-                              category: 'asset',
-                              type: key,
-                            }))
-                          }
-                          className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                          activeOpacity={0.7}
+            {showAssetGroups && (
+              <View className='mb-3'>
+                <Text className='font-ibm-semibold text-xs text-neutral-600 mb-1.5 ml-1'>
+                  자산
+                </Text>
+                <View className='flex-row flex-wrap gap-2'>
+                  {ASSET_TYPE_OPTIONS.map(({ key, label }) => {
+                    const isSelected =
+                      form.category === 'asset' && form.type === key;
+                    return (
+                      <TouchableOpacity
+                        key={`asset-${key}`}
+                        onPress={() =>
+                          setForm(s => ({
+                            ...s,
+                            category: 'asset',
+                            type: key,
+                          }))
+                        }
+                        className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        activeOpacity={0.7}
+                      >
+                        <Text
+                          className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
-                          <Text
-                            className={`font-ibm-semibold text-xs ${isSelected ? 'text-brown-dark' : 'text-brown-dark/60'}`}
-                          >
-                            {label}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
+                          {label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
-              ))}
+              </View>
+            )}
 
             {showPmGroup && (
               <View className='mb-6'>
-                <Text className='font-ibm-semibold text-xs text-neutral-400 mb-1.5 ml-1'>
+                <Text className='font-ibm-semibold text-xs text-neutral-600 mb-1.5 ml-1'>
                   결제수단
                 </Text>
                 <View className='flex-row flex-wrap gap-2'>
@@ -240,13 +249,14 @@ export function AssetPaymentFormScreen({
                             type: key,
                             card_company: '',
                             billing_day: null,
+                            linked_asset_id: null,
                           }))
                         }
                         className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-xs ${isSelected ? 'text-brown-dark' : 'text-brown-dark/60'}`}
+                          className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
                           {label}
                         </Text>
@@ -257,246 +267,132 @@ export function AssetPaymentFormScreen({
               </View>
             )}
 
-            {/* ── 신용카드 전용 ── */}
+            {/* ── 신용카드 전용: 카드사 + 결제일 ── */}
             {isCreditCard && (
               <>
-                {/* 카드사 선택 */}
-                <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+                <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
                   카드사
                 </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  className='mb-4'
-                  keyboardShouldPersistTaps='handled'
-                >
-                  <View className='flex-row gap-2 pr-2'>
-                    {CREDIT_CARD_COMPANIES.map(company => {
-                      const isSelected = form.card_company === company.id;
-                      return (
-                        <TouchableOpacity
-                          key={company.id}
-                          onPress={() =>
-                            handleCompanySelect(company.id, company.name)
-                          }
-                          className='rounded-2xl px-3 py-2'
-                          style={{
-                            backgroundColor: isSelected
-                              ? company.color
-                              : company.color + '55',
-                            borderWidth: isSelected ? 1.5 : 0,
-                            borderColor: isSelected
-                              ? company.color
-                              : 'transparent',
-                          }}
-                          activeOpacity={0.7}
-                        >
-                          <Text
-                            className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
-                          >
-                            {company.name}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </ScrollView>
-
-                {/* 결제일 선택 */}
-                <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  결제일
-                </Text>
-                <View className='flex-row flex-wrap gap-1.5 mb-2'>
-                  {availableDays.map(day => {
-                    const isSelected = form.billing_day === day;
-                    return (
-                      <TouchableOpacity
-                        key={day}
-                        onPress={() => {
-                          setForm(s => ({
-                            ...s,
-                            billing_day: isSelected ? null : day,
-                          }));
-                          Haptics.impactAsync(
-                            Haptics.ImpactFeedbackStyle.Light,
-                          );
-                        }}
-                        className={`rounded-xl items-center justify-center ${isSelected ? 'bg-lavender' : 'bg-neutral-100'}`}
-                        style={{ width: 44, height: 38 }}
-                        activeOpacity={0.7}
-                      >
-                        <Text
-                          className={`font-ibm-semibold text-xs ${isSelected ? 'text-brown' : 'text-neutral-500'}`}
-                        >
-                          {day}일
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-
-                {/* 청구 기간 안내 */}
-                {billingPeriodLabel ? (
-                  <View
-                    className='flex-row items-center gap-2 rounded-2xl px-3 py-2.5 mb-4'
-                    style={{ backgroundColor: Colors.lavender + '50' }}
-                  >
-                    <Info size={14} color={Colors.brown} strokeWidth={2} />
-                    <Text className='font-ibm-semibold text-xs text-brown'>
-                      {billingPeriodLabel}
-                    </Text>
-                  </View>
-                ) : (
-                  <View className='mb-4' />
-                )}
-              </>
-            )}
-
-            {/* ── 체크카드 전용 ── */}
-            {isDebitCard && (
-              <>
-                {/* 은행 선택 */}
-                <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  은행
-                </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  className='mb-4'
-                  keyboardShouldPersistTaps='handled'
-                >
-                  <View className='flex-row gap-2 pr-2'>
-                    {DEBIT_CARD_BANKS.map(bank => {
-                      const isSelected = form.card_company === bank.id;
-                      return (
-                        <TouchableOpacity
-                          key={bank.id}
-                          onPress={() =>
-                            handleCompanySelect(bank.id, bank.name)
-                          }
-                          className='rounded-2xl px-3 py-2'
-                          style={{
-                            backgroundColor: isSelected
-                              ? bank.color
-                              : bank.color + '55',
-                            borderWidth: isSelected ? 1.5 : 0,
-                            borderColor: isSelected
-                              ? bank.color
-                              : 'transparent',
-                          }}
-                          activeOpacity={0.7}
-                        >
-                          <Text
-                            className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
-                          >
-                            {bank.name}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </ScrollView>
-
-                {/* 연결 계좌 */}
-                <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  연결 계좌
-                </Text>
-                {bankAssets.length === 0 ? (
-                  <View
-                    className='rounded-2xl px-4 py-3 mb-4'
-                    style={{ backgroundColor: Colors.cream }}
-                  >
-                    <Text className='font-ibm-regular text-xs text-neutral-400'>
-                      등록된 은행 계좌가 없어요. 자산에서 계좌를 먼저
-                      추가해보세요.
-                    </Text>
-                  </View>
-                ) : (
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    className='mb-4'
-                    keyboardShouldPersistTaps='handled'
-                  >
-                    <View className='flex-row gap-2 pr-2'>
-                      {bankAssets.map(asset => {
-                        const isSelected = form.linked_asset_id === asset.id;
-                        return (
-                          <TouchableOpacity
-                            key={asset.id}
-                            onPress={() => {
-                              setForm(s => ({
-                                ...s,
-                                linked_asset_id: isSelected ? null : asset.id,
-                              }));
-                              Haptics.impactAsync(
-                                Haptics.ImpactFeedbackStyle.Light,
-                              );
-                            }}
-                            className={`rounded-2xl px-3 py-2 ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                            style={{
-                              borderWidth: isSelected ? 1.5 : 0,
-                              borderColor: isSelected
-                                ? Colors.brown
-                                : 'transparent',
-                            }}
-                            activeOpacity={0.7}
-                          >
-                            <Text
-                              className={`font-ibm-semibold text-xs ${isSelected ? 'text-brown' : 'text-neutral-600'}`}
-                            >
-                              {asset.name}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                  </ScrollView>
-                )}
-              </>
-            )}
-
-            {/* ── 교통카드 전용 ── */}
-            {isTransit && (
-              <>
-                <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  종류
-                </Text>
                 <View className='flex-row flex-wrap gap-2 mb-4'>
-                  {TRANSIT_PROVIDERS.map(provider => {
-                    const isSelected = form.card_company === provider.id;
+                  {CREDIT_CARD_COMPANIES.map(company => {
+                    const isSelected = form.card_company === company.id;
                     return (
                       <TouchableOpacity
-                        key={provider.id}
+                        key={company.id}
                         onPress={() =>
-                          handleCompanySelect(provider.id, provider.name)
+                          handleCompanySelect(company.id, company.name)
                         }
-                        className='rounded-2xl px-3 py-2'
-                        style={{
-                          backgroundColor: isSelected
-                            ? provider.color
-                            : provider.color + '55',
-                          borderWidth: isSelected ? 1.5 : 0,
-                          borderColor: isSelected
-                            ? provider.color
-                            : 'transparent',
-                        }}
+                        className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
                           className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
-                          {provider.name}
+                          {company.name}
                         </Text>
                       </TouchableOpacity>
                     );
                   })}
                 </View>
+
+                {form.card_company && (
+                  <>
+                    <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
+                      결제일
+                    </Text>
+                    <View className='flex-row flex-wrap gap-1.5 mb-2'>
+                      {availableDays.map(day => {
+                        const isSelected = form.billing_day === day;
+                        return (
+                          <TouchableOpacity
+                            key={day}
+                            onPress={() => {
+                              setForm(s => ({
+                                ...s,
+                                billing_day: isSelected ? null : day,
+                              }));
+                              Haptics.impactAsync(
+                                Haptics.ImpactFeedbackStyle.Light,
+                              );
+                            }}
+                            className={`rounded-xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                            style={{ width: 44, height: 38 }}
+                            activeOpacity={0.7}
+                          >
+                            <Text
+                              className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                            >
+                              {day}일
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+
+                    {billingPeriodLabel ? (
+                      <View
+                        className='flex-row items-center gap-2 rounded-2xl px-3 py-2.5 mb-4'
+                        style={{ backgroundColor: Colors.butter + '50' }}
+                      >
+                        <Info
+                          size={14}
+                          color={Colors.neutralDarker}
+                          strokeWidth={2}
+                        />
+                        <Text className='font-ibm-semibold text-xs text-neutral-700'>
+                          {billingPeriodLabel}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View className='mb-4' />
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            {/* ── 카드 공통: 연결 계좌 ── */}
+            {isCard && (
+              <>
+                <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
+                  연결 계좌
+                </Text>
+                {bankAssets.length === 0 ? (
+                  <View
+                    className='rounded-2xl px-4 py-3 mb-5'
+                    style={{ backgroundColor: Colors.cream }}
+                  >
+                    <Text className='font-ibm-regular text-xs text-neutral-600'>
+                      등록된 은행 계좌가 없어요. 자산에서 계좌를 먼저
+                      추가해보세요.
+                    </Text>
+                  </View>
+                ) : (
+                  <View className='flex-row flex-wrap gap-2 mb-5'>
+                    {bankAssets.map(asset => {
+                      const isSelected = form.linked_asset_id === asset.id;
+                      return (
+                        <TouchableOpacity
+                          key={asset.id}
+                          onPress={() => handleLinkedAssetSelect(asset)}
+                          className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                          activeOpacity={0.7}
+                        >
+                          <Text
+                            className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                          >
+                            {asset.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                )}
               </>
             )}
 
             {/* ── 이름 ── */}
-            <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+            <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
               이름
             </Text>
             <ModalTextInput
@@ -509,14 +405,10 @@ export function AssetPaymentFormScreen({
                     ? selectedCreditCompany
                       ? `${selectedCreditCompany.name} 카드 이름`
                       : '카드 이름 (예: 삼성카드 taptap)'
-                    : isDebitCard
-                      ? selectedBank
-                        ? `${selectedBank.name} 체크카드 이름`
-                        : '체크카드 이름'
-                      : isTransit
-                        ? selectedTransit
-                          ? `${selectedTransit.name} 카드 이름`
-                          : '교통카드 이름'
+                    : form.type === 'debit_card'
+                      ? '체크카드 이름'
+                      : form.type === 'transit'
+                        ? '교통카드 이름'
                         : '결제수단 이름'
               }
               maxLength={20}
@@ -526,43 +418,13 @@ export function AssetPaymentFormScreen({
             {/* ── 자산: 금액 ── */}
             {form.category === 'asset' && (
               <>
-                <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+                <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
                   금액
                 </Text>
                 <AmountInput
                   value={form.amount}
                   onChangeText={v => setForm(s => ({ ...s, amount: v }))}
                   placeholder='현재 잔액'
-                  className='mb-2'
-                />
-              </>
-            )}
-
-            {/* ── 신용카드: 연회비 ── */}
-            {isCreditCard && (
-              <>
-                <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  연회비
-                </Text>
-                <AmountInput
-                  value={form.annual_fee}
-                  onChangeText={v => setForm(s => ({ ...s, annual_fee: v }))}
-                  placeholder='연회비 금액'
-                  className='mb-5'
-                />
-              </>
-            )}
-
-            {/* ── 결제수단: 한도 (신용카드 포함) ── */}
-            {form.category === 'pm' && (
-              <>
-                <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-                  한도
-                </Text>
-                <AmountInput
-                  value={form.limit}
-                  onChangeText={v => setForm(s => ({ ...s, limit: v }))}
-                  placeholder='한도 금액'
                   className='mb-2'
                 />
               </>
