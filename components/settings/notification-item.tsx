@@ -25,7 +25,7 @@ export function NotificationItem({ notification }: Props) {
   return (
     // 읽은 알림은 흐리게 (opacity-60)
     <View
-      className={`flex-row items-center gap-3 px-4 py-3 bg-cream-light rounded-2xl ${isUnread ? '' : 'opacity-60'}`}
+      className={`flex-row items-center gap-3 px-4 py-3 bg-cream rounded-2xl ${isUnread ? '' : 'opacity-60'}`}
     >
       {/* 아이콘 박스 */}
       {hasIcon ? (

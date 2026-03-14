@@ -14,9 +14,19 @@ export type { Notification };
 export function useNotifications() {
   const { session } = useAuthStore();
   const userId = session?.user.id;
+
+  return useQuery<Notification[]>({
+    queryKey: ['notifications', userId],
+    queryFn: () => fetchNotifications(userId!),
+    enabled: !!userId,
+  });
+}
+
+export function useNotificationsSubscription() {
+  const { session } = useAuthStore();
+  const userId = session?.user.id;
   const queryClient = useQueryClient();
 
-  // Realtime 구독: 새 알림 INSERT 시 캐시 갱신
   useEffect(() => {
     if (!userId) return;
     const channel = supabase
@@ -40,12 +50,6 @@ export function useNotifications() {
       supabase.removeChannel(channel);
     };
   }, [userId, queryClient]);
-
-  return useQuery<Notification[]>({
-    queryKey: ['notifications', userId],
-    queryFn: () => fetchNotifications(userId!),
-    enabled: !!userId,
-  });
 }
 
 export function useUnreadCount() {

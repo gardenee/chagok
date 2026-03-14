@@ -26,7 +26,10 @@ import { supabase } from '@/lib/supabase';
 import { useCouple, useUpdateBookName } from '@/hooks/use-couple';
 import { useCoupleMembers } from '@/hooks/use-couple-members';
 import { useUpdateNickname } from '@/hooks/use-user';
-import { useUnreadCount } from '@/hooks/use-notifications';
+import {
+  useUnreadCount,
+  useNotificationsSubscription,
+} from '@/hooks/use-notifications';
 import { SettingsRow } from '@/components/settings/settings-row';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
 import { EditModal } from '@/components/settings/edit-modal';
@@ -47,6 +50,7 @@ export default function SettingsScreen() {
   }>({ type: null });
   const [notifInboxVisible, setNotifInboxVisible] = useState(false);
   const { unreadCount } = useUnreadCount();
+  useNotificationsSubscription();
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 
   const partner = members.find(m => m.id !== userProfile?.id);
