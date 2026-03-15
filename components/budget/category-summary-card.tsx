@@ -51,7 +51,7 @@ export function CategorySummaryCard({
     >
       {/* 지출/수입 금액 */}
       <Text
-        className='font-ibm-regular text-xs mb-1'
+        className='font-ibm-regular text-sm mb-1.5'
         style={{ color: '#8C7A5E' }}
       >
         {amountLabel}
@@ -68,17 +68,17 @@ export function CategorySummaryCard({
         <View className='mb-4'>
           <View className='flex-row justify-between mb-1.5'>
             <Text
-              className='font-ibm-regular text-xs'
+              className='font-ibm-regular text-sm'
               style={{ color: '#8C7A5E' }}
             >
               {isExpense ? '예산' : '목표'} {formatAmount(budget)}원
             </Text>
             <View
-              className='px-2 py-0.5 rounded-full'
+              className='px-2.5 py-1 rounded-full'
               style={{ backgroundColor: badgeBg }}
             >
               <Text
-                className='font-ibm-bold text-xs'
+                className='font-ibm-bold text-sm'
                 style={{ color: badgeText }}
               >
                 {isExpense
@@ -107,17 +107,17 @@ export function CategorySummaryCard({
       {isExpense && (
         <View className='flex-row items-center gap-3'>
           <Text
-            className='font-ibm-semibold text-xs w-14'
+            className='font-ibm-semibold text-sm w-16'
             style={{ color: '#8C7A5E' }}
           >
             {inputLabel}
           </Text>
           <View
             className='flex-1 flex-row items-center rounded-xl px-3 bg-white'
-            style={{ height: 40, ...Shadows.soft }}
+            style={{ height: 44, ...Shadows.soft }}
           >
             <TextInput
-              className='flex-1 font-ibm-semibold text-sm text-neutral-700'
+              className='flex-1 font-ibm-semibold text-base text-neutral-700'
               value={budgetInput}
               onChangeText={v => onBudgetChange(v.replace(/[^0-9]/g, ''))}
               keyboardType='numeric'
@@ -128,14 +128,14 @@ export function CategorySummaryCard({
               onSubmitEditing={onBudgetSave}
             />
             {budgetInput.length > 0 && (
-              <Text className='font-ibm-regular text-sm text-neutral-400'>
+              <Text className='font-ibm-regular text-base text-neutral-400'>
                 원
               </Text>
             )}
           </View>
           {isSavingBudget && (
             <Text
-              className='font-ibm-regular text-xs'
+              className='font-ibm-regular text-sm'
               style={{ color: '#8C7A5E' }}
             >
               저장중...

@@ -26,14 +26,14 @@ export function CalendarGrid({
 }: CalendarGridProps) {
   return (
     <View
-      className='mx-4 mt-3 bg-white rounded-3xl p-4'
+      className='mx-4 mt-3 bg-white rounded-3xl px-3 py-3.5'
       style={Shadows.primary}
     >
-      <View className='flex-row mb-1'>
+      <View className='flex-row mb-0.5'>
         {WEEKDAYS.map((day, i) => (
-          <View key={day} className='flex-1 items-center py-1.5'>
+          <View key={day} className='flex-1 items-center py-1'>
             <Text
-              className={`font-ibm-semibold text-xs ${i === 0 ? 'text-peach-dark' : 'text-neutral-600'}`}
+              className={`font-ibm-semibold text-base ${i === 0 ? 'text-peach-dark' : 'text-neutral-600'}`}
             >
               {day}
             </Text>
@@ -77,7 +77,7 @@ export function CalendarGrid({
               }}
               className='w-[14.28%] items-center'
               style={{
-                paddingVertical: 3,
+                paddingVertical: 2,
                 opacity: item.isCurrentMonth ? 1 : 0.35,
               }}
               activeOpacity={0.7}
@@ -96,7 +96,7 @@ export function CalendarGrid({
                 }
               >
                 <Text
-                  className={`font-ibm-semibold text-sm ${
+                  className={`font-ibm-semibold text-lg ${
                     isSelected
                       ? 'text-brown-darker'
                       : col === 0 || isHoliday
@@ -111,12 +111,12 @@ export function CalendarGrid({
               {activeTab === 'ledger' ? (
                 <View
                   className='w-full items-center'
-                  style={{ height: 30, overflow: 'hidden', paddingTop: 2 }}
+                  style={{ height: 30, overflow: 'hidden', paddingTop: 1 }}
                 >
                   {item.isCurrentMonth && dayExpense > 0 && (
                     <Text
                       className='font-ibm-bold text-peach-dark text-center'
-                      style={{ fontSize: 10, lineHeight: 14 }}
+                      style={{ fontSize: 12, lineHeight: 14 }}
                       numberOfLines={1}
                     >
                       -{formatAmountShort(dayExpense)}
@@ -125,7 +125,7 @@ export function CalendarGrid({
                   {item.isCurrentMonth && dayIncome > 0 && (
                     <Text
                       className='font-ibm-bold text-olive-dark text-center'
-                      style={{ fontSize: 10, lineHeight: 14 }}
+                      style={{ fontSize: 12, lineHeight: 14 }}
                       numberOfLines={1}
                     >
                       +{formatAmountShort(dayIncome)}
@@ -135,12 +135,12 @@ export function CalendarGrid({
               ) : (
                 <View
                   className='w-full items-center justify-center'
-                  style={{ height: 30, gap: 3 }}
+                  style={{ height: 30, gap: 2 }}
                 >
                   {item.isCurrentMonth && dotRow1.length > 0 && (
                     <View
                       className='flex-row justify-center'
-                      style={{ gap: 3 }}
+                      style={{ gap: 2 }}
                     >
                       {dotRow1.map(dot => (
                         <View
@@ -159,7 +159,7 @@ export function CalendarGrid({
                     (dotRow2.length > 0 || extraDotCount > 0) && (
                       <View
                         className='flex-row justify-center items-center'
-                        style={{ gap: 3 }}
+                        style={{ gap: 2 }}
                       >
                         {dotRow2.map(dot => (
                           <View
@@ -175,7 +175,7 @@ export function CalendarGrid({
                         {extraDotCount > 0 && (
                           <Text
                             className='font-ibm-semibold text-neutral-600'
-                            style={{ fontSize: 10, lineHeight: 14 }}
+                            style={{ fontSize: 12, lineHeight: 14 }}
                           >
                             +{extraDotCount}
                           </Text>

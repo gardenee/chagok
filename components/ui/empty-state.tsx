@@ -20,11 +20,11 @@ export function EmptyState({
       className={`bg-cream-dark/40 rounded-3xl py-14 items-center ${containerClassName}`}
     >
       <Icon size={32} color={Colors.brownDark} strokeWidth={1.5} />
-      <Text className='font-ibm-semibold text-sm text-neutral-700 mt-3 mb-1'>
+      <Text className='font-ibm-semibold text-base text-neutral-700 mt-3 mb-1'>
         {title}
       </Text>
       {description ? (
-        <Text className='font-ibm-regular text-xs text-neutral-600'>
+        <Text className='font-ibm-regular text-sm text-neutral-600'>
           {description}
         </Text>
       ) : null}

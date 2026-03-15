@@ -220,7 +220,7 @@ export function AssetPaymentFormScreen({
           {/* 헤더 */}
           <View className='flex-row items-center justify-between px-6 pt-5 mb-5'>
             <View style={{ width: 22 }} />
-            <Text className='font-ibm-bold text-lg text-neutral-800'>
+            <Text className='font-ibm-bold text-xl text-neutral-800'>
               {title}
             </Text>
             <TouchableOpacity
@@ -237,13 +237,13 @@ export function AssetPaymentFormScreen({
             contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
           >
             {/* ── 유형 선택 ── */}
-            <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
+            <Text className='font-ibm-bold text-lg text-neutral-700 mb-3 ml-1'>
               유형
             </Text>
 
             {showAssetGroups && (
               <View className='mb-3'>
-                <Text className='font-ibm-semibold text-xs text-neutral-600 mb-1.5 ml-1'>
+                <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2.5 ml-1'>
                   자산
                 </Text>
                 <View className='flex-row flex-wrap gap-2'>
@@ -260,11 +260,11 @@ export function AssetPaymentFormScreen({
                             type: key,
                           }))
                         }
-                        className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        className={`px-4.5 py-3.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                          className={`font-ibm-semibold text-lg ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
                           {label}
                         </Text>
@@ -277,7 +277,7 @@ export function AssetPaymentFormScreen({
 
             {showPmGroup && (
               <View className='mb-6'>
-                <Text className='font-ibm-semibold text-xs text-neutral-600 mb-1.5 ml-1'>
+                <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2.5 ml-1'>
                   결제수단
                 </Text>
                 <View className='flex-row flex-wrap gap-2'>
@@ -297,11 +297,11 @@ export function AssetPaymentFormScreen({
                             linked_asset_id: null,
                           }))
                         }
-                        className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        className={`px-4.5 py-3.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                          className={`font-ibm-semibold text-lg ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
                           {label}
                         </Text>
@@ -315,7 +315,7 @@ export function AssetPaymentFormScreen({
             {/* ── 신용카드 전용: 카드사 + 결제일 ── */}
             {isCreditCard && (
               <>
-                <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
+                <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5 ml-1'>
                   카드사
                 </Text>
                 <View className='flex-row flex-wrap gap-2 mb-4'>
@@ -327,11 +327,11 @@ export function AssetPaymentFormScreen({
                         onPress={() =>
                           handleCompanySelect(company.id, company.name)
                         }
-                        className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        className={`px-4 py-3 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                          className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
                           {company.name}
                         </Text>
@@ -342,7 +342,7 @@ export function AssetPaymentFormScreen({
 
                 {form.card_company && (
                   <>
-                    <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
+                    <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5 ml-1'>
                       결제일
                     </Text>
                     <View className='flex-row flex-wrap gap-1.5 mb-2'>
@@ -361,11 +361,11 @@ export function AssetPaymentFormScreen({
                               );
                             }}
                             className={`rounded-xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                            style={{ width: 44, height: 38 }}
+                            style={{ width: 52, height: 44 }}
                             activeOpacity={0.7}
                           >
                             <Text
-                              className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                              className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                             >
                               {day}일
                             </Text>
@@ -380,11 +380,11 @@ export function AssetPaymentFormScreen({
                         style={{ backgroundColor: Colors.butter + '50' }}
                       >
                         <Info
-                          size={14}
+                          size={15}
                           color={Colors.neutralDarker}
                           strokeWidth={2}
                         />
-                        <Text className='font-ibm-semibold text-xs text-neutral-700'>
+                        <Text className='font-ibm-semibold text-sm text-neutral-700'>
                           {billingPeriodLabel}
                         </Text>
                       </View>
@@ -394,11 +394,11 @@ export function AssetPaymentFormScreen({
                         style={{ backgroundColor: Colors.butter + '50' }}
                       >
                         <Info
-                          size={14}
+                          size={15}
                           color={Colors.neutralDarker}
                           strokeWidth={2}
                         />
-                        <Text className='font-ibm-semibold text-xs text-neutral-700'>
+                        <Text className='font-ibm-semibold text-sm text-neutral-700'>
                           청구기간이 매월 달라져요
                         </Text>
                       </View>
@@ -413,7 +413,7 @@ export function AssetPaymentFormScreen({
             {/* ── 카드 공통: 연결 계좌 ── */}
             {isCard && (
               <>
-                <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
+                <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5 ml-1'>
                   연결 계좌
                 </Text>
                 {bankAssets.length === 0 ? (
@@ -421,7 +421,7 @@ export function AssetPaymentFormScreen({
                     className='rounded-2xl px-4 py-3 mb-5'
                     style={{ backgroundColor: Colors.cream }}
                   >
-                    <Text className='font-ibm-regular text-xs text-neutral-600'>
+                    <Text className='font-ibm-regular text-sm text-neutral-600'>
                       등록된 은행 계좌가 없어요. 자산에서 계좌를 먼저
                       추가해보세요.
                     </Text>
@@ -434,11 +434,11 @@ export function AssetPaymentFormScreen({
                         <TouchableOpacity
                           key={asset.id}
                           onPress={() => handleLinkedAssetSelect(asset)}
-                          className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                          className={`px-4 py-3 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                           activeOpacity={0.7}
                         >
                           <Text
-                            className={`font-ibm-semibold text-xs ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                            className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                           >
                             {asset.name}
                           </Text>
@@ -452,11 +452,11 @@ export function AssetPaymentFormScreen({
 
             {/* ── 이름 ── */}
             <View className='mb-2 flex-row items-center ml-1'>
-              <Text className='font-ibm-bold text-sm text-neutral-700'>
+              <Text className='font-ibm-bold text-lg text-neutral-700'>
                 이름
               </Text>
               <Text
-                className='font-ibm-bold text-sm ml-0.5'
+                className='font-ibm-bold text-lg ml-0.5'
                 style={{ color: Colors.peachDarker }}
               >
                 *
@@ -489,7 +489,7 @@ export function AssetPaymentFormScreen({
             {/* ── 자산: 금액 ── */}
             {form.category === 'asset' && (
               <>
-                <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
+                <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5 ml-1'>
                   금액
                 </Text>
                 <AmountInput

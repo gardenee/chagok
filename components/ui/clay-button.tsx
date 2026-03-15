@@ -22,9 +22,9 @@ const variantStyles: Record<Variant, string> = {
 };
 
 const textSizeStyles: Record<Size, string> = {
-  sm: 'text-sm',
-  md: 'text-base',
-  lg: 'text-lg',
+  sm: 'text-base',
+  md: 'text-lg',
+  lg: 'text-xl',
 };
 
 export function ClayButton({
@@ -76,7 +76,7 @@ export function ClayButton({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      className={`w-full ${variantStyles[variant]} rounded-[20px] py-4 flex-row items-center justify-center gap-2.5`}
+      className={`w-full ${variantStyles[variant]} rounded-[20px] py-[18px] flex-row items-center justify-center gap-2.5`}
       activeOpacity={0.85}
       style={
         isGhost

@@ -134,7 +134,7 @@ export default function CategoryDetailScreen() {
           >
             <ArrowLeft size={22} color={Colors.brownDarker} strokeWidth={2.5} />
           </TouchableOpacity>
-          <Text className='font-ibm-bold text-xl text-brown-darker flex-1'>
+          <Text className='font-ibm-bold text-2xl text-brown-darker flex-1'>
             {category.name}
           </Text>
         </View>
@@ -159,7 +159,7 @@ export default function CategoryDetailScreen() {
         />
 
         {/* 거래내역 리스트 */}
-        <View className='mx-4 gap-2.5'>
+        <View className='mx-4 gap-3'>
           {txLoading ? (
             <LoadingState />
           ) : categoryTransactions.length === 0 ? (

@@ -5,6 +5,7 @@ import { Shadows } from '@/constants/shadows';
 import {
   formatAmount,
   formatAmountShortRounded,
+  formatAmountInManwon,
 } from '@/utils/format';
 
 type Props = {
@@ -75,10 +76,7 @@ export function BudgetSummaryCards({
           </View>
           <View className='flex-row justify-end items-center px-2 gap-0.5 mt-1'>
             <Text className='font-ibm-bold text-2xl text-olive-darker'>
-              {formatAmount(totalIncome)}
-            </Text>
-            <Text className='font-ibm-semibold text-sm text-neutral-700'>
-              원
+              {formatAmountInManwon(totalIncome)}
             </Text>
           </View>
         </View>
@@ -98,10 +96,7 @@ export function BudgetSummaryCards({
           </View>
           <View className='flex-row justify-end items-center px-2 gap-0.5 mt-1'>
             <Text className='font-ibm-bold text-2xl text-peach-darker'>
-              {formatAmount(totalSpent)}
-            </Text>
-            <Text className='font-ibm-semibold text-sm text-neutral-700'>
-              원
+              {formatAmountInManwon(totalSpent)}
             </Text>
           </View>
         </View>

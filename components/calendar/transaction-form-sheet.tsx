@@ -190,11 +190,11 @@ export function TransactionFormSheet({
               )}
 
               <View className='mb-2 flex-row items-center ml-1'>
-                <Text className='font-ibm-semibold text-xs text-neutral-600'>
+                <Text className='font-ibm-semibold text-lg text-neutral-600'>
                   금액
                 </Text>
                 <Text
-                  className='font-ibm-semibold text-xs ml-0.5'
+                  className='font-ibm-semibold text-lg ml-0.5'
                   style={{ color: '#C8562E' }}
                 >
                   *
@@ -215,14 +215,14 @@ export function TransactionFormSheet({
               />
               {!!amountErrorMsg && (
                 <Text
-                  className='font-ibm-regular text-xs mb-3 ml-1'
+                  className='font-ibm-regular text-sm mb-3 ml-1'
                   style={{ color: '#C8562E' }}
                 >
                   {amountErrorMsg}
                 </Text>
               )}
 
-              <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
+              <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2 ml-1'>
                 항목명
               </Text>
               <ModalTextInput
@@ -242,7 +242,7 @@ export function TransactionFormSheet({
               {/* 카테고리 선택 */}
               <View className='mb-4'>
                 <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-                  <Text className='font-ibm-semibold text-xs text-neutral-600'>
+                  <Text className='font-ibm-semibold text-lg text-neutral-600'>
                     카테고리
                   </Text>
                   {categories.length > 0 && (
@@ -253,7 +253,7 @@ export function TransactionFormSheet({
                       activeOpacity={0.7}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                      <Text className='font-ibm-semibold text-xs text-neutral-600 bg-neutral-200 rounded-2xl px-2 py-0.5'>
+                      <Text className='font-ibm-semibold text-lg text-neutral-600 bg-neutral-200 rounded-2xl px-3 py-1.5'>
                         수정
                       </Text>
                     </TouchableOpacity>
@@ -333,7 +333,7 @@ export function TransactionFormSheet({
               {txModal.form.type === 'expense' && (
                 <View className='mb-4'>
                   <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-                    <Text className='font-ibm-semibold text-xs text-neutral-600'>
+                    <Text className='font-ibm-semibold text-lg text-neutral-600'>
                       결제수단
                     </Text>
                     {paymentMethods.length > 0 && (
@@ -344,7 +344,7 @@ export function TransactionFormSheet({
                         activeOpacity={0.7}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       >
-                        <Text className='font-ibm-semibold text-xs text-neutral-600 bg-neutral-200 rounded-2xl px-2 py-0.5'>
+                        <Text className='font-ibm-semibold text-lg text-neutral-600 bg-neutral-200 rounded-2xl px-3 py-1.5'>
                           수정
                         </Text>
                       </TouchableOpacity>
@@ -476,7 +476,7 @@ export function TransactionFormSheet({
               )}
 
               <View className='mb-2'>
-                <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
+                <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2 ml-1'>
                   누가
                 </Text>
                 <View className='flex-row gap-2'>

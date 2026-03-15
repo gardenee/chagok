@@ -64,10 +64,10 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
               return (
                 <View key={group.key} className='mb-3'>
                   <View className='flex-row items-center justify-between mb-2'>
-                    <Text className='font-ibm-semibold text-sm text-neutral-700'>
+                    <Text className='font-ibm-semibold text-base text-neutral-700'>
                       {group.label}
                     </Text>
-                    <Text className='font-ibm-semibold text-sm text-neutral-700'>
+                    <Text className='font-ibm-semibold text-base text-neutral-700'>
                       {formatAmount(groupTotal)}원
                     </Text>
                   </View>
@@ -85,7 +85,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
                               strokeWidth={2.5}
                             />
                           </IconBox>
-                          <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
+                          <Text className='flex-1 font-ibm-semibold text-base text-neutral-800'>
                             {a.name}
                           </Text>
                           <Text className='font-ibm-bold text-base text-neutral-800'>
@@ -107,7 +107,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
       {/* 부채 섹션 */}
       {loanAssets.length > 0 && (
         <View>
-          <Text className='font-ibm-bold text-base text-neutral-700 mb-2'>
+          <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5'>
             부채
           </Text>
           <View className='gap-2'>
@@ -121,7 +121,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
                       strokeWidth={2.5}
                     />
                   </IconBox>
-                  <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
+                  <Text className='flex-1 font-ibm-semibold text-base text-neutral-800'>
                     {a.name}
                   </Text>
                   <Text className='font-ibm-bold text-base text-peach-dark'>
@@ -137,7 +137,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
       {/* 보험 섹션 */}
       {insuranceAssets.length > 0 && (
         <View>
-          <Text className='font-ibm-bold text-base text-neutral-700 mb-2'>
+          <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5'>
             보험
           </Text>
           <View className='gap-2'>
@@ -154,7 +154,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
                       strokeWidth={2.5}
                     />
                   </IconBox>
-                  <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
+                  <Text className='flex-1 font-ibm-semibold text-base text-neutral-800'>
                     {a.name}
                   </Text>
                   <Text className='font-ibm-bold text-base text-neutral-800'>

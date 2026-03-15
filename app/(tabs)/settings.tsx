@@ -120,7 +120,7 @@ export default function SettingsScreen() {
         contentContainerStyle={{ paddingBottom: 60 }}
       >
         <View className='px-6 pt-6 pb-4 flex-row items-center justify-between'>
-          <Text className='font-ibm-bold text-2xl text-brown-darker'>설정</Text>
+          <Text className='font-ibm-bold text-3xl text-brown-darker'>설정</Text>
           <TouchableOpacity
             onPress={() => setNotifInboxVisible(true)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -193,7 +193,7 @@ export default function SettingsScreen() {
                   rightElement={
                     <View className='flex-row items-center gap-1 bg-butter rounded-full px-2.5 py-1'>
                       <Link size={11} color={Colors.brown} strokeWidth={2.5} />
-                      <Text className='font-ibm-semibold text-xs text-brown-dark'>
+                      <Text className='font-ibm-semibold text-sm text-brown-dark'>
                         연동 완료
                       </Text>
                     </View>
@@ -252,7 +252,7 @@ export default function SettingsScreen() {
           </SettingsCard>
         </View>
 
-        <Text className='font-ibm-regular text-xs text-neutral-600 text-center mt-6'>
+        <Text className='font-ibm-regular text-sm text-neutral-600 text-center mt-6'>
           버전 {appVersion}
         </Text>
       </ScrollView>

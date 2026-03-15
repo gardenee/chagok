@@ -33,15 +33,15 @@ export function Pill({
   color,
   icon: Icon,
   solid = false,
-  className = 'px-1.5 py-0.5',
+  className = 'px-2 py-1',
 }: PillProps) {
   return (
     <View
-      className={`flex-row items-center gap-0.5 rounded-full ${className}`}
+      className={`flex-row items-center gap-1 rounded-full ${className}`}
       style={{ backgroundColor: solid ? color : color + '50' }}
     >
-      {Icon && <Icon size={10} color={color} strokeWidth={2.5} />}
-      <Text className='font-ibm-semibold text-[10px] text-neutral-700'>
+      {Icon && <Icon size={11} color={color} strokeWidth={2.5} />}
+      <Text className='font-ibm-semibold text-[11px] text-neutral-700'>
         {label}
       </Text>
     </View>

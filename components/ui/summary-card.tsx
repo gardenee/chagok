@@ -10,16 +10,16 @@ type SummaryCardProps = {
 export function SummaryCard({ label, amount, subtext }: SummaryCardProps) {
   return (
     <View
-      className='mx-4 mt-3 bg-butter rounded-3xl px-6 py-5'
+      className='mx-4 mt-3 bg-butter rounded-3xl px-6 py-6'
       style={Shadows.card}
     >
-      <Text className='font-ibm-semibold text-sm text-brown-dark mb-1'>
+      <Text className='font-ibm-semibold text-base text-brown-dark mb-1'>
         {label}
       </Text>
-      <Text className='font-ibm-bold text-3xl text-brown-darker'>
+      <Text className='font-ibm-bold text-4xl text-brown-darker'>
         {amount.toLocaleString('ko-KR')}원
       </Text>
-      <Text className='font-ibm-regular text-sm text-brown-dark mt-1'>
+      <Text className='font-ibm-regular text-base text-brown-dark mt-1.5'>
         {subtext}
       </Text>
     </View>

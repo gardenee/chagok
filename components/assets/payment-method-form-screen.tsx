@@ -77,7 +77,7 @@ export function PaymentMethodFormScreen({
           </View>
 
           {/* 유형 선택 */}
-          <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+          <Text className='font-ibm-semibold text-lg text-neutral-500 mb-2.5 ml-1'>
             유형
           </Text>
           <View className='flex-row flex-wrap gap-2 mb-6'>
@@ -87,11 +87,11 @@ export function PaymentMethodFormScreen({
                 <TouchableOpacity
                   key={key}
                   onPress={() => onChange({ ...form, type: key })}
-                  className={`px-3 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                  className={`px-4 py-3 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                   activeOpacity={0.7}
                 >
                   <Text
-                    className={`font-ibm-semibold text-xs ${isSelected ? 'text-brown-dark' : 'text-brown-dark/60'}`}
+                    className={`font-ibm-semibold text-lg ${isSelected ? 'text-brown-dark' : 'text-brown-dark/60'}`}
                   >
                     {label}
                   </Text>
@@ -102,11 +102,11 @@ export function PaymentMethodFormScreen({
 
           {/* 이름 입력 */}
           <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-xs text-neutral-500'>
+            <Text className='font-ibm-semibold text-lg text-neutral-500'>
               이름
             </Text>
             <Text
-              className='font-ibm-semibold text-xs ml-0.5'
+              className='font-ibm-semibold text-lg ml-0.5'
               style={{ color: Colors.peachDarker }}
             >
               *

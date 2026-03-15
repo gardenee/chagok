@@ -17,3 +17,11 @@ export function formatAmountShortRounded(n: number): string {
   }
   return formatAmountShort(n);
 }
+
+export function formatAmountInManwon(n: number): string {
+  const manwon = n / 10000;
+  if (n >= 100000) {
+    return `${Math.round(manwon)}만원`;
+  }
+  return `${manwon.toFixed(1)}만원`;
+}

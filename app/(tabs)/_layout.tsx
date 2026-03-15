@@ -32,7 +32,7 @@ export default function TabLayout() {
         },
         tabBarLabelStyle: {
           fontFamily: 'IBMPlexSansKR-SemiBold',
-          fontSize: 11,
+          fontSize: 12,
           marginTop: 1,
         },
       }}

@@ -20,17 +20,17 @@ export function TransactionItem({ transaction: t }: Props) {
 
   return (
     <View
-      className='bg-white rounded-3xl px-4 py-3.5 flex-row items-center gap-2.5'
+      className='bg-white rounded-3xl px-4 py-4 flex-row items-center gap-3'
       style={Shadows.soft}
     >
       {/* 날짜 */}
-      <Text className='font-ibm-regular text-xs text-neutral-400 w-9 shrink-0'>
+      <Text className='font-ibm-regular text-sm text-neutral-400 w-11 shrink-0'>
         {t.date.slice(5).replace('-', '.')}
       </Text>
 
       {/* 메모 (거래 이름) */}
       <Text
-        className='font-ibm-semibold text-sm flex-1'
+        className='font-ibm-semibold text-base flex-1'
         style={{ color: hasMemo ? '#404040' : '#BDBDBD' }}
         numberOfLines={1}
       >
@@ -42,7 +42,7 @@ export function TransactionItem({ transaction: t }: Props) {
 
       {/* 금액 */}
       <Text
-        className='font-ibm-bold text-sm shrink-0'
+        className='font-ibm-bold text-base shrink-0'
         style={{
           color: t.type === 'income' ? Colors.oliveDark : Colors.brownDarker,
         }}

@@ -87,7 +87,7 @@ export function NotificationInbox({ visible, onClose }: Props) {
         ) : notifications.length === 0 ? (
           <View className='flex-1 items-center justify-center gap-2'>
             <Bell size={36} color='#D4D4D4' strokeWidth={1.5} />
-            <Text className='font-ibm-semibold text-sm text-brown/40'>
+            <Text className='font-ibm-semibold text-base text-brown/40'>
               아직 알림이 없어요
             </Text>
           </View>

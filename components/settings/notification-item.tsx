@@ -35,7 +35,7 @@ export function NotificationItem({ notification, onPress }: Props) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={onPress ? 0.7 : 1}
-      className={`flex-row items-center gap-3 px-4 py-3 ${isUnread ? '' : 'opacity-75'}`}
+      className={`flex-row items-center gap-3.5 px-4 py-3.5 ${isUnread ? '' : 'opacity-75'}`}
     >
       {/* 아이콘 박스 */}
       {CatIcon && iconColor ? (
@@ -64,7 +64,7 @@ export function NotificationItem({ notification, onPress }: Props) {
           {notification.title}
         </Text>
         <Text
-          className='font-ibm-regular text-xs text-neutral-700 mt-0.5'
+          className='font-ibm-regular text-sm text-neutral-700 mt-1'
           numberOfLines={1}
         >
           {notification.body} · {formatRelativeTime(notification.created_at)}

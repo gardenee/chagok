@@ -30,34 +30,36 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className='bg-white rounded-3xl p-3' style={Shadows.primary}>
+      <View className='bg-white rounded-3xl p-4' style={Shadows.primary}>
         {/* 1행: 아이콘 + 카테고리명 + 목표·사용 수치 */}
-        <View className='flex-row items-center gap-2 mb-2'>
+        <View
+          className={`flex-row items-center gap-2.5 ${hasBudget ? 'mb-2.5' : ''}`}
+        >
           <IconBox color={color}>
             <CategoryIcon iconKey={c.icon} color={color} />
           </IconBox>
           <Text
-            className='font-ibm-semibold text-sm text-neutral-700 flex-1'
+            className='font-ibm-semibold text-base text-neutral-700 flex-1'
             numberOfLines={1}
           >
             {c.name}
           </Text>
           {hasBudget ? (
             <View className='flex-row items-baseline gap-1'>
-              <Text className='font-ibm-regular text-xs text-neutral-400'>
+              <Text className='font-ibm-regular text-sm text-neutral-400'>
                 목표
               </Text>
-              <Text className='font-ibm-bold text-sm text-neutral-700'>
+              <Text className='font-ibm-bold text-base text-neutral-700'>
                 {formatAmount(c.budget_amount)}원
               </Text>
-              <Text className='font-ibm-regular text-xs text-neutral-300'>
+              <Text className='font-ibm-regular text-sm text-neutral-300'>
                 ·
               </Text>
-              <Text className='font-ibm-regular text-xs text-neutral-400'>
+              <Text className='font-ibm-regular text-sm text-neutral-400'>
                 사용
               </Text>
               <Text
-                className='font-ibm-bold text-sm'
+                className='font-ibm-bold text-base'
                 style={{ color: over ? Colors.peachDark : '#404040' }}
               >
                 {formatAmount(spent)}원
@@ -65,10 +67,10 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
             </View>
           ) : (
             <View className='flex-row items-baseline gap-1'>
-              <Text className='font-ibm-regular text-xs text-neutral-400'>
+              <Text className='font-ibm-regular text-sm text-neutral-400'>
                 사용
               </Text>
-              <Text className='font-ibm-bold text-sm text-neutral-700'>
+              <Text className='font-ibm-bold text-base text-neutral-700'>
                 {formatAmount(spent)}원
               </Text>
             </View>
@@ -89,7 +91,7 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
             </View>
             <View style={{ flex: 1, alignItems: 'flex-end' }}>
               <View
-                className='px-2 py-0.5 rounded-full'
+                className='px-2.5 py-1 rounded-full'
                 style={{
                   backgroundColor: over
                     ? `${Colors.peach}40`
@@ -97,7 +99,7 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
                 }}
               >
                 <Text
-                  className='font-ibm-bold text-xs'
+                  className='font-ibm-bold text-sm'
                   style={{
                     color: over ? Colors.peachDarker : Colors.oliveDarker,
                   }}

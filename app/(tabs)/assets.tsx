@@ -214,7 +214,7 @@ export default function AssetsTab() {
 
         {/* 결제수단 섹션 */}
         <View className='mx-4 mt-8'>
-          <Text className='font-ibm-bold text-base text-neutral-700 mb-3'>
+          <Text className='font-ibm-bold text-lg text-neutral-700 mb-3.5'>
             결제수단
           </Text>
           <PaymentMethodList

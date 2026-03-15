@@ -47,13 +47,13 @@ export function ClayInput({
   return (
     <View>
       {label && (
-        <Text className='font-ibm-semibold text-sm text-brown mb-2'>
+        <Text className='font-ibm-semibold text-base text-brown mb-2.5'>
           {label}
         </Text>
       )}
       <View className='relative'>
         <TextInput
-          className={`w-full bg-brown/10 rounded-[20px] px-5 py-4 font-ibm-semibold text-lg text-neutral-700 border-2 ${borderClass}${showClearButton ? ' pr-12' : ''}${inputClassName ? ` ${inputClassName}` : ''}`}
+          className={`w-full bg-brown/10 rounded-[20px] px-5 py-[18px] font-ibm-semibold text-xl text-neutral-700 border-2 ${borderClass}${showClearButton ? ' pr-12' : ''}${inputClassName ? ` ${inputClassName}` : ''}`}
           placeholderTextColor={Colors.brown + '50'}
           maxLength={maxLength}
           value={value}
@@ -82,11 +82,11 @@ export function ClayInput({
       </View>
       {showBottom && (
         <View className='flex-row justify-between mt-2'>
-          <Text className='font-ibm-regular text-sm text-red-400'>
+          <Text className='font-ibm-regular text-base text-red-400'>
             {error && errorMessage ? errorMessage : ''}
           </Text>
           {showCounter && maxLength !== undefined && (
-            <Text className='font-ibm-regular text-sm text-brown/30'>
+            <Text className='font-ibm-regular text-base text-brown/30'>
               {value.length}/{maxLength}
             </Text>
           )}

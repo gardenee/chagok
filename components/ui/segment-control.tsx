@@ -33,11 +33,11 @@ export function SegmentControl<T extends string>({
             onChange(opt.value);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           }}
-          className={`flex-1 py-2 items-center ${value === opt.value ? activeBgClassName : ''}`}
+          className={`flex-1 py-2.5 items-center ${value === opt.value ? activeBgClassName : ''}`}
           activeOpacity={0.7}
         >
           <Text
-            className={`font-ibm-semibold text-sm ${value === opt.value ? activeTextClassName : inactiveTextClassName}`}
+            className={`font-ibm-semibold text-base ${value === opt.value ? activeTextClassName : inactiveTextClassName}`}
           >
             {opt.label}
           </Text>

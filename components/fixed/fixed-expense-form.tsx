@@ -88,7 +88,7 @@ export function FixedExpenseForm({
         {/* 헤더 */}
         <View className='flex-row items-center justify-between px-6 pt-5 mb-6'>
           <View style={{ width: 22 }} />
-          <Text className='font-ibm-bold text-lg text-neutral-800'>
+          <Text className='font-ibm-bold text-xl text-neutral-800'>
             {editingId ? '고정지출 수정' : '고정지출 추가'}
           </Text>
           <TouchableOpacity
@@ -105,11 +105,11 @@ export function FixedExpenseForm({
           keyboardShouldPersistTaps='handled'
         >
           <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-xs text-neutral-600'>
+            <Text className='font-ibm-semibold text-lg text-neutral-600'>
               항목 이름
             </Text>
             <Text
-              className='font-ibm-semibold text-xs ml-0.5'
+              className='font-ibm-semibold text-lg ml-0.5'
               style={{ color: Colors.peachDarker }}
             >
               *
@@ -129,11 +129,11 @@ export function FixedExpenseForm({
           />
 
           <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-xs text-neutral-600'>
+            <Text className='font-ibm-semibold text-lg text-neutral-600'>
               금액
             </Text>
             <Text
-              className='font-ibm-semibold text-xs ml-0.5'
+              className='font-ibm-semibold text-lg ml-0.5'
               style={{ color: Colors.peachDarker }}
             >
               *
@@ -155,7 +155,7 @@ export function FixedExpenseForm({
           />
           {!!errors.amountMsg && (
             <Text
-              className='font-ibm-regular text-xs mb-4 ml-1'
+              className='font-ibm-regular text-sm mb-4 ml-1'
               style={{ color: Colors.peachDarker }}
             >
               {errors.amountMsg}
@@ -165,7 +165,7 @@ export function FixedExpenseForm({
           {/* 카테고리 선택 */}
           <View className='mb-4'>
             <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-              <Text className='font-ibm-semibold text-xs text-neutral-600'>
+              <Text className='font-ibm-semibold text-lg text-neutral-600'>
                 카테고리
               </Text>
               {categories.length > 0 && (
@@ -174,7 +174,7 @@ export function FixedExpenseForm({
                   activeOpacity={0.7}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Text className='font-ibm-semibold text-xs text-neutral-600 bg-neutral-200 rounded-2xl px-2 py-0.5'>
+                  <Text className='font-ibm-semibold text-lg text-neutral-600 bg-neutral-200 rounded-2xl px-3 py-1.5'>
                     수정
                   </Text>
                 </TouchableOpacity>
@@ -204,17 +204,17 @@ export function FixedExpenseForm({
                       activeOpacity={0.7}
                     >
                       <View
-                        className='w-12 h-12 rounded-2xl items-center justify-center'
+                        className='w-[52px] h-[52px] rounded-2xl items-center justify-center'
                         style={{
                           backgroundColor: cColor + '30',
                           borderWidth: isSelected ? 2 : 0,
                           borderColor: isSelected ? cColor : 'transparent',
                         }}
                       >
-                        <Icon size={20} color={cColor} strokeWidth={2.5} />
+                        <Icon size={22} color={cColor} strokeWidth={2.5} />
                       </View>
                       <Text
-                        className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                        className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                       >
                         {c.name}
                       </Text>
@@ -226,10 +226,10 @@ export function FixedExpenseForm({
                   className='items-center gap-1'
                   activeOpacity={0.7}
                 >
-                  <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
-                    <Plus size={18} color='#A3A3A3' strokeWidth={2} />
+                  <View className='w-[52px] h-[52px] rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
+                    <Plus size={19} color='#A3A3A3' strokeWidth={2} />
                   </View>
-                  <Text className='font-ibm-semibold text-[10px] text-neutral-600'>
+                  <Text className='font-ibm-semibold text-[11px] text-neutral-600'>
                     추가
                   </Text>
                 </TouchableOpacity>
@@ -239,17 +239,17 @@ export function FixedExpenseForm({
 
           {/* 납부일 */}
           <View className='mb-6'>
-            <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
+            <Text className='font-ibm-semibold text-lg text-neutral-500 mb-2.5 ml-1'>
               납부일
             </Text>
             <View className='flex-row gap-2 mb-2'>
               <TouchableOpacity
                 onPress={() => onChange({ ...form, due_day_mode: 'eom' })}
-                className={`rounded-xl px-3 h-9 items-center justify-center ${form.due_day_mode === 'eom' ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                className={`rounded-xl px-3.5 h-10 items-center justify-center ${form.due_day_mode === 'eom' ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                 activeOpacity={0.7}
               >
                 <Text
-                  className={`${form.due_day_mode === 'eom' ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'} text-xs`}
+                  className={`${form.due_day_mode === 'eom' ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'} text-sm`}
                 >
                   말일
                 </Text>
@@ -266,11 +266,11 @@ export function FixedExpenseForm({
                       onChange({ ...form, due_day: day, due_day_mode: 'day' })
                     }
                     className={`rounded-xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                    style={{ width: 38, height: 36 }}
+                    style={{ width: 42, height: 40 }}
                     activeOpacity={0.7}
                   >
                     <Text
-                      className={`${isSelected ? 'font-ibm-bold' : 'font-ibm-semibold'} text-xs ${isSelected ? 'text-neutral-700' : 'text-neutral-500'}`}
+                      className={`${isSelected ? 'font-ibm-bold' : 'font-ibm-semibold'} text-sm ${isSelected ? 'text-neutral-700' : 'text-neutral-500'}`}
                     >
                       {day}
                     </Text>
@@ -278,7 +278,7 @@ export function FixedExpenseForm({
                 );
               })}
             </View>
-            <Text className='font-ibm-semibold text-xs text-neutral-500 mt-4 mb-2 ml-1'>
+            <Text className='font-ibm-semibold text-lg text-neutral-500 mt-4 mb-2.5 ml-1'>
               영업일 보정
             </Text>
             <View className='flex-row gap-2'>
@@ -300,11 +300,11 @@ export function FixedExpenseForm({
                           | 'next',
                       })
                     }
-                    className={`rounded-xl px-3 h-9 items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                    className={`rounded-xl px-3.5 h-10 items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                     activeOpacity={0.7}
                   >
                     <Text
-                      className={`${isSelected ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'} text-xs`}
+                      className={`${isSelected ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'} text-sm`}
                     >
                       {opt.label}
                     </Text>

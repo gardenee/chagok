@@ -122,7 +122,7 @@ export default function BudgetIndex() {
       >
         {/* 헤더 */}
         <View className='flex-row items-center justify-between px-6 pt-6 pb-2'>
-          <Text className='font-ibm-bold text-2xl text-brown-darker'>
+          <Text className='font-ibm-bold text-3xl text-brown-darker'>
             예산·결산
           </Text>
           <TouchableOpacity
@@ -136,10 +136,10 @@ export default function BudgetIndex() {
               }
               router.push('/budget/categories');
             }}
-            className='w-10 h-10 rounded-full items-center justify-center'
+            className='w-11 h-11 rounded-full items-center justify-center'
             activeOpacity={0.6}
           >
-            <Pencil size={20} color={Colors.brownDarker} strokeWidth={2.5} />
+            <Pencil size={21} color={Colors.brownDarker} strokeWidth={2.5} />
           </TouchableOpacity>
         </View>
 
@@ -164,7 +164,7 @@ export default function BudgetIndex() {
 
             {/* 수입 섹션 */}
             <View className='mx-4 mb-6'>
-              <Text className='font-ibm-bold text-base text-neutral-700 mb-3'>
+              <Text className='font-ibm-bold text-lg text-neutral-700 mb-3.5'>
                 수입
               </Text>
 
@@ -191,16 +191,16 @@ export default function BudgetIndex() {
             {/* 지출 섹션 */}
             <View className='mx-4'>
               <View className='flex-row items-center justify-between mb-3'>
-                <Text className='font-ibm-bold text-base text-neutral-700'>
+                <Text className='font-ibm-bold text-lg text-neutral-700'>
                   지출
                 </Text>
-                <View className='flex-row bg-neutral-100 rounded-full p-0.5'>
+                <View className='flex-row bg-neutral-100 rounded-full p-1'>
                   <TouchableOpacity
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setExpenseView('category');
                     }}
-                    className='px-3 py-1 rounded-full'
+                    className='px-3.5 py-1.5 rounded-full'
                     style={{
                       backgroundColor:
                         expenseView === 'category' ? 'white' : 'transparent',
@@ -208,7 +208,7 @@ export default function BudgetIndex() {
                     activeOpacity={0.7}
                   >
                     <Text
-                      className='font-ibm-semibold text-xs'
+                      className='font-ibm-semibold text-sm'
                       style={{
                         color:
                           expenseView === 'category'
@@ -224,7 +224,7 @@ export default function BudgetIndex() {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setExpenseView('payment');
                     }}
-                    className='px-3 py-1 rounded-full'
+                    className='px-3.5 py-1.5 rounded-full'
                     style={{
                       backgroundColor:
                         expenseView === 'payment' ? 'white' : 'transparent',
@@ -232,7 +232,7 @@ export default function BudgetIndex() {
                     activeOpacity={0.7}
                   >
                     <Text
-                      className='font-ibm-semibold text-xs'
+                      className='font-ibm-semibold text-sm'
                       style={{
                         color:
                           expenseView === 'payment'
@@ -286,25 +286,25 @@ export default function BudgetIndex() {
                     ))}
                   {(spendingByPaymentMethod['__none__'] ?? 0) > 0 && (
                     <View
-                      className='bg-white rounded-3xl p-3'
+                      className='bg-white rounded-3xl p-4'
                       style={Shadows.primary}
                     >
-                      <View className='flex-row items-center gap-2'>
-                        <View className='w-9 h-9 rounded-2xl bg-neutral-100 items-center justify-center'>
+                      <View className='flex-row items-center gap-2.5'>
+                        <View className='w-10 h-10 rounded-2xl bg-neutral-100 items-center justify-center'>
                           <Wallet
-                            size={18}
+                            size={19}
                             color={Colors.neutralLighter}
                             strokeWidth={2.5}
                           />
                         </View>
-                        <Text className='font-ibm-semibold text-sm text-neutral-700 flex-1'>
+                        <Text className='font-ibm-semibold text-base text-neutral-700 flex-1'>
                           미지정
                         </Text>
                         <View className='flex-row items-baseline gap-1'>
-                          <Text className='font-ibm-regular text-xs text-neutral-400'>
+                          <Text className='font-ibm-regular text-sm text-neutral-400'>
                             사용
                           </Text>
-                          <Text className='font-ibm-bold text-sm text-neutral-700'>
+                          <Text className='font-ibm-bold text-base text-neutral-700'>
                             {formatAmount(
                               spendingByPaymentMethod['__none__'] ?? 0,
                             )}

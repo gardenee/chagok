@@ -46,7 +46,7 @@ export function EditModal({
         autoFocus
         className='mb-1'
       />
-      <Text className='font-ibm-regular text-xs text-neutral-400 text-right mb-4 mr-1'>
+      <Text className='font-ibm-regular text-sm text-neutral-400 text-right mb-4 mr-1'>
         {text.length}/{maxLength}
       </Text>
 

@@ -17,22 +17,22 @@ export function IncomeCard({ c, income, onPress }: Props) {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <View className='bg-white rounded-3xl p-3' style={Shadows.primary}>
-        <View className='flex-row items-center gap-2'>
+      <View className='bg-white rounded-3xl p-4' style={Shadows.primary}>
+        <View className='flex-row items-center gap-2.5'>
           <IconBox color={color}>
             <CategoryIcon iconKey={c.icon} color={color} />
           </IconBox>
           <Text
-            className='font-ibm-semibold text-sm text-neutral-700 flex-1'
+            className='font-ibm-semibold text-base text-neutral-700 flex-1'
             numberOfLines={1}
           >
             {c.name}
           </Text>
           <View className='flex-row items-baseline gap-1'>
-            <Text className='font-ibm-regular text-xs text-neutral-400'>
+            <Text className='font-ibm-regular text-sm text-neutral-400'>
               수입
             </Text>
-            <Text className='font-ibm-bold text-sm text-neutral-700'>
+            <Text className='font-ibm-bold text-base text-neutral-700'>
               {formatAmount(income)}원
             </Text>
           </View>

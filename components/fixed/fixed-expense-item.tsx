@@ -29,7 +29,7 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
   return (
     <SwipeableDeleteRow onDelete={() => onDelete(item.id, item.name)}>
       <TouchableOpacity onPress={() => onEdit(item)} activeOpacity={0.8}>
-        <View className='bg-white rounded-3xl px-4 py-3.5 flex-row items-center gap-3'>
+        <View className='bg-white rounded-3xl px-4 py-4 flex-row items-center gap-3.5'>
           {/* 아이콘 */}
           <IconBox color={iconColor} size='md'>
             {category ? (
@@ -45,15 +45,15 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
 
           {/* 이름 + 날짜 + 카테고리 */}
           <View className='flex-1'>
-            <Text className='font-ibm-semibold text-sm text-neutral-800'>
+            <Text className='font-ibm-semibold text-base text-neutral-800'>
               {item.name}
             </Text>
-            <View className='flex-row items-center gap-1.5 mt-0.5'>
-              <Text className='font-ibm-regular text-xs text-neutral-600'>
+            <View className='flex-row items-center gap-1.5 mt-1'>
+              <Text className='font-ibm-regular text-sm text-neutral-600'>
                 {dueLabel(item)}
               </Text>
               {category && (
-                <Text className='font-ibm-regular text-xs text-neutral-600'>
+                <Text className='font-ibm-regular text-sm text-neutral-600'>
                   · {category.name}
                 </Text>
               )}
@@ -61,7 +61,7 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
           </View>
 
           {/* 금액 */}
-          <Text className='font-ibm-bold text-sm text-neutral-800'>
+          <Text className='font-ibm-bold text-base text-neutral-800'>
             {formatAmount(item.amount)}원
           </Text>
         </View>

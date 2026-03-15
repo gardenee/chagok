@@ -70,7 +70,7 @@ export function BottomSheetHeader({
 }: BottomSheetHeaderProps) {
   return (
     <View className={`flex-row items-center justify-between ${className}`}>
-      <Text className='font-ibm-bold text-lg text-neutral-800'>{title}</Text>
+      <Text className='font-ibm-bold text-xl text-neutral-800'>{title}</Text>
       <View className='flex-row items-center gap-3'>
         {onDelete && (
           <TouchableOpacity

@@ -16,22 +16,22 @@ export function PaymentMethodExpenseCard({ pm, spent }: Props) {
     PM_TYPE_OPTIONS[PM_TYPE_OPTIONS.length - 1];
 
   return (
-    <View className='bg-white rounded-3xl p-3' style={Shadows.primary}>
-      <View className='flex-row items-center gap-2'>
+    <View className='bg-white rounded-3xl p-4' style={Shadows.primary}>
+      <View className='flex-row items-center gap-2.5'>
         <IconBox color={pmType.color} size='md'>
           <pmType.Icon size={20} color={pmType.color} strokeWidth={2.5} />
         </IconBox>
         <Text
-          className='font-ibm-semibold text-sm text-neutral-700 flex-1'
+          className='font-ibm-semibold text-base text-neutral-700 flex-1'
           numberOfLines={1}
         >
           {pm.name}
         </Text>
         <View className='flex-row items-baseline gap-1'>
-          <Text className='font-ibm-regular text-xs text-neutral-400'>
+          <Text className='font-ibm-regular text-sm text-neutral-400'>
             사용
           </Text>
-          <Text className='font-ibm-bold text-sm text-neutral-700'>
+          <Text className='font-ibm-bold text-base text-neutral-700'>
             {formatAmount(spent)}원
           </Text>
         </View>

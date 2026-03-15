@@ -73,10 +73,10 @@ export function PaymentMethodList({
                 <pmType.Icon size={20} color={pmType.color} strokeWidth={2.5} />
               </IconBox>
               <View className='flex-1'>
-                <Text className='font-ibm-semibold text-sm text-neutral-800'>
+                <Text className='font-ibm-semibold text-base text-neutral-800'>
                   {pm.name}
                 </Text>
-                <Text className='font-ibm-regular text-xs text-neutral-500 mt-0.5'>
+                <Text className='font-ibm-regular text-sm text-neutral-500 mt-1'>
                   {getPmSubtitle(pm)}
                 </Text>
               </View>

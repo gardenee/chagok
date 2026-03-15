@@ -72,9 +72,9 @@ export function ScheduleFormSheet({
       />
 
       <View className='mb-2 flex-row items-center ml-1'>
-        <Text className='font-ibm-semibold text-xs text-neutral-600'>제목</Text>
+        <Text className='font-ibm-semibold text-lg text-neutral-600'>제목</Text>
         <Text
-          className='font-ibm-semibold text-xs ml-0.5'
+          className='font-ibm-semibold text-lg ml-0.5'
           style={{ color: Colors.peachDarker }}
         >
           *
@@ -95,11 +95,11 @@ export function ScheduleFormSheet({
 
       <View className='mb-5'>
         <View className='flex-row items-center mb-2 ml-1'>
-          <Text className='font-ibm-semibold text-xs text-neutral-600'>
+          <Text className='font-ibm-semibold text-lg text-neutral-600'>
             참여자
           </Text>
           <Text
-            className='font-ibm-semibold text-xs ml-0.5'
+            className='font-ibm-semibold text-lg ml-0.5'
             style={{ color: Colors.peachDarker }}
           >
             *
@@ -134,7 +134,7 @@ export function ScheduleFormSheet({
         </View>
         {tagError && !form.tag && (
           <Text
-            className='font-ibm-regular text-xs mt-1 ml-1'
+            className='font-ibm-regular text-sm mt-1 ml-1'
             style={{ color: Colors.peachDarker }}
           >
             참여자를 선택해주세요

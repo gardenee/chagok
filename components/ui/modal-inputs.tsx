@@ -25,14 +25,14 @@ export function ModalTextInput({
 }: ModalTextInputProps) {
   return (
     <View
-      className={`bg-neutral-100 rounded-2xl px-4 py-3.5 ${className}`}
+      className={`bg-neutral-100 rounded-2xl px-4 py-4 ${className}`}
       style={{
         borderWidth: 1.5,
         borderColor: error ? Colors.peachDarker : 'transparent',
       }}
     >
       <TextInput
-        className='font-ibm-regular text-sm text-neutral-800'
+        className='font-ibm-regular text-base text-neutral-800'
         placeholder={placeholder}
         placeholderTextColor='#A3A3A3'
         value={value}
@@ -64,15 +64,17 @@ export function AmountInput({
 }: AmountInputProps) {
   return (
     <View
-      className={`bg-neutral-100 rounded-2xl px-4 py-3.5 flex-row items-center ${className}`}
+      className={`bg-neutral-100 rounded-2xl px-4 py-4 flex-row items-center ${className}`}
       style={{
         borderWidth: 1.5,
         borderColor: error ? Colors.peachDarker : 'transparent',
       }}
     >
-      <Text className='font-ibm-regular text-sm text-neutral-800 mr-2'>₩</Text>
+      <Text className='font-ibm-regular text-base text-neutral-800 mr-2'>
+        ₩
+      </Text>
       <TextInput
-        className='flex-1 font-ibm-regular text-sm text-neutral-800'
+        className='flex-1 font-ibm-regular text-base text-neutral-800'
         placeholder={placeholder}
         placeholderTextColor='#A3A3A3'
         keyboardType='numeric'
@@ -80,7 +82,7 @@ export function AmountInput({
         maxLength={maxLength}
         onChangeText={v => onChangeText(v.replace(/[^0-9]/g, ''))}
       />
-      <Text className='font-ibm-regular text-sm text-neutral-800'>원</Text>
+      <Text className='font-ibm-regular text-base text-neutral-800'>원</Text>
     </View>
   );
 }

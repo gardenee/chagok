@@ -55,7 +55,7 @@ export function NotificationSettings() {
                 strokeWidth={2}
               />
             </View>
-            <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
+            <Text className='flex-1 font-ibm-semibold text-base text-neutral-800'>
               {item.label}
             </Text>
             <Switch

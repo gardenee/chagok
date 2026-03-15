@@ -88,7 +88,7 @@ export function CategoryFormScreen({
           {/* 헤더 */}
           <View className='flex-row items-center justify-between pt-5 mb-6'>
             <View style={{ width: 22 }} />
-            <Text className='font-ibm-bold text-lg text-neutral-800'>
+            <Text className='font-ibm-bold text-xl text-neutral-800'>
               {title}
             </Text>
             <TouchableOpacity
@@ -114,11 +114,11 @@ export function CategoryFormScreen({
 
           {/* 이름 */}
           <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-xs text-neutral-600'>
+            <Text className='font-ibm-semibold text-lg text-neutral-600'>
               카테고리명
             </Text>
             <Text
-              className='font-ibm-semibold text-xs ml-0.5'
+              className='font-ibm-semibold text-lg ml-0.5'
               style={{ color: Colors.peachDarker }}
             >
               *
@@ -137,7 +137,7 @@ export function CategoryFormScreen({
           />
 
           {/* 아이콘 */}
-          <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
+          <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2.5 ml-1'>
             아이콘
           </Text>
           <View className='flex-row flex-wrap gap-2 mb-6'>
@@ -147,11 +147,11 @@ export function CategoryFormScreen({
                 <TouchableOpacity
                   key={key}
                   onPress={() => onChange({ ...form, icon: key })}
-                  className={`w-12 h-12 rounded-2xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                  className={`w-[52px] h-[52px] rounded-2xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                   activeOpacity={0.7}
                 >
                   <Icon
-                    size={20}
+                    size={22}
                     color={isSelected ? Colors.brownDarker : '#A3A3A3'}
                     strokeWidth={2.5}
                   />
@@ -161,7 +161,7 @@ export function CategoryFormScreen({
           </View>
 
           {/* 색상 */}
-          <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
+          <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2.5 ml-1'>
             색상
           </Text>
           <View className='flex-row flex-wrap gap-2 mb-6'>

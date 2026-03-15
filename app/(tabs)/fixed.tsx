@@ -281,7 +281,7 @@ export default function FixedScreen() {
               description='월세, 구독, 보험 등을 등록해보세요'
             />
           ) : (
-            <View className='gap-2.5'>
+            <View className='gap-3'>
               {fixedExpenses.map(item => {
                 const cat = categories.find(c => c.id === item.category_id);
                 return (
