@@ -28,7 +28,7 @@ export type TxModalState = {
   catFormSource: 'tx' | 'catMgmt';
   pmEditingId: string | null;
   pmForm: PaymentMethodFormData;
-  detachFixed: boolean;
+  fixedExpenseId: string | null;
 };
 
 export type ScheduleModalState = {

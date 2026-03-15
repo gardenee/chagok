@@ -188,7 +188,7 @@ export default function CalendarTab() {
     catFormSource: 'tx',
     pmEditingId: null,
     pmForm: INITIAL_PM_FORM,
-    detachFixed: false,
+    fixedExpenseId: null,
   });
   const [scheduleModal, setScheduleModal] = useState<ScheduleModalState>({
     visible: false,
@@ -738,7 +738,7 @@ export default function CalendarTab() {
       editingId: null,
       form: INITIAL_TX_FORM,
       view: 'tx',
-      detachFixed: false,
+      fixedExpenseId: null,
     }));
     setOriginalTxForm(null);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -762,7 +762,7 @@ export default function CalendarTab() {
               ...s,
               visible: true,
               editingId: t.id,
-              detachFixed: true,
+              fixedExpenseId: t.fixed_expense_id ?? null,
               form: txForm,
               view: 'tx',
             }));
@@ -781,7 +781,7 @@ export default function CalendarTab() {
         ...s,
         visible: true,
         editingId: t.id,
-        detachFixed: false,
+        fixedExpenseId: null,
         form: txForm,
         view: 'tx',
       }));
@@ -818,7 +818,7 @@ export default function CalendarTab() {
       payment_method_id: txModal.form.payment_method_id,
       asset_id: txModal.form.asset_id,
       date: selectedDate,
-      ...(txModal.detachFixed ? { fixed_expense_id: null } : {}),
+      fixed_expense_id: txModal.fixedExpenseId,
     };
     try {
       if (txModal.editingId)
@@ -829,7 +829,7 @@ export default function CalendarTab() {
         ...s,
         visible: false,
         view: 'tx',
-        detachFixed: false,
+        fixedExpenseId: null,
       }));
     } catch (err) {
       console.error('[handleTxSave] error:', err);
@@ -1155,10 +1155,18 @@ export default function CalendarTab() {
                                 </Text>
                                 <View className='flex-row items-center gap-1.5 mt-0.5'>
                                   {isFixed ? (
-                                    <ColorPill
-                                      label='고정지출'
-                                      color={Colors.peach}
-                                    />
+                                    <>
+                                      <ColorPill
+                                        label='고정지출'
+                                        color={Colors.peach}
+                                      />
+                                      {cat && (
+                                        <ColorPill
+                                          label={cat.name}
+                                          color={catColor}
+                                        />
+                                      )}
+                                    </>
                                   ) : (
                                     <>
                                       {cat && (

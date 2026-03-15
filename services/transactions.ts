@@ -147,6 +147,18 @@ export async function materializeFixedExpenses(
   if (error) throw error;
 }
 
+export async function deleteFutureFixedTransactions(
+  fixedExpenseId: string,
+  fromDate: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from('transactions')
+    .delete()
+    .eq('fixed_expense_id', fixedExpenseId)
+    .gte('date', fromDate);
+  if (error) throw error;
+}
+
 export async function updateLinkedTransactions(
   fixedExpenseId: string,
   update: { name?: string; amount?: number; category_id?: string | null },

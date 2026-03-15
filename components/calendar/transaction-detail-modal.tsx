@@ -144,20 +144,37 @@ export function TransactionDetailModal({
                 {formatAmount(detailTx?.amount ?? 0)}원
               </Text>
 
-              {/* 태그 영역: 소비주체 + 카테고리 */}
+              {/* 태그 영역: 고정지출/카테고리/소비주체 */}
               {detailTx && (
                 <View className='flex-row items-center gap-1'>
-                  {detailTx.categories && (
-                    <ColorPill
-                      label={detailTx.categories.name}
-                      color={detailTx.categories.color}
-                    />
+                  {detailTx.fixed_expense_id ? (
+                    <>
+                      <ColorPill label='고정지출' color={Colors.peach} />
+                      {detailTx.categories && (
+                        <ColorPill
+                          label={detailTx.categories.name}
+                          color={detailTx.categories.color}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {detailTx.categories && (
+                        <ColorPill
+                          label={detailTx.categories.name}
+                          color={detailTx.categories.color}
+                        />
+                      )}
+                      <TagPill
+                        tag={detailTx.tag}
+                        label={resolveTagLabel(detailTx.tag, detailTx.user_id)}
+                        bgColor={resolveTagColor(
+                          detailTx.tag,
+                          detailTx.user_id,
+                        )}
+                      />
+                    </>
                   )}
-                  <TagPill
-                    tag={detailTx.tag}
-                    label={resolveTagLabel(detailTx.tag, detailTx.user_id)}
-                    bgColor={resolveTagColor(detailTx.tag, detailTx.user_id)}
-                  />
                 </View>
               )}
             </View>
