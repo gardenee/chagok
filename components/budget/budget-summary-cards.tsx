@@ -65,7 +65,7 @@ export function BudgetSummaryCards({
                 strokeWidth={2.5}
               />
               <Text className='font-ibm-semibold text-sm text-neutral-800'>
-                총 수입
+                월 수입
               </Text>
             </View>
           </View>
@@ -85,7 +85,7 @@ export function BudgetSummaryCards({
             <View className='flex-row items-center gap-2'>
               <Wallet size={16} color={Colors.peachDarker} strokeWidth={2.5} />
               <Text className='font-ibm-semibold text-sm text-neutral-800'>
-                총 지출
+                월 지출
               </Text>
             </View>
             {totalBudget > 0 && (
