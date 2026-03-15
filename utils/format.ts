@@ -10,3 +10,10 @@ export function formatAmountShort(n: number): string {
   if (n >= 1000) return `${Math.floor(n / 1000)}천`;
   return String(n);
 }
+
+export function formatAmountShortRounded(n: number): string {
+  if (n >= 100000) {
+    return `${Math.round(n / 10000)}만`;
+  }
+  return formatAmountShort(n);
+}

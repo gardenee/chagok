@@ -2,7 +2,10 @@ import { View, Text } from 'react-native';
 import { TrendingUp, Wallet, Scale } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { Shadows } from '@/constants/shadows';
-import { formatAmount, formatAmountShort } from '@/utils/format';
+import {
+  formatAmount,
+  formatAmountShortRounded,
+} from '@/utils/format';
 
 type Props = {
   totalIncome: number;
@@ -14,7 +17,8 @@ function DiffTag({ diff, positive }: { diff: number; positive: boolean }) {
   return (
     <View className='bg-white/40 rounded-full px-2 py-0.5'>
       <Text className='font-ibm-semibold text-xs text-neutral-700'>
-        {formatAmountShort(Math.abs(diff))}원{positive ? ' 절약' : ' 초과'}
+        {formatAmountShortRounded(Math.abs(diff))}원
+        {positive ? ' 절약' : ' 초과'}
       </Text>
     </View>
   );

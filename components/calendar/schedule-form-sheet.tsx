@@ -38,16 +38,11 @@ export function ScheduleFormSheet({
   }, [scheduleModal.visible]);
 
   function handleSavePress() {
-    if (!form.title.trim()) {
-      setTitleError(true);
-      return;
-    }
-    if (!form.tag) {
-      setTagError(true);
-      return;
-    }
-    setTitleError(false);
-    setTagError(false);
+    const titleEmpty = !form.title.trim();
+    const tagEmpty = !form.tag;
+    if (titleEmpty) setTitleError(true);
+    if (tagEmpty) setTagError(true);
+    if (titleEmpty || tagEmpty) return;
     onSave();
   }
 
@@ -113,14 +108,19 @@ export function ScheduleFormSheet({
         <View className='flex-row gap-2'>
           {tagOptions.map(({ value, label }) => {
             const isSelected = form.tag === value;
+            const showError = tagError && !form.tag;
             return (
               <TouchableOpacity
                 key={value}
-                onPress={() => {
-                  onFormChange({ ...form, tag: isSelected ? null : value });
-                  if (tagError) setTagError(false);
+                onPress={() =>
+                  onFormChange({ ...form, tag: isSelected ? null : value })
+                }
+                className={`flex-1 py-2.5 items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                style={{
+                  borderRadius: 16,
+                  borderWidth: 1.5,
+                  borderColor: showError ? Colors.peachDarker : 'transparent',
                 }}
-                className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                 activeOpacity={0.7}
               >
                 <Text
@@ -132,7 +132,7 @@ export function ScheduleFormSheet({
             );
           })}
         </View>
-        {tagError && (
+        {tagError && !form.tag && (
           <Text
             className='font-ibm-regular text-xs mt-1 ml-1'
             style={{ color: Colors.peachDarker }}
