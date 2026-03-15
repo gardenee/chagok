@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -35,6 +36,21 @@ export function PaymentMethodFormScreen({
   onSave,
   onDelete,
 }: Props) {
+  const [nameError, setNameError] = useState(false);
+
+  useEffect(() => {
+    setNameError(false);
+  }, [editingId]);
+
+  function handleSavePress() {
+    if (!form.name.trim()) {
+      setNameError(true);
+      return;
+    }
+    setNameError(false);
+    onSave();
+  }
+
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <KeyboardAvoidingView
@@ -85,16 +101,28 @@ export function PaymentMethodFormScreen({
           </View>
 
           {/* 이름 입력 */}
-          <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
-            이름
-          </Text>
+          <View className='mb-2 flex-row items-center ml-1'>
+            <Text className='font-ibm-semibold text-xs text-neutral-500'>
+              이름
+            </Text>
+            <Text
+              className='font-ibm-semibold text-xs ml-0.5'
+              style={{ color: Colors.peachDarker }}
+            >
+              *
+            </Text>
+          </View>
           <ModalTextInput
             value={form.name}
-            onChangeText={v => onChange({ ...form, name: v })}
+            onChangeText={v => {
+              onChange({ ...form, name: v });
+              if (nameError) setNameError(false);
+            }}
             placeholder='결제수단 이름 (예: 신한카드, T-money)'
             maxLength={20}
             autoFocus
             className='mb-5'
+            error={nameError}
           />
         </ScrollView>
 
@@ -121,7 +149,7 @@ export function PaymentMethodFormScreen({
             </TouchableOpacity>
           )}
           <SaveButton
-            onPress={onSave}
+            onPress={handleSavePress}
             isSaving={isSaving}
             label={editingId ? '수정 완료' : '저장'}
           />

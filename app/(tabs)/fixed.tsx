@@ -41,6 +41,7 @@ type State = {
   view: FixedView;
   editingId: string | null;
   form: FormData;
+  originalForm: FormData | null;
   catEditingId: string | null;
   catForm: CategoryFormData;
   catFormSource: 'main' | 'catMgmt';
@@ -51,6 +52,7 @@ const INITIAL_STATE: State = {
   view: 'main',
   editingId: null,
   form: INITIAL_FORM,
+  originalForm: null,
   catEditingId: null,
   catForm: INITIAL_CATEGORY_FORM,
   catFormSource: 'main',
@@ -81,16 +83,20 @@ export default function FixedScreen() {
   }
 
   function openEdit(item: FixedExpense) {
+    const form: FormData = {
+      name: item.name,
+      amount: String(item.amount),
+      due_day: item.due_day,
+      due_day_mode: item.due_day_mode ?? 'day',
+      business_day_adjust: item.business_day_adjust ?? 'none',
+      category_id: item.category_id ?? null,
+    };
     setState({
       ...INITIAL_STATE,
       visible: true,
       editingId: item.id,
-      form: {
-        name: item.name,
-        amount: String(item.amount),
-        due_day: item.due_day,
-        category_id: item.category_id ?? null,
-      },
+      form,
+      originalForm: form,
     });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
@@ -103,19 +109,28 @@ export default function FixedScreen() {
     const name = state.form.name.trim();
     const amount = parseInt(state.form.amount.replace(/[^0-9]/g, ''), 10);
 
-    if (!name) {
-      Alert.alert('입력 오류', '항목 이름을 입력해주세요');
-      return;
-    }
-    if (!amount || amount <= 0) {
-      Alert.alert('입력 오류', '금액을 올바르게 입력해주세요');
-      return;
+    // no-op check for edit
+    if (state.editingId && state.originalForm) {
+      const orig = state.originalForm;
+      const noChange =
+        name === orig.name.trim() &&
+        state.form.amount === orig.amount &&
+        state.form.due_day === orig.due_day &&
+        state.form.due_day_mode === orig.due_day_mode &&
+        state.form.business_day_adjust === orig.business_day_adjust &&
+        state.form.category_id === orig.category_id;
+      if (noChange) {
+        closeAll();
+        return;
+      }
     }
 
     const payload = {
       name,
       amount,
       due_day: state.form.due_day,
+      due_day_mode: state.form.due_day_mode,
+      business_day_adjust: state.form.business_day_adjust,
       category_id: state.form.category_id,
     };
     try {
@@ -159,12 +174,25 @@ export default function FixedScreen() {
 
   async function handleCatSave() {
     const name = state.catForm.name.trim();
-    if (!name) {
-      Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
-      return;
-    }
     try {
       if (state.catEditingId) {
+        // no-op check: compare with original category data
+        const origCat = categories.find(c => c.id === state.catEditingId);
+        if (origCat) {
+          const origColor = resolveColorKey(origCat.color);
+          const noChange =
+            name === origCat.name.trim() &&
+            state.catForm.icon === origCat.icon &&
+            state.catForm.color === origColor;
+          if (noChange) {
+            setState(s => ({
+              ...s,
+              view: s.catFormSource,
+              catEditingId: null,
+            }));
+            return;
+          }
+        }
         await updateCategory.mutateAsync({
           id: state.catEditingId,
           name,

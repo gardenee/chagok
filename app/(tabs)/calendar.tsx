@@ -109,6 +109,7 @@ type FixedEditState = {
   view: FixedEditView;
   editingId: string | null;
   form: FixedFormData;
+  originalForm: FixedFormData | null;
   catEditingId: string | null;
   catForm: CategoryFormData;
   catFormSource: 'form' | 'catMgmt';
@@ -119,6 +120,7 @@ const INITIAL_FIXED_EDIT: FixedEditState = {
   view: 'form',
   editingId: null,
   form: INITIAL_FIXED_FORM,
+  originalForm: null,
   catEditingId: null,
   catForm: INITIAL_CATEGORY_FORM,
   catFormSource: 'form',
@@ -167,6 +169,12 @@ export default function CalendarTab() {
     editingId: null,
     form: INITIAL_SCHEDULE_FORM,
   });
+  const [originalTxForm, setOriginalTxForm] = useState<
+    TxModalState['form'] | null
+  >(null);
+  const [originalScheduleForm, setOriginalScheduleForm] = useState<
+    ScheduleModalState['form'] | null
+  >(null);
   const [detailTx, setDetailTx] = useState<TransactionRow | null>(null);
   const [commentText, setCommentText] = useState('');
   const [fixedEditState, setFixedEditState] =
@@ -245,13 +253,24 @@ export default function CalendarTab() {
   // ── 결제수단 핸들러 ──
   async function handlePmSave() {
     const name = txModal.pmForm.name.trim();
-    if (!name) {
-      Alert.alert('입력 오류', '결제수단 이름을 입력해주세요');
-      return;
-    }
     const color = getPmColor(txModal.pmForm.type);
     try {
       if (txModal.pmEditingId) {
+        // no-op check
+        const origPm = paymentMethods.find(p => p.id === txModal.pmEditingId);
+        if (origPm) {
+          const noChange =
+            name === origPm.name.trim() && txModal.pmForm.type === origPm.type;
+          if (noChange) {
+            setTxModal(s => ({
+              ...s,
+              view: 'pmMgmt',
+              pmEditingId: null,
+              pmForm: INITIAL_PM_FORM,
+            }));
+            return;
+          }
+        }
         await updatePaymentMethod.mutateAsync({
           id: txModal.pmEditingId,
           name,
@@ -338,12 +357,21 @@ export default function CalendarTab() {
   }
   async function handleCatSave() {
     const name = txModal.catForm.name.trim();
-    if (!name) {
-      Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
-      return;
-    }
     try {
       if (txModal.catEditingId) {
+        // no-op check
+        const origCat = categories.find(c => c.id === txModal.catEditingId);
+        if (origCat) {
+          const origColor = resolveColorKey(origCat.color);
+          const noChange =
+            name === origCat.name.trim() &&
+            txModal.catForm.icon === origCat.icon &&
+            txModal.catForm.color === origColor;
+          if (noChange) {
+            setTxModal(s => ({ ...s, view: s.catFormSource }));
+            return;
+          }
+        }
         await updateCategory.mutateAsync({
           id: txModal.catEditingId,
           name,
@@ -390,16 +418,20 @@ export default function CalendarTab() {
   function openFixedTemplateEdit(fixedExpenseId: string) {
     const fe = fixedExpenses.find((f: FixedExpense) => f.id === fixedExpenseId);
     if (!fe) return;
+    const fixedForm: FixedFormData = {
+      name: fe.name,
+      amount: String(fe.amount),
+      due_day: fe.due_day,
+      due_day_mode: fe.due_day_mode ?? 'day',
+      business_day_adjust: fe.business_day_adjust ?? 'none',
+      category_id: fe.category_id ?? null,
+    };
     setFixedEditState({
       visible: true,
       view: 'form',
       editingId: fe.id,
-      form: {
-        name: fe.name,
-        amount: String(fe.amount),
-        due_day: fe.due_day,
-        category_id: fe.category_id ?? null,
-      },
+      form: fixedForm,
+      originalForm: fixedForm,
       catEditingId: null,
       catForm: INITIAL_CATEGORY_FORM,
       catFormSource: 'form',
@@ -443,12 +475,27 @@ export default function CalendarTab() {
 
   async function handleFixedCatSave() {
     const name = fixedEditState.catForm.name.trim();
-    if (!name) {
-      Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
-      return;
-    }
     try {
       if (fixedEditState.catEditingId) {
+        // no-op check
+        const origCat = expenseCategories.find(
+          c => c.id === fixedEditState.catEditingId,
+        );
+        if (origCat) {
+          const origColor = resolveColorKey(origCat.color);
+          const noChange =
+            name === origCat.name.trim() &&
+            fixedEditState.catForm.icon === origCat.icon &&
+            fixedEditState.catForm.color === origColor;
+          if (noChange) {
+            setFixedEditState(s => ({
+              ...s,
+              view: s.catFormSource,
+              catEditingId: null,
+            }));
+            return;
+          }
+        }
         await updateCategory.mutateAsync({
           id: fixedEditState.catEditingId,
           name,
@@ -513,20 +560,30 @@ export default function CalendarTab() {
       fixedEditState.form.amount.replace(/[^0-9]/g, ''),
       10,
     );
-    if (!name) {
-      Alert.alert('입력 오류', '항목 이름을 입력해주세요');
-      return;
+    // no-op check
+    if (fixedEditState.originalForm) {
+      const orig = fixedEditState.originalForm;
+      const noChange =
+        name === orig.name.trim() &&
+        fixedEditState.form.amount === orig.amount &&
+        fixedEditState.form.due_day === orig.due_day &&
+        fixedEditState.form.due_day_mode === orig.due_day_mode &&
+        fixedEditState.form.business_day_adjust === orig.business_day_adjust &&
+        fixedEditState.form.category_id === orig.category_id;
+      if (noChange) {
+        closeFixedEdit();
+        return;
+      }
     }
-    if (!amount || amount <= 0) {
-      Alert.alert('입력 오류', '금액을 올바르게 입력해주세요');
-      return;
-    }
+
     try {
       await updateFixedExpense.mutateAsync({
         id: fixedEditState.editingId!,
         name,
         amount,
         due_day: fixedEditState.form.due_day,
+        due_day_mode: fixedEditState.form.due_day_mode,
+        business_day_adjust: fixedEditState.form.business_day_adjust,
         category_id: fixedEditState.form.category_id,
       });
       // Update all linked transactions from current month onward
@@ -657,9 +714,19 @@ export default function CalendarTab() {
       view: 'tx',
       detachFixed: false,
     }));
+    setOriginalTxForm(null);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   function openTxEdit(t: TransactionRow) {
+    const txForm = {
+      amount: String(t.amount),
+      type: t.type,
+      tag: t.tag,
+      memo: t.memo ?? '',
+      category_id: t.category_id ?? null,
+      payment_method_id: t.payment_method_id ?? null,
+      asset_id: t.asset_id ?? null,
+    };
     if (t.fixed_expense_id) {
       Alert.alert('수정 방법', '어떻게 수정할까요?', [
         {
@@ -670,17 +737,10 @@ export default function CalendarTab() {
               visible: true,
               editingId: t.id,
               detachFixed: true,
-              form: {
-                amount: String(t.amount),
-                type: t.type,
-                tag: t.tag,
-                memo: t.memo ?? '',
-                category_id: t.category_id ?? null,
-                payment_method_id: t.payment_method_id ?? null,
-                asset_id: t.asset_id ?? null,
-              },
+              form: txForm,
               view: 'tx',
             }));
+            setOriginalTxForm(txForm);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           },
         },
@@ -696,26 +756,33 @@ export default function CalendarTab() {
         visible: true,
         editingId: t.id,
         detachFixed: false,
-        form: {
-          amount: String(t.amount),
-          type: t.type,
-          tag: t.tag,
-          memo: t.memo ?? '',
-          category_id: t.category_id ?? null,
-          payment_method_id: t.payment_method_id ?? null,
-          asset_id: t.asset_id ?? null,
-        },
+        form: txForm,
         view: 'tx',
       }));
+      setOriginalTxForm(txForm);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   }
   async function handleTxSave() {
     const amount = parseInt(txModal.form.amount.replace(/[^0-9]/g, ''), 10);
-    if (!amount || amount <= 0) {
-      Alert.alert('입력 오류', '금액을 올바르게 입력해주세요');
-      return;
+
+    // no-op check for edit
+    if (txModal.editingId && originalTxForm) {
+      const f = txModal.form;
+      const noChange =
+        f.amount === originalTxForm.amount &&
+        f.type === originalTxForm.type &&
+        f.tag === originalTxForm.tag &&
+        f.memo === originalTxForm.memo &&
+        f.category_id === originalTxForm.category_id &&
+        f.payment_method_id === originalTxForm.payment_method_id &&
+        f.asset_id === originalTxForm.asset_id;
+      if (noChange) {
+        setTxModal(s => ({ ...s, visible: false, view: 'tx' }));
+        return;
+      }
     }
+
     const payload = {
       amount,
       type: txModal.form.type,
@@ -768,21 +835,37 @@ export default function CalendarTab() {
       editingId: null,
       form: INITIAL_SCHEDULE_FORM,
     });
+    setOriginalScheduleForm(null);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   function openScheduleEdit(s: Schedule) {
+    const scheduleForm = {
+      title: s.title,
+      tag: s.tag,
+      time: s.start_time ?? null,
+    };
     setScheduleModal({
       visible: true,
       editingId: s.id,
-      form: { title: s.title, tag: s.tag, time: s.start_time ?? null },
+      form: scheduleForm,
     });
+    setOriginalScheduleForm(scheduleForm);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   async function handleScheduleSave() {
-    if (!scheduleModal.form.title.trim()) {
-      Alert.alert('입력 오류', '일정 제목을 입력해주세요');
-      return;
+    // no-op check for edit
+    if (scheduleModal.editingId && originalScheduleForm) {
+      const f = scheduleModal.form;
+      const noChange =
+        f.title.trim() === originalScheduleForm.title.trim() &&
+        f.tag === originalScheduleForm.tag &&
+        f.time === originalScheduleForm.time;
+      if (noChange) {
+        setScheduleModal(s => ({ ...s, visible: false }));
+        return;
+      }
     }
+
     const payload = {
       title: scheduleModal.form.title.trim(),
       tag: scheduleModal.form.tag,

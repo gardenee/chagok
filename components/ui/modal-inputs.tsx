@@ -1,5 +1,6 @@
 import { View, Text, TextInput } from 'react-native';
 import type { TextInputProps } from 'react-native';
+import { Colors } from '@/constants/colors';
 
 type ModalTextInputProps = {
   value: string;
@@ -9,6 +10,7 @@ type ModalTextInputProps = {
   autoFocus?: boolean;
   keyboardType?: TextInputProps['keyboardType'];
   className?: string;
+  error?: boolean;
 };
 
 export function ModalTextInput({
@@ -19,9 +21,16 @@ export function ModalTextInput({
   autoFocus,
   keyboardType,
   className = '',
+  error = false,
 }: ModalTextInputProps) {
   return (
-    <View className={`bg-neutral-100 rounded-2xl px-4 py-3.5 ${className}`}>
+    <View
+      className={`bg-neutral-100 rounded-2xl px-4 py-3.5 ${className}`}
+      style={{
+        borderWidth: 1.5,
+        borderColor: error ? Colors.peachDarker : 'transparent',
+      }}
+    >
       <TextInput
         className='font-ibm-regular text-sm text-neutral-800'
         placeholder={placeholder}
@@ -41,6 +50,8 @@ type AmountInputProps = {
   onChangeText: (raw: string) => void;
   placeholder?: string;
   className?: string;
+  error?: boolean;
+  maxLength?: number;
 };
 
 export function AmountInput({
@@ -48,10 +59,16 @@ export function AmountInput({
   onChangeText,
   placeholder = '금액 입력',
   className = '',
+  error = false,
+  maxLength,
 }: AmountInputProps) {
   return (
     <View
       className={`bg-neutral-100 rounded-2xl px-4 py-3.5 flex-row items-center ${className}`}
+      style={{
+        borderWidth: 1.5,
+        borderColor: error ? Colors.peachDarker : 'transparent',
+      }}
     >
       <Text className='font-ibm-regular text-sm text-neutral-800 mr-2'>₩</Text>
       <TextInput
@@ -60,6 +77,7 @@ export function AmountInput({
         placeholderTextColor='#A3A3A3'
         keyboardType='numeric'
         value={value}
+        maxLength={maxLength}
         onChangeText={v => onChangeText(v.replace(/[^0-9]/g, ''))}
       />
       <Text className='font-ibm-regular text-sm text-neutral-800'>원</Text>

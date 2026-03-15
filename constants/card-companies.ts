@@ -193,8 +193,8 @@ export const CREDIT_CARD_COMPANIES: CardCompany[] = [
     ),
   },
   // {
-    // 카카오뱅크: BC 네트워크, preOffset=18 사용자 직접 확인
-    // BC바로카드와 동일 패턴(pivot=13, preOffset=18) 추정이나 공식 미확인
+  // 카카오뱅크: BC 네트워크, preOffset=18 사용자 직접 확인
+  // BC바로카드와 동일 패턴(pivot=13, preOffset=18) 추정이나 공식 미확인
   //   id: 'kakaobank',
   //   name: '카카오뱅크',
   //   color: '#FFE870',

@@ -14,8 +14,13 @@ type Props = {
   onDelete: (id: string, name: string) => void;
 };
 
-function ordinalDay(day: number): string {
-  return `매월 ${day}일`;
+function dueLabel(item: FixedExpense): string {
+  const dayMode = item.due_day_mode ?? 'day';
+  const adjust = item.business_day_adjust ?? 'none';
+  const dayText = dayMode === 'eom' ? '말일' : `${item.due_day}일`;
+  if (adjust === 'prev') return `매월 ${dayText} (직전 영업일)`;
+  if (adjust === 'next') return `매월 ${dayText} (직후 영업일)`;
+  return `매월 ${dayText}`;
 }
 
 export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
@@ -45,7 +50,7 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
             </Text>
             <View className='flex-row items-center gap-1.5 mt-0.5'>
               <Text className='font-ibm-regular text-xs text-neutral-600'>
-                {ordinalDay(item.due_day)}
+                {dueLabel(item)}
               </Text>
               {category && (
                 <Text className='font-ibm-regular text-xs text-neutral-600'>

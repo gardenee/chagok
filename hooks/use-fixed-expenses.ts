@@ -14,6 +14,14 @@ import type { FixedExpense } from '@/types/database';
 
 export type { FixedExpenseInput };
 
+function dueSortValue(item: FixedExpense): number {
+  return item.due_day_mode === 'eom' ? 32 : item.due_day;
+}
+
+function sortByDue(items: FixedExpense[]): FixedExpense[] {
+  return [...items].sort((a, b) => dueSortValue(a) - dueSortValue(b));
+}
+
 export function useFixedExpenses() {
   const { userProfile } = useAuthStore();
   const coupleId = userProfile?.couple_id;
@@ -22,6 +30,7 @@ export function useFixedExpenses() {
   const query = useQuery<FixedExpense[]>({
     queryKey: ['fixed-expenses', coupleId],
     queryFn: () => fetchFixedExpenses(coupleId!),
+    select: items => sortByDue(items),
     enabled: !!coupleId,
   });
 
@@ -52,7 +61,7 @@ export function useCreateFixedExpense() {
       if (!coupleId) return;
       queryClient.setQueryData<FixedExpense[]>(
         ['fixed-expenses', coupleId],
-        old => [...(old ?? []), newItem].sort((a, b) => a.due_day - b.due_day),
+        old => sortByDue([...(old ?? []), newItem]),
       );
     },
   });
@@ -74,9 +83,11 @@ export function useUpdateFixedExpense() {
       queryClient.setQueryData<FixedExpense[]>(
         ['fixed-expenses', coupleId],
         old =>
-          (old ?? [])
-            .map(item => (item.id === updatedItem.id ? updatedItem : item))
-            .sort((a, b) => a.due_day - b.due_day),
+          sortByDue(
+            (old ?? []).map(item =>
+              item.id === updatedItem.id ? updatedItem : item,
+            ),
+          ),
       );
     },
   });

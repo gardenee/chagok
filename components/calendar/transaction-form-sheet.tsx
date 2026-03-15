@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -80,6 +81,21 @@ export function TransactionFormSheet({
   onPmSave,
   onPmDelete,
 }: TransactionFormSheetProps) {
+  const [amountErrorMsg, setAmountErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (!txModal.visible) setAmountErrorMsg('');
+  }, [txModal.visible]);
+
+  function handleTxSavePress() {
+    const amount = parseInt(txModal.form.amount.replace(/[^0-9]/g, ''), 10);
+    if (!amount || amount <= 0 || amountErrorMsg) {
+      setAmountErrorMsg(prev => prev || '금액을 입력해주세요');
+      return;
+    }
+    onTxSave();
+  }
+
   const closeTx = () => setTxModal(s => ({ ...s, visible: false, view: 'tx' }));
 
   return (
@@ -146,13 +162,40 @@ export function TransactionFormSheet({
                 />
               )}
 
+              <View className='mb-2 flex-row items-center ml-1'>
+                <Text className='font-ibm-semibold text-xs text-neutral-600'>
+                  금액
+                </Text>
+                <Text
+                  className='font-ibm-semibold text-xs ml-0.5'
+                  style={{ color: '#C8562E' }}
+                >
+                  *
+                </Text>
+              </View>
               <AmountInput
                 value={txModal.form.amount}
-                onChangeText={v =>
-                  setTxModal(s => ({ ...s, form: { ...s.form, amount: v } }))
-                }
-                className='mb-3'
+                onChangeText={v => {
+                  setTxModal(s => ({ ...s, form: { ...s.form, amount: v } }));
+                  const n = parseInt(v, 10);
+                  setAmountErrorMsg(
+                    n > 2_147_483_647
+                      ? '최대 입력값을 초과했어요'
+                      : '',
+                  );
+                }}
+                className={amountErrorMsg ? 'mb-1' : 'mb-3'}
+                error={!!amountErrorMsg}
+                maxLength={10}
               />
+              {!!amountErrorMsg && (
+                <Text
+                  className='font-ibm-regular text-xs mb-3 ml-1'
+                  style={{ color: '#C8562E' }}
+                >
+                  {amountErrorMsg}
+                </Text>
+              )}
 
               <ModalTextInput
                 value={txModal.form.memo}
@@ -454,7 +497,7 @@ export function TransactionFormSheet({
                 </TouchableOpacity>
               )}
               <SaveButton
-                onPress={onTxSave}
+                onPress={handleTxSavePress}
                 isSaving={isTxSaving}
                 label={txModal.editingId ? '수정 완료' : '저장'}
               />

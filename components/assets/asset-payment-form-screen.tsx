@@ -71,11 +71,19 @@ export function AssetPaymentFormScreen({
   onDeletePm,
 }: Props) {
   const [form, setForm] = useState<UnifiedFormData>(INITIAL_FORM);
+  const [nameError, setNameError] = useState(false);
+  const [originalForm, setOriginalForm] = useState<UnifiedFormData | null>(
+    null,
+  );
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) {
+      setNameError(false);
+      return;
+    }
+    let initialForm: UnifiedFormData;
     if (editingAsset) {
-      setForm({
+      initialForm = {
         category: 'asset',
         type: editingAsset.type,
         name: editingAsset.name,
@@ -85,9 +93,9 @@ export function AssetPaymentFormScreen({
         billing_day: null,
         annual_fee: '',
         linked_asset_id: null,
-      });
+      };
     } else if (editingPm) {
-      setForm({
+      initialForm = {
         category: 'pm',
         type: editingPm.type,
         name: editingPm.name,
@@ -98,11 +106,42 @@ export function AssetPaymentFormScreen({
         annual_fee:
           editingPm.annual_fee != null ? String(editingPm.annual_fee) : '',
         linked_asset_id: editingPm.linked_asset_id ?? null,
-      });
+      };
     } else {
-      setForm(INITIAL_FORM);
+      initialForm = INITIAL_FORM;
     }
+    setForm(initialForm);
+    setNameError(false);
+    setOriginalForm(initialForm);
   }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleSavePress() {
+    const nameErr = !form.name.trim();
+    if (nameErr) {
+      setNameError(true);
+      return;
+    }
+    setNameError(false);
+
+    // no-op check for edit mode
+    if (originalForm && (editingAsset || editingPm)) {
+      const noChange =
+        form.name.trim() === originalForm.name.trim() &&
+        form.amount === originalForm.amount &&
+        form.limit === originalForm.limit &&
+        form.card_company === originalForm.card_company &&
+        form.billing_day === originalForm.billing_day &&
+        form.annual_fee === originalForm.annual_fee &&
+        form.linked_asset_id === originalForm.linked_asset_id &&
+        form.type === originalForm.type;
+      if (noChange) {
+        onClose();
+        return;
+      }
+    }
+
+    onSave(form);
+  }
 
   const isEditMode = !!(editingAsset || editingPm);
 
@@ -412,12 +451,23 @@ export function AssetPaymentFormScreen({
             )}
 
             {/* ── 이름 ── */}
-            <Text className='font-ibm-bold text-sm text-neutral-700 mb-2 ml-1'>
-              이름
-            </Text>
+            <View className='mb-2 flex-row items-center ml-1'>
+              <Text className='font-ibm-bold text-sm text-neutral-700'>
+                이름
+              </Text>
+              <Text
+                className='font-ibm-bold text-sm ml-0.5'
+                style={{ color: Colors.peachDarker }}
+              >
+                *
+              </Text>
+            </View>
             <ModalTextInput
               value={form.name}
-              onChangeText={v => setForm(s => ({ ...s, name: v }))}
+              onChangeText={v => {
+                setForm(s => ({ ...s, name: v }));
+                if (nameError) setNameError(false);
+              }}
               placeholder={
                 form.category === 'asset'
                   ? '자산 이름 (예: 국민은행, 비상금)'
@@ -433,6 +483,7 @@ export function AssetPaymentFormScreen({
               }
               maxLength={20}
               className='mb-5'
+              error={nameError}
             />
 
             {/* ── 자산: 금액 ── */}
@@ -446,6 +497,7 @@ export function AssetPaymentFormScreen({
                   onChangeText={v => setForm(s => ({ ...s, amount: v }))}
                   placeholder='현재 잔액'
                   className='mb-2'
+                  maxLength={15}
                 />
               </>
             )}
@@ -494,7 +546,7 @@ export function AssetPaymentFormScreen({
               </TouchableOpacity>
             )}
             <SaveButton
-              onPress={() => onSave(form)}
+              onPress={handleSavePress}
               isSaving={isSaving}
               label={isEditMode ? '수정 완료' : '저장'}
             />

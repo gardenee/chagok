@@ -79,11 +79,6 @@ export default function AssetsTab() {
 
   async function handleFormSave(form: UnifiedFormData) {
     const name = form.name.trim();
-    if (!name) {
-      Alert.alert('입력 오류', '이름을 입력해주세요');
-      return;
-    }
-
     try {
       if (form.category === 'asset') {
         const amount = form.amount

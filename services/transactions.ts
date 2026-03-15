@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { Transaction, FixedExpense } from '@/types/database';
+import { resolveFixedExpenseDate } from '@/utils/fixed-expense-date';
 
 export type TransactionRow = Transaction & {
   categories: { name: string; icon: string; color: string } | null;
@@ -84,36 +85,47 @@ export async function materializeFixedExpenses(
   year: number,
   month: number,
 ): Promise<void> {
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const m = String(month + 1).padStart(2, '0');
-  const candidates = fixedExpenses.filter(fe => fe.due_day <= daysInMonth);
-  if (candidates.length === 0) return;
+  if (fixedExpenses.length === 0) return;
+
+  const candidates = fixedExpenses.map(fe => {
+    const resolved = resolveFixedExpenseDate(fe, year, month);
+    const resolvedY = resolved.getFullYear();
+    const resolvedM = String(resolved.getMonth() + 1).padStart(2, '0');
+    const resolvedD = String(resolved.getDate()).padStart(2, '0');
+    return {
+      item: fe,
+      date: `${resolvedY}-${resolvedM}-${resolvedD}`,
+    };
+  });
 
   // 이미 materialized된 항목 조회
-  const startDate = `${year}-${m}-01`;
-  const endDate = `${year}-${m}-${String(daysInMonth).padStart(2, '0')}`;
+  const sortedDates = [...candidates].map(c => c.date).sort();
+  const startDate = sortedDates[0];
+  const endDate = sortedDates[sortedDates.length - 1];
   const { data: existing, error: fetchError } = await supabase
     .from('transactions')
-    .select('fixed_expense_id')
+    .select('fixed_expense_id, date')
     .eq('couple_id', coupleId)
     .gte('date', startDate)
     .lte('date', endDate)
     .not('fixed_expense_id', 'is', null);
   if (fetchError) throw fetchError;
 
-  const existingIds = new Set((existing ?? []).map(t => t.fixed_expense_id));
+  const existingKeys = new Set(
+    (existing ?? []).map(t => `${t.fixed_expense_id}|${t.date}`),
+  );
   const toInsert = candidates
-    .filter(fe => !existingIds.has(fe.id))
-    .map(fe => ({
+    .filter(({ item, date }) => !existingKeys.has(`${item.id}|${date}`))
+    .map(({ item, date }) => ({
       couple_id: coupleId,
       user_id: userId,
-      category_id: fe.category_id ?? null,
-      amount: fe.amount,
+      category_id: item.category_id ?? null,
+      amount: item.amount,
       type: 'expense' as const,
       tag: 'together' as const,
-      date: `${year}-${m}-${String(fe.due_day).padStart(2, '0')}`,
-      fixed_expense_id: fe.id,
-      memo: fe.name,
+      date,
+      fixed_expense_id: item.id,
+      memo: item.name,
     }));
   if (toInsert.length === 0) return;
 

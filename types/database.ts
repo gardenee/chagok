@@ -262,6 +262,8 @@ export interface Database {
           name: string;
           amount: number;
           due_day: number;
+          due_day_mode: 'day' | 'eom';
+          business_day_adjust: 'none' | 'prev' | 'next';
           created_at: string;
         };
         Insert: {
@@ -271,6 +273,8 @@ export interface Database {
           name: string;
           amount: number;
           due_day: number;
+          due_day_mode?: 'day' | 'eom';
+          business_day_adjust?: 'none' | 'prev' | 'next';
           created_at?: string;
         };
         Update: {
@@ -278,6 +282,8 @@ export interface Database {
           name?: string;
           amount?: number;
           due_day?: number;
+          due_day_mode?: 'day' | 'eom';
+          business_day_adjust?: 'none' | 'prev' | 'next';
         };
         Relationships: never[];
       };

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { ChevronUp, ChevronDown, Clock, X } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
@@ -26,6 +27,20 @@ export function ScheduleFormSheet({
   isSaving,
 }: ScheduleFormSheetProps) {
   const { form } = scheduleModal;
+  const [titleError, setTitleError] = useState(false);
+
+  useEffect(() => {
+    if (!scheduleModal.visible) setTitleError(false);
+  }, [scheduleModal.visible]);
+
+  function handleSavePress() {
+    if (!form.title.trim()) {
+      setTitleError(true);
+      return;
+    }
+    setTitleError(false);
+    onSave();
+  }
 
   function adjustHour(delta: number) {
     const [hStr, mStr] = (form.time ?? '09:00').split(':');
@@ -52,13 +67,26 @@ export function ScheduleFormSheet({
         className='mb-5'
       />
 
+      <View className='mb-2 flex-row items-center ml-1'>
+        <Text className='font-ibm-semibold text-xs text-neutral-600'>제목</Text>
+        <Text
+          className='font-ibm-semibold text-xs ml-0.5'
+          style={{ color: Colors.peachDarker }}
+        >
+          *
+        </Text>
+      </View>
       <ModalTextInput
         value={form.title}
-        onChangeText={v => onFormChange({ ...form, title: v })}
+        onChangeText={v => {
+          onFormChange({ ...form, title: v });
+          if (titleError) setTitleError(false);
+        }}
         placeholder='일정 제목'
         maxLength={30}
         autoFocus
         className='mb-5'
+        error={titleError}
       />
 
       <View className='mb-5'>
@@ -190,7 +218,7 @@ export function ScheduleFormSheet({
       </View>
 
       <SaveButton
-        onPress={onSave}
+        onPress={handleSavePress}
         isSaving={isSaving}
         label={scheduleModal.editingId ? '수정 완료' : '저장'}
       />

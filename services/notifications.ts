@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { supabase } from '@/lib/supabase';
 import type { FixedExpense, Notification } from '@/types/database';
+import { resolveFixedExpenseDate } from '@/utils/fixed-expense-date';
 
 function isExpoPushToken(token: string): boolean {
   return (
@@ -160,7 +161,7 @@ export async function scheduleFixedExpenseReminders(
       const totalMonths = now.getMonth() + offset;
       const year = now.getFullYear() + Math.floor(totalMonths / 12);
       const month = totalMonths % 12;
-      const dueDate = new Date(year, month, expense.due_day, 9, 0, 0);
+      const dueDate = resolveFixedExpenseDate(expense, year, month);
 
       if (dueDate > now) {
         await Notifications.scheduleNotificationAsync({
@@ -170,7 +171,10 @@ export async function scheduleFixedExpenseReminders(
             sound: true,
             data: { type: 'FIXED_EXPENSE', id: expense.id },
           },
-          trigger: dueDate,
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: dueDate,
+          },
         });
       }
     }

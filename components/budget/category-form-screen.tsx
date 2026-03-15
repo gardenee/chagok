@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -52,7 +53,21 @@ export function CategoryFormScreen({
   categoryType = 'expense',
   onTypeChange,
 }: Props) {
+  const [nameError, setNameError] = useState(false);
   const isIncome = categoryType === 'income';
+
+  useEffect(() => {
+    setNameError(false);
+  }, [editingId]);
+
+  function handleSavePress() {
+    if (!form.name.trim()) {
+      setNameError(true);
+      return;
+    }
+    setNameError(false);
+    onSave();
+  }
   const title = editingId
     ? isIncome
       ? '수입 카테고리 수정'
@@ -98,15 +113,27 @@ export function CategoryFormScreen({
           )}
 
           {/* 이름 */}
-          <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
-            카테고리명
-          </Text>
+          <View className='mb-2 flex-row items-center ml-1'>
+            <Text className='font-ibm-semibold text-xs text-neutral-600'>
+              카테고리명
+            </Text>
+            <Text
+              className='font-ibm-semibold text-xs ml-0.5'
+              style={{ color: Colors.peachDarker }}
+            >
+              *
+            </Text>
+          </View>
           <ModalTextInput
             value={form.name}
-            onChangeText={v => onChange({ ...form, name: v })}
+            onChangeText={v => {
+              onChange({ ...form, name: v });
+              if (nameError) setNameError(false);
+            }}
             placeholder='카테고리 이름 (예: 식비, 교통비)'
             maxLength={10}
             className='mb-6'
+            error={nameError}
           />
 
           {/* 아이콘 */}
@@ -189,9 +216,8 @@ export function CategoryFormScreen({
             </TouchableOpacity>
           )}
           <SaveButton
-            onPress={onSave}
+            onPress={handleSavePress}
             isSaving={isSaving}
-            disabled={!form.icon || !form.color}
             label={editingId ? '수정 완료' : '저장'}
           />
         </View>

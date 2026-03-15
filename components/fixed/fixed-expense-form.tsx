@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,6 +21,8 @@ export type FormData = {
   name: string;
   amount: string;
   due_day: number;
+  due_day_mode: 'day' | 'eom';
+  business_day_adjust: 'none' | 'prev' | 'next';
   category_id: string | null;
 };
 
@@ -27,6 +30,8 @@ export const INITIAL_FORM: FormData = {
   name: '',
   amount: '',
   due_day: 1,
+  due_day_mode: 'day',
+  business_day_adjust: 'none',
   category_id: null,
 };
 
@@ -55,6 +60,25 @@ export function FixedExpenseForm({
   onCatCreate,
   onCatMgmt,
 }: Props) {
+  const [errors, setErrors] = useState({ name: false, amountMsg: '' });
+
+  useEffect(() => {
+    setErrors({ name: false, amountMsg: '' });
+  }, [editingId]);
+
+  function handleSavePress() {
+    const nameError = !form.name.trim();
+    const parsed = parseInt(form.amount, 10);
+    const amountMsg =
+      errors.amountMsg ||
+      (!form.amount || parsed <= 0 ? '금액을 입력해주세요' : '');
+    if (nameError || amountMsg) {
+      setErrors({ name: nameError, amountMsg });
+      return;
+    }
+    onSave();
+  }
+
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <KeyboardAvoidingView
@@ -80,20 +104,66 @@ export function FixedExpenseForm({
           contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
           keyboardShouldPersistTaps='handled'
         >
+          <View className='mb-2 flex-row items-center ml-1'>
+            <Text className='font-ibm-semibold text-xs text-neutral-600'>
+              항목 이름
+            </Text>
+            <Text
+              className='font-ibm-semibold text-xs ml-0.5'
+              style={{ color: Colors.peachDarker }}
+            >
+              *
+            </Text>
+          </View>
           <ModalTextInput
             value={form.name}
-            onChangeText={v => onChange({ ...form, name: v })}
+            onChangeText={v => {
+              onChange({ ...form, name: v });
+              if (errors.name) setErrors(e => ({ ...e, name: false }));
+            }}
             placeholder='항목 이름 (예: 월세, 넷플릭스)'
             maxLength={20}
             autoFocus={!editingId}
             className='mb-4'
+            error={errors.name}
           />
 
+          <View className='mb-2 flex-row items-center ml-1'>
+            <Text className='font-ibm-semibold text-xs text-neutral-600'>
+              금액
+            </Text>
+            <Text
+              className='font-ibm-semibold text-xs ml-0.5'
+              style={{ color: Colors.peachDarker }}
+            >
+              *
+            </Text>
+          </View>
           <AmountInput
             value={form.amount}
-            onChangeText={v => onChange({ ...form, amount: v })}
-            className='mb-4'
+            onChangeText={v => {
+              onChange({ ...form, amount: v });
+              const n = parseInt(v, 10);
+              setErrors(e => ({
+                ...e,
+                amountMsg:
+                  n > 2_147_483_647
+                    ? '최대 입력값을 초과했어요'
+                    : '',
+              }));
+            }}
+            className={errors.amountMsg ? 'mb-1' : 'mb-4'}
+            error={!!errors.amountMsg}
+            maxLength={10}
           />
+          {!!errors.amountMsg && (
+            <Text
+              className='font-ibm-regular text-xs mb-4 ml-1'
+              style={{ color: Colors.peachDarker }}
+            >
+              {errors.amountMsg}
+            </Text>
+          )}
 
           {/* 카테고리 선택 */}
           <View className='mb-4'>
@@ -175,13 +245,29 @@ export function FixedExpenseForm({
             <Text className='font-ibm-semibold text-xs text-neutral-500 mb-2 ml-1'>
               납부일
             </Text>
+            <View className='flex-row gap-2 mb-2'>
+              <TouchableOpacity
+                onPress={() => onChange({ ...form, due_day_mode: 'eom' })}
+                className={`rounded-xl px-3 h-9 items-center justify-center ${form.due_day_mode === 'eom' ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                activeOpacity={0.7}
+              >
+                <Text
+                  className={`${form.due_day_mode === 'eom' ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'} text-xs`}
+                >
+                  말일
+                </Text>
+              </TouchableOpacity>
+            </View>
             <View className='flex-row flex-wrap gap-1.5'>
               {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
-                const isSelected = form.due_day === day;
+                const isSelected =
+                  form.due_day_mode === 'day' && form.due_day === day;
                 return (
                   <TouchableOpacity
                     key={day}
-                    onPress={() => onChange({ ...form, due_day: day })}
+                    onPress={() =>
+                      onChange({ ...form, due_day: day, due_day_mode: 'day' })
+                    }
                     className={`rounded-xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                     style={{ width: 38, height: 36 }}
                     activeOpacity={0.7}
@@ -190,6 +276,40 @@ export function FixedExpenseForm({
                       className={`${isSelected ? 'font-ibm-bold' : 'font-ibm-semibold'} text-xs ${isSelected ? 'text-neutral-700' : 'text-neutral-500'}`}
                     >
                       {day}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <Text className='font-ibm-semibold text-xs text-neutral-500 mt-4 mb-2 ml-1'>
+              영업일 보정
+            </Text>
+            <View className='flex-row gap-2'>
+              {[
+                { key: 'none', label: '없음' },
+                { key: 'prev', label: '직전' },
+                { key: 'next', label: '직후' },
+              ].map(opt => {
+                const isSelected = form.business_day_adjust === opt.key;
+                return (
+                  <TouchableOpacity
+                    key={opt.key}
+                    onPress={() =>
+                      onChange({
+                        ...form,
+                        business_day_adjust: opt.key as
+                          | 'none'
+                          | 'prev'
+                          | 'next',
+                      })
+                    }
+                    className={`rounded-xl px-3 h-9 items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      className={`${isSelected ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'} text-xs`}
+                    >
+                      {opt.label}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -223,7 +343,7 @@ export function FixedExpenseForm({
             </TouchableOpacity>
           )}
           <SaveButton
-            onPress={onSave}
+            onPress={handleSavePress}
             isSaving={isSaving}
             label={editingId ? '수정 완료' : '저장'}
           />

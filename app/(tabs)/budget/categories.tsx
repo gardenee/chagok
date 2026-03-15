@@ -68,12 +68,21 @@ export default function CategoriesScreen() {
 
   async function handleSave() {
     const name = modal.form.name.trim();
-    if (!name) {
-      Alert.alert('입력 오류', '카테고리 이름을 입력해주세요');
-      return;
-    }
     try {
       if (modal.editingId) {
+        // no-op check
+        const origCat = categories.find(c => c.id === modal.editingId);
+        if (origCat) {
+          const origColor = resolveColorKey(origCat.color);
+          const noChange =
+            name === origCat.name.trim() &&
+            modal.form.icon === origCat.icon &&
+            modal.form.color === origColor;
+          if (noChange) {
+            setModal(INITIAL_MODAL);
+            return;
+          }
+        }
         await updateCategory.mutateAsync({
           id: modal.editingId,
           name,
