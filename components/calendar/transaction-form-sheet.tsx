@@ -119,30 +119,32 @@ export function TransactionFormSheet({
               }}
               keyboardShouldPersistTaps='handled'
             >
-              <SegmentControl
-                options={[
-                  { value: 'expense' as const, label: '지출' },
-                  { value: 'income' as const, label: '수입' },
-                ]}
-                value={txModal.form.type}
-                onChange={type =>
-                  setTxModal(s => ({
-                    ...s,
-                    form: {
-                      ...s.form,
-                      type,
-                      category_id: null,
-                      ...(type === 'income'
-                        ? { payment_method_id: null, asset_id: null }
-                        : {}),
-                    },
-                  }))
-                }
-                bgClassName='bg-neutral-100 rounded-2xl'
-                className='mb-5'
-                activeTextClassName='text-neutral-800'
-                inactiveTextClassName='text-neutral-500'
-              />
+              {!txModal.editingId && (
+                <SegmentControl
+                  options={[
+                    { value: 'expense' as const, label: '지출' },
+                    { value: 'income' as const, label: '수입' },
+                  ]}
+                  value={txModal.form.type}
+                  onChange={type =>
+                    setTxModal(s => ({
+                      ...s,
+                      form: {
+                        ...s.form,
+                        type,
+                        category_id: null,
+                        ...(type === 'income'
+                          ? { payment_method_id: null, asset_id: null }
+                          : {}),
+                      },
+                    }))
+                  }
+                  bgClassName='bg-neutral-100 rounded-2xl'
+                  className='mb-5'
+                  activeTextClassName='text-neutral-800'
+                  inactiveTextClassName='text-neutral-500'
+                />
+              )}
 
               <AmountInput
                 value={txModal.form.amount}

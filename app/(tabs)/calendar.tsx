@@ -738,7 +738,8 @@ export default function CalendarTab() {
         view: 'tx',
         detachFixed: false,
       }));
-    } catch {
+    } catch (err) {
+      console.error('[handleTxSave] error:', err);
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
   }
