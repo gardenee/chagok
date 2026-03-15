@@ -812,7 +812,7 @@ export default function CalendarTab() {
     const payload = {
       amount,
       type: txModal.form.type,
-      tag: txModal.form.tag,
+      ...(txModal.form.tag ? { tag: txModal.form.tag } : {}),
       memo: txModal.form.memo.trim() || null,
       category_id: txModal.form.category_id,
       payment_method_id: txModal.form.payment_method_id,

@@ -4,7 +4,7 @@ import type { PaymentMethodFormData } from '@/constants/payment-method';
 export type TxFormData = {
   amount: string;
   type: 'expense' | 'income';
-  tag: 'me' | 'partner' | 'together';
+  tag: 'me' | 'partner' | 'together' | null;
   memo: string;
   category_id: string | null;
   payment_method_id: string | null;
@@ -13,7 +13,7 @@ export type TxFormData = {
 
 export type ScheduleFormData = {
   title: string;
-  tag: 'me' | 'partner' | 'together';
+  tag: 'me' | 'partner' | 'together' | null;
   time: string | null;
 };
 
@@ -60,7 +60,7 @@ export const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 export const INITIAL_TX_FORM: TxFormData = {
   amount: '',
   type: 'expense',
-  tag: 'me',
+  tag: null,
   memo: '',
   category_id: null,
   payment_method_id: null,

@@ -11,7 +11,7 @@ export type TransactionRow = Transaction & {
 export type TransactionInput = {
   amount: number;
   type: 'expense' | 'income';
-  tag: 'me' | 'partner' | 'together';
+  tag?: 'me' | 'partner' | 'together' | null;
   memo?: string | null;
   date: string;
   category_id?: string | null;

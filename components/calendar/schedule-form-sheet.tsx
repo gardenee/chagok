@@ -28,9 +28,13 @@ export function ScheduleFormSheet({
 }: ScheduleFormSheetProps) {
   const { form } = scheduleModal;
   const [titleError, setTitleError] = useState(false);
+  const [tagError, setTagError] = useState(false);
 
   useEffect(() => {
-    if (!scheduleModal.visible) setTitleError(false);
+    if (!scheduleModal.visible) {
+      setTitleError(false);
+      setTagError(false);
+    }
   }, [scheduleModal.visible]);
 
   function handleSavePress() {
@@ -38,7 +42,12 @@ export function ScheduleFormSheet({
       setTitleError(true);
       return;
     }
+    if (!form.tag) {
+      setTagError(true);
+      return;
+    }
     setTitleError(false);
+    setTagError(false);
     onSave();
   }
 
@@ -90,16 +99,27 @@ export function ScheduleFormSheet({
       />
 
       <View className='mb-5'>
-        <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
-          참여자
-        </Text>
+        <View className='flex-row items-center mb-2 ml-1'>
+          <Text className='font-ibm-semibold text-xs text-neutral-600'>
+            참여자
+          </Text>
+          <Text
+            className='font-ibm-semibold text-xs ml-0.5'
+            style={{ color: Colors.peachDarker }}
+          >
+            *
+          </Text>
+        </View>
         <View className='flex-row gap-2'>
           {tagOptions.map(({ value, label }) => {
             const isSelected = form.tag === value;
             return (
               <TouchableOpacity
                 key={value}
-                onPress={() => onFormChange({ ...form, tag: value })}
+                onPress={() => {
+                  onFormChange({ ...form, tag: isSelected ? null : value });
+                  if (tagError) setTagError(false);
+                }}
                 className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                 activeOpacity={0.7}
               >
@@ -112,6 +132,14 @@ export function ScheduleFormSheet({
             );
           })}
         </View>
+        {tagError && (
+          <Text
+            className='font-ibm-regular text-xs mt-1 ml-1'
+            style={{ color: Colors.peachDarker }}
+          >
+            참여자를 선택해주세요
+          </Text>
+        )}
       </View>
 
       <View className='mb-6'>

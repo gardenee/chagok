@@ -195,12 +195,15 @@ export function TransactionFormSheet({
                 </Text>
               )}
 
+              <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
+                항목명
+              </Text>
               <ModalTextInput
                 value={txModal.form.memo}
                 onChangeText={v =>
                   setTxModal(s => ({ ...s, form: { ...s.form, memo: v } }))
                 }
-                placeholder='메모'
+                placeholder={txModal.form.type === 'expense' ? '예: 장보기, 넷플릭스' : '예: 월급, 용돈'}
                 maxLength={50}
                 className='mb-4'
               />
@@ -443,28 +446,34 @@ export function TransactionFormSheet({
 
               <View className='mb-2'>
                 <Text className='font-ibm-semibold text-xs text-neutral-600 mb-2 ml-1'>
-                  {'누가'}
+                  누가
                 </Text>
                 <View className='flex-row gap-2'>
-                  {tagOptions.map(({ value, label }) => (
-                    <TouchableOpacity
-                      key={value}
-                      onPress={() =>
-                        setTxModal(s => ({
-                          ...s,
-                          form: { ...s.form, tag: value },
-                        }))
-                      }
-                      className={`flex-1 py-2.5 rounded-2xl items-center ${txModal.form.tag === value ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                      activeOpacity={0.7}
-                    >
-                      <Text
-                        className={`font-ibm-semibold text-sm ${txModal.form.tag === value ? 'text-neutral-800' : 'text-neutral-500'}`}
+                  {tagOptions.map(({ value, label }) => {
+                    const isSelected = txModal.form.tag === value;
+                    return (
+                      <TouchableOpacity
+                        key={value}
+                        onPress={() =>
+                          setTxModal(s => ({
+                            ...s,
+                            form: {
+                              ...s.form,
+                              tag: isSelected ? null : value,
+                            },
+                          }))
+                        }
+                        className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        activeOpacity={0.7}
                       >
-                        {label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                        <Text
+                          className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                        >
+                          {label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </View>
             </ScrollView>
