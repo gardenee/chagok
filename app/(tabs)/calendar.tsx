@@ -933,34 +933,6 @@ export default function CalendarTab() {
           holidaysByDate={holidaysByDate}
         />
 
-        {/* 선택일 요약 (가계부 탭만) */}
-        {activeTab === 'ledger' && (
-          <View className='mx-4 mt-6 flex-row gap-3'>
-            <View
-              className='flex-1 bg-peach rounded-2xl px-4 py-3.5'
-              style={Shadows.card}
-            >
-              <Text className='font-ibm-semibold text-sm text-neutral-700'>
-                지출
-              </Text>
-              <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
-                {totalExpense > 0 ? `-${formatAmount(totalExpense)}원` : '-'}
-              </Text>
-            </View>
-            <View
-              className='flex-1 bg-olive rounded-2xl px-4 py-3.5'
-              style={Shadows.card}
-            >
-              <Text className='font-ibm-semibold text-sm text-neutral-700'>
-                수입
-              </Text>
-              <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
-                {totalIncome > 0 ? `+${formatAmount(totalIncome)}원` : '-'}
-              </Text>
-            </View>
-          </View>
-        )}
-
         {/* 탭 콘텐츠 */}
         <View className='mx-4 mt-4'>
           <View className='flex-row items-center justify-between mb-3'>
@@ -987,6 +959,34 @@ export default function CalendarTab() {
             )}
           </View>
 
+          {/* 선택일 요약 (가계부 탭만) */}
+          {activeTab === 'ledger' && (
+            <View className='flex-row gap-3 mb-4'>
+              <View
+                className='flex-1 bg-peach rounded-2xl px-4 py-3.5'
+                style={Shadows.card}
+              >
+                <Text className='font-ibm-semibold text-sm text-neutral-700'>
+                  지출
+                </Text>
+                <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
+                  {totalExpense > 0 ? `-${formatAmount(totalExpense)}원` : '-'}
+                </Text>
+              </View>
+              <View
+                className='flex-1 bg-olive rounded-2xl px-4 py-3.5'
+                style={Shadows.card}
+              >
+                <Text className='font-ibm-semibold text-sm text-neutral-700'>
+                  수입
+                </Text>
+                <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
+                  {totalIncome > 0 ? `+${formatAmount(totalIncome)}원` : '-'}
+                </Text>
+              </View>
+            </View>
+          )}
+
           {/* 가계부 탭 */}
           {activeTab === 'ledger' &&
             (txLoading ? (
@@ -994,59 +994,92 @@ export default function CalendarTab() {
             ) : selectedTransactions.length === 0 ? (
               <EmptyState icon={CalendarX} title='거래 내역이 없어요' />
             ) : (
-              <View className='gap-2.5'>
-                {selectedTransactions.map(t => {
-                  const cat = categories.find(c => c.id === t.category_id);
-                  const isFixed = !!t.fixed_expense_id;
-                  const CatIcon = cat
-                    ? (ICON_MAP[cat.icon] ?? Wallet)
-                    : isFixed
-                      ? Repeat
-                      : Wallet;
-                  const catColor = cat
-                    ? resolveColor(cat.color)
-                    : isFixed
-                      ? Colors.peach
-                      : '#A3A3A3';
-                  const isExpense = t.type === 'expense';
-                  return (
-                    <ItemCard key={t.id} onPress={() => setDetailTx(t)}>
-                      <IconBox color={catColor}>
-                        <CatIcon size={18} color={catColor} strokeWidth={2.5} />
-                      </IconBox>
-                      <View className='flex-1'>
-                        <Text
-                          className='font-ibm-semibold text-sm text-neutral-800'
-                          numberOfLines={1}
-                        >
-                          {t.memo ?? cat?.name ?? '기타'}
-                        </Text>
-                        <View className='flex-row items-center gap-1.5 mt-0.5'>
-                          {isFixed ? (
-                            <ColorPill label='고정지출' color={Colors.peach} />
-                          ) : (
-                            <>
-                              {cat && (
-                                <ColorPill label={cat.name} color={catColor} />
-                              )}
-                              <TagPill
-                                tag={t.tag}
-                                label={resolveTagLabel(t.tag, t.user_id)}
-                                bgColor={resolveTagColor(t.tag, t.user_id)}
-                              />
-                            </>
-                          )}
-                        </View>
-                      </View>
-                      <Text
-                        className={`font-ibm-bold text-sm ${isExpense ? 'text-peach-darker' : 'text-olive-darker'}`}
-                      >
-                        {isExpense ? '-' : '+'}
-                        {formatAmount(t.amount)}원
+              <View className='gap-5'>
+                {(['income', 'expense'] as const)
+                  .map(type => ({
+                    type,
+                    items: selectedTransactions.filter(t => t.type === type),
+                  }))
+                  .filter(({ items }) => items.length > 0)
+                  .map(({ type, items }) => (
+                    <View key={type}>
+                      <Text className='font-ibm-bold text-sm text-neutral-500 mb-2 ml-1'>
+                        {type === 'expense' ? '지출' : '수입'}
                       </Text>
-                    </ItemCard>
-                  );
-                })}
+                      <View className='gap-2.5'>
+                        {items.map(t => {
+                          const cat = categories.find(
+                            c => c.id === t.category_id,
+                          );
+                          const isFixed = !!t.fixed_expense_id;
+                          const CatIcon = cat
+                            ? (ICON_MAP[cat.icon] ?? Wallet)
+                            : isFixed
+                              ? Repeat
+                              : Wallet;
+                          const catColor = cat
+                            ? resolveColor(cat.color)
+                            : isFixed
+                              ? Colors.peach
+                              : '#A3A3A3';
+                          const isExpense = t.type === 'expense';
+                          return (
+                            <ItemCard key={t.id} onPress={() => setDetailTx(t)}>
+                              <IconBox color={catColor}>
+                                <CatIcon
+                                  size={18}
+                                  color={catColor}
+                                  strokeWidth={2.5}
+                                />
+                              </IconBox>
+                              <View className='flex-1'>
+                                <Text
+                                  className='font-ibm-semibold text-sm text-neutral-800'
+                                  numberOfLines={1}
+                                >
+                                  {t.memo ?? cat?.name ?? '기타'}
+                                </Text>
+                                <View className='flex-row items-center gap-1.5 mt-0.5'>
+                                  {isFixed ? (
+                                    <ColorPill
+                                      label='고정지출'
+                                      color={Colors.peach}
+                                    />
+                                  ) : (
+                                    <>
+                                      {cat && (
+                                        <ColorPill
+                                          label={cat.name}
+                                          color={catColor}
+                                        />
+                                      )}
+                                      <TagPill
+                                        tag={t.tag}
+                                        label={resolveTagLabel(
+                                          t.tag,
+                                          t.user_id,
+                                        )}
+                                        bgColor={resolveTagColor(
+                                          t.tag,
+                                          t.user_id,
+                                        )}
+                                      />
+                                    </>
+                                  )}
+                                </View>
+                              </View>
+                              <Text
+                                className={`font-ibm-bold text-sm ${isExpense ? 'text-peach-darker' : 'text-olive-darker'}`}
+                              >
+                                {isExpense ? '-' : '+'}
+                                {formatAmount(t.amount)}원
+                              </Text>
+                            </ItemCard>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  ))}
               </View>
             ))}
 
