@@ -39,6 +39,7 @@ import {
   type TagOption,
 } from './types';
 import type { Category, PaymentMethod, Asset } from '@/types/database';
+import type { TransactionRow } from '@/hooks/use-transactions';
 
 interface TransactionFormSheetProps {
   txModal: TxModalState;
@@ -47,6 +48,7 @@ interface TransactionFormSheetProps {
   categories: Category[];
   paymentMethods: PaymentMethod[];
   bankCashAssets: Asset[];
+  transactions: TransactionRow[];
   tagOptions: TagOption[];
   isTxSaving: boolean;
   isCatSaving: boolean;
@@ -68,6 +70,7 @@ export function TransactionFormSheet({
   categories,
   paymentMethods,
   bankCashAssets,
+  transactions,
   tagOptions,
   isTxSaving,
   isCatSaving,
@@ -86,6 +89,30 @@ export function TransactionFormSheet({
   useEffect(() => {
     if (!txModal.visible) setAmountErrorMsg('');
   }, [txModal.visible]);
+
+  // 동일 메모의 최근 항목이 있으면 카테고리 자동 선택 (신규 입력 시에만)
+  useEffect(() => {
+    if (txModal.editingId) return;
+    const trimmed = txModal.form.memo.trim();
+    if (!trimmed) return;
+    const match = [...transactions]
+      .filter(
+        t =>
+          t.type === txModal.form.type &&
+          t.memo?.trim() === trimmed &&
+          t.category_id,
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )[0];
+    if (match) {
+      setTxModal(s => ({
+        ...s,
+        form: { ...s.form, category_id: match.category_id },
+      }));
+    }
+  }, [txModal.form.memo, txModal.form.type]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleTxSavePress() {
     const amount = parseInt(txModal.form.amount.replace(/[^0-9]/g, ''), 10);
@@ -203,7 +230,11 @@ export function TransactionFormSheet({
                 onChangeText={v =>
                   setTxModal(s => ({ ...s, form: { ...s.form, memo: v } }))
                 }
-                placeholder={txModal.form.type === 'expense' ? '예: 장보기, 넷플릭스' : '예: 월급, 용돈'}
+                placeholder={
+                  txModal.form.type === 'expense'
+                    ? '예: 장보기, 넷플릭스'
+                    : '예: 월급, 용돈'
+                }
                 maxLength={50}
                 className='mb-4'
               />

@@ -894,7 +894,7 @@ export default function CalendarTab() {
 
     const payload = {
       title: scheduleModal.form.title.trim(),
-      tag: scheduleModal.form.tag,
+      tag: scheduleModal.form.tag ?? ('me' as const),
       date: selectedDate,
       start_time: scheduleModal.form.time ?? null,
     };
@@ -1260,6 +1260,7 @@ export default function CalendarTab() {
         categories={categories}
         paymentMethods={paymentMethods}
         bankCashAssets={bankCashAssets}
+        transactions={transactions}
         tagOptions={tagOptions}
         isTxSaving={isTxSaving}
         isCatSaving={isCatSaving}
