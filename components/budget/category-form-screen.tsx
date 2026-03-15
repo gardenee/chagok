@@ -114,11 +114,11 @@ export function CategoryFormScreen({
 
           {/* 이름 */}
           <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-lg text-neutral-600'>
+            <Text className='font-ibm-semibold text-base text-neutral-600'>
               카테고리명
             </Text>
             <Text
-              className='font-ibm-semibold text-lg ml-0.5'
+              className='font-ibm-semibold text-base ml-0.5'
               style={{ color: Colors.peachDarker }}
             >
               *
@@ -137,7 +137,7 @@ export function CategoryFormScreen({
           />
 
           {/* 아이콘 */}
-          <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2.5 ml-1'>
+          <Text className='font-ibm-semibold text-base text-neutral-600 mb-2.5 ml-1'>
             아이콘
           </Text>
           <View className='flex-row flex-wrap gap-2 mb-6'>
@@ -151,7 +151,7 @@ export function CategoryFormScreen({
                   activeOpacity={0.7}
                 >
                   <Icon
-                    size={22}
+                    size={20}
                     color={isSelected ? Colors.brownDarker : '#A3A3A3'}
                     strokeWidth={2.5}
                   />
@@ -161,7 +161,7 @@ export function CategoryFormScreen({
           </View>
 
           {/* 색상 */}
-          <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2.5 ml-1'>
+          <Text className='font-ibm-semibold text-base text-neutral-600 mb-2.5 ml-1'>
             색상
           </Text>
           <View className='flex-row flex-wrap gap-2 mb-6'>
@@ -208,7 +208,7 @@ export function CategoryFormScreen({
               }}
             >
               <Text
-                className='font-ibm-semibold text-base'
+                className='font-ibm-semibold text-lg'
                 style={{ color: Colors.peachDark }}
               >
                 카테고리 삭제

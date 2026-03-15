@@ -51,13 +51,13 @@ export function CategorySummaryCard({
     >
       {/* 지출/수입 금액 */}
       <Text
-        className='font-ibm-regular text-sm mb-1.5'
+        className='font-ibm-regular text-base mb-1.5'
         style={{ color: '#8C7A5E' }}
       >
         {amountLabel}
       </Text>
       <Text
-        className='font-ibm-bold text-3xl mb-4'
+        className='font-ibm-bold text-4xl leading-[44px] mb-4'
         style={{ color: amountColor }}
       >
         {formatAmount(totalAmount)}원
@@ -68,7 +68,7 @@ export function CategorySummaryCard({
         <View className='mb-4'>
           <View className='flex-row justify-between mb-1.5'>
             <Text
-              className='font-ibm-regular text-sm'
+              className='font-ibm-regular text-base'
               style={{ color: '#8C7A5E' }}
             >
               {isExpense ? '예산' : '목표'} {formatAmount(budget)}원
@@ -78,7 +78,7 @@ export function CategorySummaryCard({
               style={{ backgroundColor: badgeBg }}
             >
               <Text
-                className='font-ibm-bold text-sm'
+                className='font-ibm-bold text-base'
                 style={{ color: badgeText }}
               >
                 {isExpense
@@ -107,14 +107,14 @@ export function CategorySummaryCard({
       {isExpense && (
         <View className='flex-row items-center gap-3'>
           <Text
-            className='font-ibm-semibold text-sm w-16'
+            className='font-ibm-semibold text-base w-20'
             style={{ color: '#8C7A5E' }}
           >
             {inputLabel}
           </Text>
           <View
             className='flex-1 flex-row items-center rounded-xl px-3 bg-white'
-            style={{ height: 44, ...Shadows.soft }}
+            style={{ height: 46, ...Shadows.soft }}
           >
             <TextInput
               className='flex-1 font-ibm-semibold text-base text-neutral-700'
@@ -135,7 +135,7 @@ export function CategorySummaryCard({
           </View>
           {isSavingBudget && (
             <Text
-              className='font-ibm-regular text-sm'
+              className='font-ibm-regular text-base'
               style={{ color: '#8C7A5E' }}
             >
               저장중...

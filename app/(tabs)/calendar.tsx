@@ -1050,25 +1050,25 @@ export default function CalendarTab() {
           }}
         >
           <View className='flex-row items-center justify-between mb-3'>
-            <Text className='font-ibm-bold text-base text-neutral-700'>
+            <Text className='font-ibm-bold text-lg text-neutral-700'>
               {getSelectedDateLabel(selectedDate)}{' '}
               {activeTab === 'ledger' ? '거래내역' : '일정목록'}
             </Text>
             {activeTab === 'ledger' ? (
               <TouchableOpacity
                 onPress={openTxCreate}
-                className='w-8 h-8 rounded-full items-center justify-center'
+                className='w-9 h-9 rounded-full items-center justify-center'
                 activeOpacity={0.6}
               >
-                <Plus size={16} color={Colors.brownDark} strokeWidth={2.5} />
+                <Plus size={18} color={Colors.brownDark} strokeWidth={2.5} />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
                 onPress={openScheduleCreate}
-                className='w-8 h-8 rounded-full items-center justify-center'
+                className='w-9 h-9 rounded-full items-center justify-center'
                 activeOpacity={0.6}
               >
-                <Plus size={16} color={Colors.brownDark} strokeWidth={2.5} />
+                <Plus size={18} color={Colors.brownDark} strokeWidth={2.5} />
               </TouchableOpacity>
             )}
           </View>
@@ -1080,10 +1080,10 @@ export default function CalendarTab() {
                 className='flex-1 bg-peach rounded-2xl px-4 py-3.5'
                 style={Shadows.card}
               >
-                <Text className='font-ibm-semibold text-sm text-neutral-700'>
+                <Text className='font-ibm-semibold text-base text-neutral-700'>
                   지출
                 </Text>
-                <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
+                <Text className='font-ibm-bold text-2xl text-brown-darker mt-0.5'>
                   {totalExpense > 0 ? `-${formatAmount(totalExpense)}원` : '-'}
                 </Text>
               </View>
@@ -1091,10 +1091,10 @@ export default function CalendarTab() {
                 className='flex-1 bg-olive rounded-2xl px-4 py-3.5'
                 style={Shadows.card}
               >
-                <Text className='font-ibm-semibold text-sm text-neutral-700'>
+                <Text className='font-ibm-semibold text-base text-neutral-700'>
                   수입
                 </Text>
-                <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
+                <Text className='font-ibm-bold text-2xl text-brown-darker mt-0.5'>
                   {totalIncome > 0 ? `+${formatAmount(totalIncome)}원` : '-'}
                 </Text>
               </View>
@@ -1117,7 +1117,7 @@ export default function CalendarTab() {
                   .filter(({ items }) => items.length > 0)
                   .map(({ type, items }) => (
                     <View key={type}>
-                      <Text className='font-ibm-bold text-sm text-neutral-500 mb-2 ml-1'>
+                      <Text className='font-ibm-bold text-base text-neutral-500 mb-2 ml-1'>
                         {type === 'expense' ? '지출' : '수입'}
                       </Text>
                       <View className='gap-2.5'>
@@ -1148,7 +1148,7 @@ export default function CalendarTab() {
                               </IconBox>
                               <View className='flex-1'>
                                 <Text
-                                  className='font-ibm-semibold text-sm text-neutral-800'
+                                  className='font-ibm-semibold text-base text-neutral-800'
                                   numberOfLines={1}
                                 >
                                   {t.memo ?? cat?.name ?? '기타'}
@@ -1191,7 +1191,7 @@ export default function CalendarTab() {
                                 </View>
                               </View>
                               <Text
-                                className={`font-ibm-bold text-sm ${isExpense ? 'text-peach-darker' : 'text-olive-darker'}`}
+                                className={`font-ibm-bold text-base ${isExpense ? 'text-peach-darker' : 'text-olive-darker'}`}
                               >
                                 {isExpense ? '-' : '+'}
                                 {formatAmount(t.amount)}원

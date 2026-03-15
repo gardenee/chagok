@@ -32,12 +32,12 @@ export function SettingsRow({
         {icon}
       </View>
       <Text
-        className={`flex-1 font-ibm-semibold text-sm ${disabled ? 'text-neutral-400' : 'text-neutral-800'}`}
+        className={`flex-1 font-ibm-semibold text-base ${disabled ? 'text-neutral-400' : 'text-neutral-800'}`}
       >
         {label}
       </Text>
       {value ? (
-        <Text className='font-ibm-regular text-sm text-neutral-800 mr-1.5'>
+        <Text className='font-ibm-regular text-base text-neutral-800 mr-1.5'>
           {value}
         </Text>
       ) : null}

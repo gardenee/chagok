@@ -83,7 +83,7 @@ export function CalendarGrid({
               activeOpacity={0.7}
             >
               <View
-                className={`w-8 h-8 rounded-full items-center justify-center ${isSelected ? 'bg-butter' : item.isToday ? 'bg-butter/40' : ''}`}
+                className={`w-9 h-9 rounded-full items-center justify-center ${isSelected ? 'bg-butter' : item.isToday ? 'bg-butter/40' : ''}`}
                 style={
                   isSelected
                     ? {
@@ -96,7 +96,7 @@ export function CalendarGrid({
                 }
               >
                 <Text
-                  className={`font-ibm-semibold text-lg ${
+                  className={`font-ibm-semibold text-base ${
                     isSelected
                       ? 'text-brown-darker'
                       : col === 0 || isHoliday

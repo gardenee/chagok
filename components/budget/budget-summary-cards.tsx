@@ -17,7 +17,7 @@ type Props = {
 function DiffTag({ diff, positive }: { diff: number; positive: boolean }) {
   return (
     <View className='bg-white/40 rounded-full px-2 py-0.5'>
-      <Text className='font-ibm-semibold text-xs text-neutral-700'>
+      <Text className='font-ibm-semibold text-sm text-neutral-700'>
         {formatAmountShortRounded(Math.abs(diff))}원
         {positive ? ' 절약' : ' 초과'}
       </Text>
@@ -42,7 +42,7 @@ export function BudgetSummaryCards({
         <View className='flex-row items-center justify-between'>
           <View className='flex-row items-center gap-2'>
             <Scale size={16} color={Colors.brownDark} strokeWidth={2.5} />
-            <Text className='font-ibm-semibold text-sm text-neutral-800'>
+            <Text className='font-ibm-semibold text-base text-neutral-800'>
               이번달 결산
             </Text>
           </View>
@@ -69,7 +69,7 @@ export function BudgetSummaryCards({
                 color={Colors.oliveDarker}
                 strokeWidth={2.5}
               />
-              <Text className='font-ibm-semibold text-sm text-neutral-800'>
+              <Text className='font-ibm-semibold text-base text-neutral-800'>
                 월 수입
               </Text>
             </View>
@@ -86,7 +86,7 @@ export function BudgetSummaryCards({
           <View className='flex-row justify-between items-center mb-1.5'>
             <View className='flex-row items-center gap-2'>
               <Wallet size={16} color={Colors.peachDarker} strokeWidth={2.5} />
-              <Text className='font-ibm-semibold text-sm text-neutral-800'>
+              <Text className='font-ibm-semibold text-base text-neutral-800'>
                 월 지출
               </Text>
             </View>

@@ -115,7 +115,7 @@ export function TransactionDetailModal({
             {/* 타이틀(메모/카테고리명) + 수정 버튼 */}
             <View className='flex-row items-start justify-between mb-1'>
               <Text
-                className='font-ibm-bold text-xl text-neutral-800 flex-1 mr-3'
+                className='font-ibm-bold text-2xl text-neutral-800 flex-1 mr-3'
                 numberOfLines={2}
               >
                 {detailTx?.memo ?? detailTx?.categories?.name ?? '내역'}
@@ -129,7 +129,7 @@ export function TransactionDetailModal({
                   }
                 }}
               >
-                <Text className='font-ibm-semibold text-xs text-neutral-600'>
+                <Text className='font-ibm-semibold text-sm text-neutral-600'>
                   수정
                 </Text>
               </TouchableOpacity>
@@ -138,7 +138,7 @@ export function TransactionDetailModal({
             <View className='flex flex-row justify-start items-center gap-2'>
               {/* 금액 */}
               <Text
-                className={`font-ibm-bold text-2xl ${isExpense ? 'text-peach-darker' : 'text-olive-darker'}`}
+                className={`font-ibm-bold text-3xl ${isExpense ? 'text-peach-darker' : 'text-olive-darker'}`}
               >
                 {isExpense ? '-' : '+'}
                 {formatAmount(detailTx?.amount ?? 0)}원

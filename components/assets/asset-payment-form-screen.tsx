@@ -243,7 +243,7 @@ export function AssetPaymentFormScreen({
 
             {showAssetGroups && (
               <View className='mb-3'>
-                <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2.5 ml-1'>
+                <Text className='font-ibm-semibold text-[17px] text-neutral-600 mb-2.5 ml-1'>
                   자산
                 </Text>
                 <View className='flex-row flex-wrap gap-2'>
@@ -260,11 +260,11 @@ export function AssetPaymentFormScreen({
                             type: key,
                           }))
                         }
-                        className={`px-4.5 py-3.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        className={`px-4 py-2.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-lg ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                          className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
                           {label}
                         </Text>
@@ -277,7 +277,7 @@ export function AssetPaymentFormScreen({
 
             {showPmGroup && (
               <View className='mb-6'>
-                <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2.5 ml-1'>
+                <Text className='font-ibm-semibold text-[17px] text-neutral-600 mb-2.5 ml-1'>
                   결제수단
                 </Text>
                 <View className='flex-row flex-wrap gap-2'>
@@ -297,11 +297,11 @@ export function AssetPaymentFormScreen({
                             linked_asset_id: null,
                           }))
                         }
-                        className={`px-4.5 py-3.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        className={`px-4 py-2.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-lg ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                          className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
                           {label}
                         </Text>
@@ -315,7 +315,7 @@ export function AssetPaymentFormScreen({
             {/* ── 신용카드 전용: 카드사 + 결제일 ── */}
             {isCreditCard && (
               <>
-                <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5 ml-1'>
+                <Text className='font-ibm-bold text-base text-neutral-700 mb-2.5 ml-1'>
                   카드사
                 </Text>
                 <View className='flex-row flex-wrap gap-2 mb-4'>
@@ -327,7 +327,7 @@ export function AssetPaymentFormScreen({
                         onPress={() =>
                           handleCompanySelect(company.id, company.name)
                         }
-                        className={`px-4 py-3 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        className={`px-3.5 py-2.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
@@ -342,7 +342,7 @@ export function AssetPaymentFormScreen({
 
                 {form.card_company && (
                   <>
-                    <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5 ml-1'>
+                    <Text className='font-ibm-bold text-base text-neutral-700 mb-2.5 ml-1'>
                       결제일
                     </Text>
                     <View className='flex-row flex-wrap gap-1.5 mb-2'>
@@ -413,7 +413,7 @@ export function AssetPaymentFormScreen({
             {/* ── 카드 공통: 연결 계좌 ── */}
             {isCard && (
               <>
-                <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5 ml-1'>
+                <Text className='font-ibm-bold text-base text-neutral-700 mb-2.5 ml-1'>
                   연결 계좌
                 </Text>
                 {bankAssets.length === 0 ? (
@@ -452,11 +452,11 @@ export function AssetPaymentFormScreen({
 
             {/* ── 이름 ── */}
             <View className='mb-2 flex-row items-center ml-1'>
-              <Text className='font-ibm-bold text-lg text-neutral-700'>
+              <Text className='font-ibm-bold text-base text-neutral-700'>
                 이름
               </Text>
               <Text
-                className='font-ibm-bold text-lg ml-0.5'
+                className='font-ibm-bold text-base ml-0.5'
                 style={{ color: Colors.peachDarker }}
               >
                 *
@@ -489,7 +489,7 @@ export function AssetPaymentFormScreen({
             {/* ── 자산: 금액 ── */}
             {form.category === 'asset' && (
               <>
-                <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5 ml-1'>
+                <Text className='font-ibm-bold text-base text-neutral-700 mb-2.5 ml-1'>
                   금액
                 </Text>
                 <AmountInput
@@ -518,7 +518,7 @@ export function AssetPaymentFormScreen({
                 }}
               >
                 <Text
-                  className='font-ibm-semibold text-base'
+                  className='font-ibm-semibold text-lg'
                   style={{ color: Colors.peachDark }}
                 >
                   자산 삭제
@@ -538,7 +538,7 @@ export function AssetPaymentFormScreen({
                 }}
               >
                 <Text
-                  className='font-ibm-semibold text-base'
+                  className='font-ibm-semibold text-lg'
                   style={{ color: Colors.peachDark }}
                 >
                   결제수단 삭제

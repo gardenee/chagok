@@ -16,7 +16,7 @@ export function SummaryCard({ label, amount, subtext }: SummaryCardProps) {
       <Text className='font-ibm-semibold text-base text-brown-dark mb-1'>
         {label}
       </Text>
-      <Text className='font-ibm-bold text-4xl text-brown-darker'>
+      <Text className='font-ibm-bold text-4xl leading-[44px] text-brown-darker'>
         {amount.toLocaleString('ko-KR')}원
       </Text>
       <Text className='font-ibm-regular text-base text-brown-dark mt-1.5'>

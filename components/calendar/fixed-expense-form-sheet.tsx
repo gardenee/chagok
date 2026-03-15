@@ -43,7 +43,7 @@ export function FixedExpenseFormSheet({
       />
 
       <View className='mb-6'>
-        <Text className='font-ibm-semibold text-lg text-neutral-500 mb-2.5 ml-1'>
+        <Text className='font-ibm-semibold text-base text-neutral-500 mb-2.5 ml-1'>
           납부일
         </Text>
         <View className='flex-row flex-wrap gap-1.5'>

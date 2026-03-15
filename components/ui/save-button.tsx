@@ -22,7 +22,7 @@ export function SaveButton({
       onPress={onPress}
       disabled={isDisabled}
       activeOpacity={0.8}
-      className='bg-butter rounded-2xl py-[18px] items-center flex-row justify-center gap-2.5'
+      className='bg-butter rounded-2xl py-4 items-center flex-row justify-center gap-2'
       style={{
         opacity: isDisabled ? 0.45 : 1,
         ...Shadows.primary,
@@ -32,8 +32,10 @@ export function SaveButton({
         <ActivityIndicator color={Colors.brownDark} />
       ) : (
         <>
-          <Check size={19} color={Colors.brownDark} strokeWidth={2.5} />
-          <Text className='font-ibm-bold text-lg text-brown-dark'>{label}</Text>
+          <Check size={18} color={Colors.brownDark} strokeWidth={2.5} />
+          <Text className='font-ibm-bold text-base text-brown-dark'>
+            {label}
+          </Text>
         </>
       )}
     </TouchableOpacity>

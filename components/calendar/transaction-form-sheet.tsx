@@ -190,11 +190,11 @@ export function TransactionFormSheet({
               )}
 
               <View className='mb-2 flex-row items-center ml-1'>
-                <Text className='font-ibm-semibold text-lg text-neutral-600'>
+                <Text className='font-ibm-semibold text-base text-neutral-600'>
                   금액
                 </Text>
                 <Text
-                  className='font-ibm-semibold text-lg ml-0.5'
+                  className='font-ibm-semibold text-base ml-0.5'
                   style={{ color: '#C8562E' }}
                 >
                   *
@@ -222,7 +222,7 @@ export function TransactionFormSheet({
                 </Text>
               )}
 
-              <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2 ml-1'>
+              <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
                 항목명
               </Text>
               <ModalTextInput
@@ -242,7 +242,7 @@ export function TransactionFormSheet({
               {/* 카테고리 선택 */}
               <View className='mb-4'>
                 <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-                  <Text className='font-ibm-semibold text-lg text-neutral-600'>
+                  <Text className='font-ibm-semibold text-base text-neutral-600'>
                     카테고리
                   </Text>
                   {categories.length > 0 && (
@@ -253,7 +253,7 @@ export function TransactionFormSheet({
                       activeOpacity={0.7}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                      <Text className='font-ibm-semibold text-lg text-neutral-600 bg-neutral-200 rounded-2xl px-3 py-1.5'>
+                      <Text className='font-ibm-semibold text-sm text-neutral-600 bg-neutral-200 rounded-2xl px-2.5 py-1'>
                         수정
                       </Text>
                     </TouchableOpacity>
@@ -306,7 +306,7 @@ export function TransactionFormSheet({
                               />
                             </View>
                             <Text
-                              className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                             >
                               {c.name}
                             </Text>
@@ -321,7 +321,7 @@ export function TransactionFormSheet({
                       <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
                         <Plus size={18} color='#A3A3A3' strokeWidth={2} />
                       </View>
-                      <Text className='font-ibm-semibold text-[10px] text-neutral-600'>
+                      <Text className='font-ibm-semibold text-[11px] text-neutral-600'>
                         추가
                       </Text>
                     </TouchableOpacity>
@@ -333,7 +333,7 @@ export function TransactionFormSheet({
               {txModal.form.type === 'expense' && (
                 <View className='mb-4'>
                   <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-                    <Text className='font-ibm-semibold text-lg text-neutral-600'>
+                    <Text className='font-ibm-semibold text-base text-neutral-600'>
                       결제수단
                     </Text>
                     {paymentMethods.length > 0 && (
@@ -344,7 +344,7 @@ export function TransactionFormSheet({
                         activeOpacity={0.7}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       >
-                        <Text className='font-ibm-semibold text-lg text-neutral-600 bg-neutral-200 rounded-2xl px-3 py-1.5'>
+                        <Text className='font-ibm-semibold text-sm text-neutral-600 bg-neutral-200 rounded-2xl px-2.5 py-1'>
                           수정
                         </Text>
                       </TouchableOpacity>
@@ -395,7 +395,7 @@ export function TransactionFormSheet({
                               />
                             </View>
                             <Text
-                              className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                               numberOfLines={1}
                             >
                               {pm.name}
@@ -443,7 +443,7 @@ export function TransactionFormSheet({
                               />
                             </View>
                             <Text
-                              className={`font-ibm-semibold text-[10px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                               numberOfLines={1}
                             >
                               {asset.name}
@@ -466,7 +466,7 @@ export function TransactionFormSheet({
                         <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
                           <Plus size={18} color='#A3A3A3' strokeWidth={2} />
                         </View>
-                        <Text className='font-ibm-semibold text-[10px] text-neutral-600'>
+                        <Text className='font-ibm-semibold text-[11px] text-neutral-600'>
                           추가
                         </Text>
                       </TouchableOpacity>
@@ -476,7 +476,7 @@ export function TransactionFormSheet({
               )}
 
               <View className='mb-2'>
-                <Text className='font-ibm-semibold text-lg text-neutral-600 mb-2 ml-1'>
+                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
                   누가
                 </Text>
                 <View className='flex-row gap-2'>
@@ -498,7 +498,7 @@ export function TransactionFormSheet({
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                          className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                         >
                           {label}
                         </Text>
@@ -527,7 +527,7 @@ export function TransactionFormSheet({
                   }}
                 >
                   <Text
-                    className='font-ibm-semibold text-base'
+                    className='font-ibm-semibold text-lg'
                     style={{ color: Colors.peachDark }}
                   >
                     내역 삭제

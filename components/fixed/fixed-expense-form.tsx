@@ -105,11 +105,11 @@ export function FixedExpenseForm({
           keyboardShouldPersistTaps='handled'
         >
           <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-lg text-neutral-600'>
+            <Text className='font-ibm-semibold text-base text-neutral-600'>
               항목 이름
             </Text>
             <Text
-              className='font-ibm-semibold text-lg ml-0.5'
+              className='font-ibm-semibold text-base ml-0.5'
               style={{ color: Colors.peachDarker }}
             >
               *
@@ -129,11 +129,11 @@ export function FixedExpenseForm({
           />
 
           <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-lg text-neutral-600'>
+            <Text className='font-ibm-semibold text-base text-neutral-600'>
               금액
             </Text>
             <Text
-              className='font-ibm-semibold text-lg ml-0.5'
+              className='font-ibm-semibold text-base ml-0.5'
               style={{ color: Colors.peachDarker }}
             >
               *
@@ -165,7 +165,7 @@ export function FixedExpenseForm({
           {/* 카테고리 선택 */}
           <View className='mb-4'>
             <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-              <Text className='font-ibm-semibold text-lg text-neutral-600'>
+              <Text className='font-ibm-semibold text-base text-neutral-600'>
                 카테고리
               </Text>
               {categories.length > 0 && (
@@ -174,7 +174,7 @@ export function FixedExpenseForm({
                   activeOpacity={0.7}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Text className='font-ibm-semibold text-lg text-neutral-600 bg-neutral-200 rounded-2xl px-3 py-1.5'>
+                  <Text className='font-ibm-semibold text-sm text-neutral-600 bg-neutral-200 rounded-2xl px-2.5 py-1'>
                     수정
                   </Text>
                 </TouchableOpacity>
@@ -204,17 +204,17 @@ export function FixedExpenseForm({
                       activeOpacity={0.7}
                     >
                       <View
-                        className='w-[52px] h-[52px] rounded-2xl items-center justify-center'
+                        className='w-12 h-12 rounded-2xl items-center justify-center'
                         style={{
                           backgroundColor: cColor + '30',
                           borderWidth: isSelected ? 2 : 0,
                           borderColor: isSelected ? cColor : 'transparent',
                         }}
                       >
-                        <Icon size={22} color={cColor} strokeWidth={2.5} />
+                        <Icon size={20} color={cColor} strokeWidth={2.5} />
                       </View>
                       <Text
-                        className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                        className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                       >
                         {c.name}
                       </Text>
@@ -226,10 +226,10 @@ export function FixedExpenseForm({
                   className='items-center gap-1'
                   activeOpacity={0.7}
                 >
-                  <View className='w-[52px] h-[52px] rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
-                    <Plus size={19} color='#A3A3A3' strokeWidth={2} />
+                  <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
+                    <Plus size={18} color='#A3A3A3' strokeWidth={2} />
                   </View>
-                  <Text className='font-ibm-semibold text-[11px] text-neutral-600'>
+                  <Text className='font-ibm-semibold text-sm text-neutral-600'>
                     추가
                   </Text>
                 </TouchableOpacity>
@@ -239,7 +239,7 @@ export function FixedExpenseForm({
 
           {/* 납부일 */}
           <View className='mb-6'>
-            <Text className='font-ibm-semibold text-lg text-neutral-500 mb-2.5 ml-1'>
+            <Text className='font-ibm-semibold text-base text-neutral-500 mb-2.5 ml-1'>
               납부일
             </Text>
             <View className='flex-row gap-2 mb-2'>
@@ -278,7 +278,7 @@ export function FixedExpenseForm({
                 );
               })}
             </View>
-            <Text className='font-ibm-semibold text-lg text-neutral-500 mt-4 mb-2.5 ml-1'>
+            <Text className='font-ibm-semibold text-base text-neutral-500 mt-4 mb-2.5 ml-1'>
               영업일 보정
             </Text>
             <View className='flex-row gap-2'>
@@ -332,7 +332,7 @@ export function FixedExpenseForm({
               }}
             >
               <Text
-                className='font-ibm-semibold text-base'
+                className='font-ibm-semibold text-lg'
                 style={{ color: Colors.peachDark }}
               >
                 고정지출 삭제
