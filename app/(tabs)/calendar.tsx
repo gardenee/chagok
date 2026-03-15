@@ -1044,7 +1044,7 @@ export default function CalendarTab() {
 
         {/* 탭 콘텐츠 */}
         <View
-          className='mx-4 mt-4'
+          className='mx-4 mt-6'
           onLayout={e => {
             listYRef.current = e.nativeEvent.layout.y;
           }}
@@ -1083,7 +1083,7 @@ export default function CalendarTab() {
                 <Text className='font-ibm-semibold text-base text-neutral-700'>
                   지출
                 </Text>
-                <Text className='font-ibm-bold text-2xl text-brown-darker mt-0.5'>
+                <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
                   {totalExpense > 0 ? `-${formatAmount(totalExpense)}원` : '-'}
                 </Text>
               </View>
@@ -1094,7 +1094,7 @@ export default function CalendarTab() {
                 <Text className='font-ibm-semibold text-base text-neutral-700'>
                   수입
                 </Text>
-                <Text className='font-ibm-bold text-2xl text-brown-darker mt-0.5'>
+                <Text className='font-ibm-bold text-xl text-brown-darker mt-0.5'>
                   {totalIncome > 0 ? `+${formatAmount(totalIncome)}원` : '-'}
                 </Text>
               </View>
@@ -1148,12 +1148,12 @@ export default function CalendarTab() {
                               </IconBox>
                               <View className='flex-1'>
                                 <Text
-                                  className='font-ibm-semibold text-base text-neutral-800'
+                                  className='font-ibm-semibold text-base text-neutral-800 pl-0.5 pb-0.5'
                                   numberOfLines={1}
                                 >
                                   {t.memo ?? cat?.name ?? '기타'}
                                 </Text>
-                                <View className='flex-row items-center gap-1.5 mt-0.5'>
+                                <View className='flex-row items-center gap-1 mt-0.5'>
                                   {isFixed ? (
                                     <>
                                       <ColorPill

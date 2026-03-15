@@ -11,6 +11,7 @@ import {
 import { X, Check } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { COLOR_MAP } from '@/constants/color-map';
+import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { SegmentControl } from '@/components/ui/segment-control';
 import { ModalTextInput } from '@/components/ui/modal-inputs';
@@ -130,7 +131,7 @@ export function CategoryFormScreen({
               onChange({ ...form, name: v });
               if (nameError) setNameError(false);
             }}
-            placeholder='카테고리 이름 (예: 식비, 교통비)'
+            placeholder={categoryType === 'expense' ? '예: 식비, 교통비' : '예: 월급, 용돈'}
             maxLength={10}
             className='mb-6'
             error={nameError}
@@ -147,7 +148,7 @@ export function CategoryFormScreen({
                 <TouchableOpacity
                   key={key}
                   onPress={() => onChange({ ...form, icon: key })}
-                  className={`w-[52px] h-[52px] rounded-2xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                  className={`w-[43px] h-[43px] rounded-2xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                   activeOpacity={0.7}
                 >
                   <Icon
@@ -196,24 +197,7 @@ export function CategoryFormScreen({
         {/* 하단 버튼 영역 */}
         <View className='px-6 pb-6 pt-3 gap-3'>
           {editingId && onDelete && (
-            <TouchableOpacity
-              onPress={onDelete}
-              activeOpacity={0.8}
-              className='rounded-2xl items-center'
-              style={{
-                backgroundColor: Colors.cream,
-                borderWidth: 1.5,
-                borderColor: Colors.peachDark,
-                paddingVertical: 14,
-              }}
-            >
-              <Text
-                className='font-ibm-semibold text-lg'
-                style={{ color: Colors.peachDark }}
-              >
-                카테고리 삭제
-              </Text>
-            </TouchableOpacity>
+            <DeleteButton onPress={onDelete} label='카테고리 삭제' />
           )}
           <SaveButton
             onPress={handleSavePress}

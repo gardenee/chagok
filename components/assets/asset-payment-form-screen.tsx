@@ -12,6 +12,7 @@ import {
 import { X, Info } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
+import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { PM_TYPE_OPTIONS } from '@/constants/payment-method';
@@ -237,13 +238,13 @@ export function AssetPaymentFormScreen({
             contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
           >
             {/* ── 유형 선택 ── */}
-            <Text className='font-ibm-bold text-lg text-neutral-700 mb-3 ml-1'>
+            <Text className='font-ibm-bold text-lg text-neutral-700 mb-1.5 ml-1'>
               유형
             </Text>
 
             {showAssetGroups && (
-              <View className='mb-3'>
-                <Text className='font-ibm-semibold text-[17px] text-neutral-600 mb-2.5 ml-1'>
+              <View className='mb-6'>
+                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2.5 ml-1'>
                   자산
                 </Text>
                 <View className='flex-row flex-wrap gap-2'>
@@ -260,11 +261,11 @@ export function AssetPaymentFormScreen({
                             type: key,
                           }))
                         }
-                        className={`px-4 py-2.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        className={`px-3.5 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                          className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
                           {label}
                         </Text>
@@ -277,7 +278,7 @@ export function AssetPaymentFormScreen({
 
             {showPmGroup && (
               <View className='mb-6'>
-                <Text className='font-ibm-semibold text-[17px] text-neutral-600 mb-2.5 ml-1'>
+                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2.5 ml-1'>
                   결제수단
                 </Text>
                 <View className='flex-row flex-wrap gap-2'>
@@ -297,11 +298,11 @@ export function AssetPaymentFormScreen({
                             linked_asset_id: null,
                           }))
                         }
-                        className={`px-4 py-2.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        className={`px-3.5 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                          className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                         >
                           {label}
                         </Text>
@@ -506,44 +507,10 @@ export function AssetPaymentFormScreen({
           {/* 하단 고정 버튼 */}
           <View className='px-6 pb-6 pt-3 gap-3'>
             {onDeleteAsset && (
-              <TouchableOpacity
-                onPress={onDeleteAsset}
-                activeOpacity={0.8}
-                className='rounded-2xl items-center'
-                style={{
-                  backgroundColor: Colors.cream,
-                  borderWidth: 1.5,
-                  borderColor: Colors.peachDark,
-                  paddingVertical: 14,
-                }}
-              >
-                <Text
-                  className='font-ibm-semibold text-lg'
-                  style={{ color: Colors.peachDark }}
-                >
-                  자산 삭제
-                </Text>
-              </TouchableOpacity>
+              <DeleteButton onPress={onDeleteAsset} label='자산 삭제' />
             )}
             {onDeletePm && (
-              <TouchableOpacity
-                onPress={onDeletePm}
-                activeOpacity={0.8}
-                className='rounded-2xl items-center'
-                style={{
-                  backgroundColor: Colors.cream,
-                  borderWidth: 1.5,
-                  borderColor: Colors.peachDark,
-                  paddingVertical: 14,
-                }}
-              >
-                <Text
-                  className='font-ibm-semibold text-lg'
-                  style={{ color: Colors.peachDark }}
-                >
-                  결제수단 삭제
-                </Text>
-              </TouchableOpacity>
+              <DeleteButton onPress={onDeletePm} label='결제수단 삭제' />
             )}
             <SaveButton
               onPress={handleSavePress}

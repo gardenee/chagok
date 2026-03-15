@@ -83,8 +83,8 @@ export function CategoryManagementScreen({
           </View>
         ) : (
           <>
-            <View className='mx-4 mt-4 mb-6'>
-              <Text className='font-ibm-bold text-base text-neutral-700 mb-3'>
+            <View className='mx-4 mt-4 mb-8'>
+              <Text className='font-ibm-bold text-lg text-neutral-700 mb-3 pl-2'>
                 지출
               </Text>
               {expenseCategories.length === 0 ? (
@@ -108,7 +108,7 @@ export function CategoryManagementScreen({
             </View>
 
             <View className='mx-4'>
-              <Text className='font-ibm-bold text-base text-neutral-700 mb-3'>
+              <Text className='font-ibm-bold text-lg text-neutral-700 mb-3 pl-2'>
                 수입
               </Text>
               {incomeCategories.length === 0 ? (

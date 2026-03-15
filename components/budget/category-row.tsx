@@ -18,14 +18,14 @@ export function CategoryRow({ c, onEdit, onDelete }: Props) {
   return (
     <SwipeableDeleteRow onDelete={() => onDelete(c.id)}>
       <TouchableOpacity onPress={() => onEdit(c)} activeOpacity={0.8}>
-        <View className='px-4 py-3.5 flex-row items-center gap-3'>
+        <View className='px-4 py-3.5 flex-row items-center gap-3.5'>
           <IconBox color={color}>
             <CategoryIcon iconKey={c.icon} color={color} />
           </IconBox>
-          <Text className='flex-1 font-ibm-semibold text-sm text-neutral-800'>
+          <Text className='flex-1 font-ibm-semibold text-base text-neutral-800'>
             {c.name}
           </Text>
-          <ChevronRight size={16} color={Colors.neutral} strokeWidth={2} />
+          <ChevronRight size={20} color={Colors.neutralDark} strokeWidth={2} />
         </View>
       </TouchableOpacity>
     </SwipeableDeleteRow>

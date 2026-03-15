@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
+import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput } from '@/components/ui/modal-inputs';
 import {
@@ -129,24 +130,7 @@ export function PaymentMethodFormScreen({
         {/* 하단 버튼 */}
         <View className='px-6 pb-6 pt-3 gap-3'>
           {editingId && onDelete && (
-            <TouchableOpacity
-              onPress={onDelete}
-              activeOpacity={0.8}
-              className='rounded-2xl items-center'
-              style={{
-                backgroundColor: Colors.cream,
-                borderWidth: 1.5,
-                borderColor: Colors.peachDark,
-                paddingVertical: 14,
-              }}
-            >
-              <Text
-                className='font-ibm-semibold text-lg'
-                style={{ color: Colors.peachDark }}
-              >
-                결제수단 삭제
-              </Text>
-            </TouchableOpacity>
+            <DeleteButton onPress={onDelete} label='결제수단 삭제' />
           )}
           <SaveButton
             onPress={handleSavePress}

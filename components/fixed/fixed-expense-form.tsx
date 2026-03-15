@@ -13,6 +13,7 @@ import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { resolveColor } from '@/constants/color-map';
 import { ICON_MAP } from '@/constants/icon-map';
+import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import type { Category } from '@/types/database';
@@ -320,24 +321,7 @@ export function FixedExpenseForm({
           style={{ borderTopWidth: 1, borderTopColor: Colors.cream }}
         >
           {editingId && onDelete && (
-            <TouchableOpacity
-              onPress={onDelete}
-              activeOpacity={0.8}
-              className='rounded-2xl items-center'
-              style={{
-                backgroundColor: Colors.cream,
-                borderWidth: 1.5,
-                borderColor: Colors.peachDark,
-                paddingVertical: 14,
-              }}
-            >
-              <Text
-                className='font-ibm-semibold text-lg'
-                style={{ color: Colors.peachDark }}
-              >
-                고정지출 삭제
-              </Text>
-            </TouchableOpacity>
+            <DeleteButton onPress={onDelete} label='고정지출 삭제' />
           )}
           <SaveButton
             onPress={handleSavePress}

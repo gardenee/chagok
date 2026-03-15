@@ -41,7 +41,7 @@ export function Pill({
       style={{ backgroundColor: solid ? color : color + '50' }}
     >
       {Icon && <Icon size={11} color={color} strokeWidth={2.5} />}
-      <Text className='font-ibm-semibold text-[11px] text-neutral-700'>
+      <Text className='font-ibm-semibold text-xs text-neutral-700'>
         {label}
       </Text>
     </View>

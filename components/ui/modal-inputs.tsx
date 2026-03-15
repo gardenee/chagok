@@ -25,7 +25,7 @@ export function ModalTextInput({
 }: ModalTextInputProps) {
   return (
     <View
-      className={`bg-neutral-100 rounded-2xl px-4 py-4 ${className}`}
+      className={`bg-neutral-100 rounded-2xl px-4 py-3 ${className}`}
       style={{
         borderWidth: 1.5,
         borderColor: error ? Colors.peachDarker : 'transparent',

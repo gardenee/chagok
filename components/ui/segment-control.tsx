@@ -21,8 +21,8 @@ export function SegmentControl<T extends string>({
   bgClassName = 'bg-cream-dark/50 rounded-2xl',
   activeBgClassName = 'bg-butter rounded-xl',
   className,
-  activeTextClassName = 'text-brown-dark',
-  inactiveTextClassName = 'text-brown-dark/80',
+  activeTextClassName = 'text-neutral-800',
+  inactiveTextClassName = 'text-neutral-600',
 }: Props<T>) {
   return (
     <View className={`flex-row p-1 ${bgClassName} ${className ?? ''}`}>
@@ -33,7 +33,7 @@ export function SegmentControl<T extends string>({
             onChange(opt.value);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           }}
-          className={`flex-1 py-2.5 items-center ${value === opt.value ? activeBgClassName : ''}`}
+          className={`flex-1 py-2 items-center ${value === opt.value ? activeBgClassName : ''}`}
           activeOpacity={0.7}
         >
           <Text

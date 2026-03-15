@@ -19,6 +19,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { resolveColor } from '@/constants/color-map';
+import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { SegmentControl } from '@/components/ui/segment-control';
@@ -515,24 +516,10 @@ export function TransactionFormSheet({
               style={{ borderTopWidth: 1, borderTopColor: Colors.cream }}
             >
               {txModal.editingId && (
-                <TouchableOpacity
+                <DeleteButton
                   onPress={() => onTxDelete(txModal.editingId!)}
-                  activeOpacity={0.8}
-                  className='rounded-2xl items-center'
-                  style={{
-                    backgroundColor: Colors.cream,
-                    borderWidth: 1.5,
-                    borderColor: Colors.peachDark,
-                    paddingVertical: 14,
-                  }}
-                >
-                  <Text
-                    className='font-ibm-semibold text-lg'
-                    style={{ color: Colors.peachDark }}
-                  >
-                    내역 삭제
-                  </Text>
-                </TouchableOpacity>
+                  label='내역 삭제'
+                />
               )}
               <SaveButton
                 onPress={handleTxSavePress}

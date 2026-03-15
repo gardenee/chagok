@@ -1,5 +1,4 @@
 import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
-import { Check } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { Shadows } from '@/constants/shadows';
 
@@ -22,7 +21,7 @@ export function SaveButton({
       onPress={onPress}
       disabled={isDisabled}
       activeOpacity={0.8}
-      className='bg-butter rounded-2xl py-4 items-center flex-row justify-center gap-2'
+      className='h-14 bg-butter rounded-2xl px-4 items-center justify-center'
       style={{
         opacity: isDisabled ? 0.45 : 1,
         ...Shadows.primary,
@@ -31,12 +30,7 @@ export function SaveButton({
       {isSaving ? (
         <ActivityIndicator color={Colors.brownDark} />
       ) : (
-        <>
-          <Check size={18} color={Colors.brownDark} strokeWidth={2.5} />
-          <Text className='font-ibm-bold text-base text-brown-dark'>
-            {label}
-          </Text>
-        </>
+        <Text className='font-ibm-bold text-base text-brown-dark'>{label}</Text>
       )}
     </TouchableOpacity>
   );
