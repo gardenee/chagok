@@ -1,11 +1,12 @@
 // components/settings/notification-item.tsx
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { MessageCircle } from 'lucide-react-native';
 import type { Notification } from '@/hooks/use-notifications';
 import { Colors } from '@/constants/colors';
 
 type Props = {
   notification: Notification;
+  onPress?: () => void;
 };
 
 function formatRelativeTime(createdAt: string): string {
@@ -19,14 +20,15 @@ function formatRelativeTime(createdAt: string): string {
   return `${diffDay}일 전`;
 }
 
-export function NotificationItem({ notification }: Props) {
+export function NotificationItem({ notification, onPress }: Props) {
   const hasIcon = !!notification.icon;
   const isUnread = !notification.is_read;
 
   return (
-    // 읽은 알림은 흐리게 (opacity-60)
-    <View
-      className={`flex-row items-center gap-3 px-4 pb-3 bg-cream rounded-2xl ${isUnread ? '' : 'opacity-75'}`}
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={onPress ? 0.7 : 1}
+      className={`flex-row items-center gap-3 px-4 py-3 ${isUnread ? '' : 'opacity-75'}`}
     >
       {/* 아이콘 박스 */}
       {hasIcon ? (
@@ -66,6 +68,6 @@ export function NotificationItem({ notification }: Props) {
       {isUnread && (
         <View className='w-2 h-2 rounded-full bg-peach flex-shrink-0' />
       )}
-    </View>
+    </TouchableOpacity>
   );
 }

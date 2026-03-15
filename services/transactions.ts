@@ -41,6 +41,20 @@ export async function fetchMonthTransactions(
   return data as unknown as TransactionRow[];
 }
 
+export async function fetchTransactionById(
+  id: string,
+): Promise<TransactionRow | null> {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select(
+      '*, categories(name, icon, color), payment_methods(name), assets(name)',
+    )
+    .eq('id', id)
+    .single();
+  if (error) return null;
+  return data as unknown as TransactionRow;
+}
+
 export async function createTransaction(
   coupleId: string,
   userId: string,
