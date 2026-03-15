@@ -19,10 +19,10 @@ export type PmTypeOption = {
 };
 
 export const PM_TYPE_OPTIONS: PmTypeOption[] = [
-  { key: 'credit_card', label: '신용카드', Icon: CreditCard, color: '#D4C5F0' },
-  { key: 'debit_card', label: '체크카드', Icon: CreditCard, color: '#B5D5F0' },
-  { key: 'transit', label: '교통카드', Icon: Bus, color: '#A8D8B0' },
-  { key: 'other', label: '기타', Icon: Wallet, color: '#F0C5D5' },
+  { key: 'credit_card', label: '신용카드', Icon: CreditCard, color: '#B8A3DE' },
+  { key: 'debit_card', label: '체크카드', Icon: CreditCard, color: '#8ECAE6' },
+  { key: 'transit', label: '교통카드', Icon: Bus, color: '#95D5B2' },
+  { key: 'other', label: '기타', Icon: Wallet, color: '#FF85A1' },
 ];
 
 export function getPmColor(type: PaymentMethod['type']): string {

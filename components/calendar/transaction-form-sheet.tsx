@@ -179,9 +179,7 @@ export function TransactionFormSheet({
                   setTxModal(s => ({ ...s, form: { ...s.form, amount: v } }));
                   const n = parseInt(v, 10);
                   setAmountErrorMsg(
-                    n > 2_147_483_647
-                      ? '최대 입력값을 초과했어요'
-                      : '',
+                    n > 2_147_483_647 ? '최대 입력값을 초과했어요' : '',
                   );
                 }}
                 className={amountErrorMsg ? 'mb-1' : 'mb-3'}
@@ -349,7 +347,7 @@ export function TransactionFormSheet({
                             <View
                               className='w-12 h-12 rounded-2xl items-center justify-center'
                               style={{
-                                backgroundColor: pm.color + '50',
+                                backgroundColor: pm.color + '30',
                                 borderWidth: isSelected ? 2 : 0,
                                 borderColor: isSelected
                                   ? pm.color
@@ -397,7 +395,7 @@ export function TransactionFormSheet({
                             <View
                               className='w-12 h-12 rounded-2xl items-center justify-center'
                               style={{
-                                backgroundColor: assetColor + '80',
+                                backgroundColor: assetColor + '30',
                                 borderWidth: isSelected ? 2 : 0,
                                 borderColor: isSelected
                                   ? assetColor
@@ -406,7 +404,7 @@ export function TransactionFormSheet({
                             >
                               <AssetIcon
                                 size={20}
-                                color={Colors.brown}
+                                color={assetColor}
                                 strokeWidth={2.5}
                               />
                             </View>

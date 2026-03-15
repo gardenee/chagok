@@ -146,10 +146,7 @@ export function FixedExpenseForm({
               const n = parseInt(v, 10);
               setErrors(e => ({
                 ...e,
-                amountMsg:
-                  n > 2_147_483_647
-                    ? '최대 입력값을 초과했어요'
-                    : '',
+                amountMsg: n > 2_147_483_647 ? '최대 입력값을 초과했어요' : '',
               }));
             }}
             className={errors.amountMsg ? 'mb-1' : 'mb-4'}
