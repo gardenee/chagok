@@ -9,11 +9,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useEffect, useRef } from 'react';
+import { useRouter } from 'expo-router';
 import { Bell, X } from 'lucide-react-native';
 import {
   useNotifications,
   useMarkAllNotificationsAsRead,
 } from '@/hooks/use-notifications';
+import type { Notification } from '@/hooks/use-notifications';
 import { NotificationItem } from '@/components/settings/notification-item';
 import { Colors } from '@/constants/colors';
 
@@ -23,8 +25,23 @@ type Props = {
 };
 
 export function NotificationInbox({ visible, onClose }: Props) {
+  const router = useRouter();
   const { data: notifications = [], isLoading } = useNotifications();
   const markAllAsRead = useMarkAllNotificationsAsRead();
+
+  function handleNotificationPress(notification: Notification) {
+    onClose();
+    if (
+      (notification.type === 'comment' ||
+        notification.type === 'partner_transaction') &&
+      notification.reference_id
+    ) {
+      router.push({
+        pathname: '/(tabs)/calendar',
+        params: { openTxId: notification.reference_id },
+      });
+    }
+  }
 
   // 모달이 닫히거나(visible: true→false) 컴포넌트가 언마운트될 때 전체 읽음 처리
   const wasVisibleRef = useRef(false);
@@ -78,8 +95,19 @@ export function NotificationInbox({ visible, onClose }: Props) {
           <FlatList
             data={notifications}
             keyExtractor={item => item.id}
-            renderItem={({ item }) => <NotificationItem notification={item} />}
-            contentContainerStyle={{ padding: 16, gap: 12 }}
+            renderItem={({ item }) => (
+              <NotificationItem
+                notification={item}
+                onPress={() => handleNotificationPress(item)}
+              />
+            )}
+            ItemSeparatorComponent={() => (
+              <View
+                className='mx-4'
+                style={{ height: 1, backgroundColor: Colors.cream }}
+              />
+            )}
+            contentContainerStyle={{ paddingVertical: 8 }}
             showsVerticalScrollIndicator={false}
           />
         )}

@@ -10,6 +10,7 @@ import {
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useScrollToTop } from '@react-navigation/native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ChevronLeft,
   ChevronRight,
@@ -70,7 +71,10 @@ import {
 } from '@/hooks/use-payment-methods';
 import { useAssets } from '@/hooks/use-assets';
 import { useMaterializeFixedExpenses } from '@/hooks/use-materialize-fixed-expenses';
-import { updateLinkedTransactions } from '@/services/transactions';
+import {
+  updateLinkedTransactions,
+  fetchTransactionById,
+} from '@/services/transactions';
 import { LoadingState } from '@/components/ui/loading-state';
 import { SegmentControl } from '@/components/ui/segment-control';
 import { ItemCard } from '@/components/ui/item-card';
@@ -130,7 +134,10 @@ export default function CalendarTab() {
   const { session, userProfile } = useAuthStore();
   const myId = session?.user.id ?? '';
   const scrollRef = useRef<ScrollView>(null);
+  const listYRef = useRef(0);
   const navigation = useNavigation();
+  const router = useRouter();
+  const { openTxId } = useLocalSearchParams<{ openTxId?: string }>();
   useScrollToTop(scrollRef);
   const queryClient = useQueryClient();
 
@@ -148,6 +155,25 @@ export default function CalendarTab() {
       scrollRef.current?.scrollTo({ y: 0, animated: true });
     });
   }, [navigation]);
+
+  useEffect(() => {
+    if (!openTxId) return;
+    fetchTransactionById(openTxId).then(tx => {
+      if (!tx) {
+        Alert.alert('알림', '이미 삭제된 내역이에요');
+        return;
+      }
+      const d = new Date(tx.date);
+      setCurrentYear(d.getFullYear());
+      setCurrentMonth(d.getMonth());
+      setSelectedDate(tx.date);
+      setDetailTx(tx);
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollTo({ y: listYRef.current, animated: true });
+      });
+    });
+    router.setParams({ openTxId: undefined });
+  }, [openTxId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [txModal, setTxModal] = useState<TxModalState>({
     visible: false,
@@ -934,7 +960,12 @@ export default function CalendarTab() {
         />
 
         {/* 탭 콘텐츠 */}
-        <View className='mx-4 mt-4'>
+        <View
+          className='mx-4 mt-4'
+          onLayout={e => {
+            listYRef.current = e.nativeEvent.layout.y;
+          }}
+        >
           <View className='flex-row items-center justify-between mb-3'>
             <Text className='font-ibm-bold text-base text-neutral-700'>
               {getSelectedDateLabel(selectedDate)}{' '}
