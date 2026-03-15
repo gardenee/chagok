@@ -133,6 +133,12 @@ export function AssetPaymentFormScreen({
       ? getBillingPeriodLabel(selectedCreditCompany, form.billing_day)
       : null;
 
+  const isVariableMonthDay =
+    isCreditCard &&
+    selectedCreditCompany &&
+    form.billing_day != null &&
+    (selectedCreditCompany.variableMonthDays ?? []).includes(form.billing_day);
+
   function handleCompanySelect(id: string, name: string) {
     const isSame = form.card_company === id;
     const prevCompanyName =
@@ -341,6 +347,20 @@ export function AssetPaymentFormScreen({
                         />
                         <Text className='font-ibm-semibold text-xs text-neutral-700'>
                           {billingPeriodLabel}
+                        </Text>
+                      </View>
+                    ) : isVariableMonthDay ? (
+                      <View
+                        className='flex-row items-center gap-2 rounded-2xl px-3 py-2.5 mb-4'
+                        style={{ backgroundColor: Colors.butter + '50' }}
+                      >
+                        <Info
+                          size={14}
+                          color={Colors.neutralDarker}
+                          strokeWidth={2}
+                        />
+                        <Text className='font-ibm-semibold text-xs text-neutral-700'>
+                          청구기간이 매월 달라져요
                         </Text>
                       </View>
                     ) : (

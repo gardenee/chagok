@@ -13,6 +13,8 @@ export type CardCompany = {
   color: string;
   availablePaymentDays: number[];
   billingPeriods: Record<number, BillingPeriod>;
+  // 이용기간이 매월 달라서 고정 표시 불가한 결제일 목록
+  variableMonthDays?: number[];
 };
 
 export type BankInfo = {
@@ -33,9 +35,11 @@ export type TransitProvider = {
  * 패턴 (공식 출처로 확인된 카드사에만 사용):
  *   day < pivotDay  → 전전월 (preOffset+day)일 ~ 전월 (preOffset+day-1)일
  *   day === pivotDay → 전월 1일 ~ 전월 말일
- *   day > pivotDay  → 전월 (day-pivotDay+1)일 ~ 당월 (day-pivotDay)일
+ *   day > pivotDay  → 전월 (day-pivotDay+postOffset)일 ~ 당월 (day-pivotDay+postOffset-1)일
+ *   postOffset 기본값=1 (신한/KB/NH/하나 등), 삼성카드는 postOffset=2
  *
  * 확인 출처:
+ *   삼성카드: 직접 확인 (pivot=14, postOffset=2, 14일 미만은 매월 가변)
  *   신한카드: shinhancard.com (1187644_1118.html)  pivot=14, preOffset=17
  *   KB국민카드: card.kbcard.com (HSGMCXCRSCSC0044)   pivot=14, preOffset=17
  *   현대카드: hyundaicard.com (MOCUS014700_01.html)   pivot=12, preOffset=19
@@ -46,6 +50,7 @@ function buildBillingPeriodsFromPivot(
   days: number[],
   pivotDay: number,
   preOffset: number,
+  postOffset: number = 1,
 ): Record<number, BillingPeriod> {
   return Object.fromEntries(
     days.map(day => {
@@ -67,9 +72,9 @@ function buildBillingPeriodsFromPivot(
       } else {
         period = {
           startMonthOffset: -1,
-          startDay: day - pivotDay + 1,
+          startDay: day - pivotDay + postOffset,
           endMonthOffset: 0,
-          endDay: day - pivotDay,
+          endDay: day - pivotDay + postOffset - 1,
         };
       }
       return [day, period];
@@ -82,14 +87,20 @@ const DAYS_1_TO_25 = Array.from({ length: 25 }, (_, i) => i + 1);
 
 export const CREDIT_CARD_COMPANIES: CardCompany[] = [
   {
-    // 삼성카드: 결제일 공식 확인 (동적 페이지라 이용기간 직접 확인 불가)
+    // 삼성카드: pivot=14, postOffset=2 / 14일 미만은 매월 가변
     id: 'samsung',
     name: '삼성카드',
     color: '#B5D0F0',
     availablePaymentDays: [
       1, 5, 10, 11, 12, 13, 14, 15, 18, 21, 22, 23, 24, 25, 26,
     ],
-    billingPeriods: {},
+    billingPeriods: buildBillingPeriodsFromPivot(
+      [14, 15, 18, 21, 22, 23, 24, 25, 26],
+      14,
+      0,
+      2,
+    ),
+    variableMonthDays: [1, 5, 10, 11, 12, 13],
   },
   {
     // 신한카드: 공식 확인 (pivot=14, preOffset=17)
@@ -120,20 +131,26 @@ export const CREDIT_CARD_COMPANIES: CardCompany[] = [
     ),
   },
   {
-    // 롯데카드: 결제일 공식 확인 (이용기간 직접 확인 불가)
+    // 롯데카드: pivot=14, preOffset=17, postOffset=1 (신한카드와 동일 패턴)
+    // 출처: cardmore.co.kr / toptierfintech.com 교차 확인 + 사용자 직접 확인 (day=1)
     id: 'lotte',
     name: '롯데카드',
     color: '#F7C0C5',
     availablePaymentDays: [1, 5, 7, 10, 14, 15, 17, 20, 21, 22, 23, 24, 25],
-    billingPeriods: {},
+    billingPeriods: buildBillingPeriodsFromPivot(
+      [1, 5, 7, 10, 14, 15, 17, 20, 21, 22, 23, 24, 25],
+      14,
+      17,
+    ),
   },
   {
-    // 우리카드: 결제일 공식 확인 (이용기간 직접 확인 불가) / 27일은 기존 고객만
+    // 우리카드: pivot=14, preOffset=17, postOffset=1 / 출처: bccard.com/pop_credit_giving_woori.html
+    // 27일은 기존 고객만 (신규는 1~25일)
     id: 'woori',
     name: '우리카드',
     color: '#B8D4F0',
     availablePaymentDays: DAYS_1_TO_25,
-    billingPeriods: {},
+    billingPeriods: buildBillingPeriodsFromPivot(DAYS_1_TO_25, 14, 17),
   },
   {
     // 하나카드: 공식 확인 (pivot=13, preOffset=18)
@@ -156,29 +173,34 @@ export const CREDIT_CARD_COMPANIES: CardCompany[] = [
     billingPeriods: buildBillingPeriodsFromPivot(DAYS_1_TO_27, 14, 17),
   },
   {
-    // IBK기업카드: 결제일 공식 확인 (이용기간 직접 확인 불가)
+    // IBK기업카드: pivot=15, preOffset=16, postOffset=1 / 출처: bccard.com/pop_credit_giving_ibk.html
     id: 'ibk',
     name: 'IBK기업카드',
     color: '#B0C8E8',
     availablePaymentDays: DAYS_1_TO_27,
-    billingPeriods: {},
+    billingPeriods: buildBillingPeriodsFromPivot(DAYS_1_TO_27, 15, 16),
   },
   {
-    // BC카드(바로카드): 결제일 공식 확인 (이용기간 직접 확인 불가)
+    // BC카드(바로카드): pivot=13, preOffset=18, postOffset=1 / 출처: bccard.com/pop_credit_giving_baro.html
     id: 'bc',
     name: 'BC카드',
     color: '#F0C0C0',
     availablePaymentDays: [1, 5, 8, 12, 13, 15, 23, 25, 27],
-    billingPeriods: {},
+    billingPeriods: buildBillingPeriodsFromPivot(
+      [1, 5, 8, 12, 13, 15, 23, 25, 27],
+      13,
+      18,
+    ),
   },
-  {
-    // 카카오뱅크: 신한카드 PLCC이나 이용기간 공식 직접 확인 불가
-    id: 'kakaobank',
-    name: '카카오뱅크',
-    color: '#FFE870',
-    availablePaymentDays: DAYS_1_TO_27,
-    billingPeriods: {},
-  },
+  // {
+    // 카카오뱅크: BC 네트워크, preOffset=18 사용자 직접 확인
+    // BC바로카드와 동일 패턴(pivot=13, preOffset=18) 추정이나 공식 미확인
+  //   id: 'kakaobank',
+  //   name: '카카오뱅크',
+  //   color: '#FFE870',
+  //   availablePaymentDays: DAYS_1_TO_27,
+  //   billingPeriods: {},
+  // },
 ];
 
 // 결제일이 지정되지 않았을 때 표시할 일반 결제일 목록
