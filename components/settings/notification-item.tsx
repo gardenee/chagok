@@ -1,8 +1,10 @@
 // components/settings/notification-item.tsx
 import { View, Text, TouchableOpacity } from 'react-native';
-import { MessageCircle } from 'lucide-react-native';
+import { MessageCircle, Wallet } from 'lucide-react-native';
 import type { Notification } from '@/hooks/use-notifications';
 import { Colors } from '@/constants/colors';
+import { ICON_MAP } from '@/constants/icon-map';
+import { resolveColor } from '@/constants/color-map';
 
 type Props = {
   notification: Notification;
@@ -21,8 +23,13 @@ function formatRelativeTime(createdAt: string): string {
 }
 
 export function NotificationItem({ notification, onPress }: Props) {
-  const hasIcon = !!notification.icon;
   const isUnread = !notification.is_read;
+  const CatIcon = notification.icon
+    ? (ICON_MAP[notification.icon] ?? Wallet)
+    : null;
+  const iconColor = notification.icon_color
+    ? resolveColor(notification.icon_color)
+    : null;
 
   return (
     <TouchableOpacity
@@ -31,12 +38,12 @@ export function NotificationItem({ notification, onPress }: Props) {
       className={`flex-row items-center gap-3 px-4 py-3 ${isUnread ? '' : 'opacity-75'}`}
     >
       {/* 아이콘 박스 */}
-      {hasIcon ? (
+      {CatIcon && iconColor ? (
         <View
-          className='w-9 h-9 rounded-xl items-center justify-center flex-shrink-0'
-          style={{ backgroundColor: notification.icon_color ?? '#FAD97A' }}
+          className='w-10 h-10 rounded-xl items-center justify-center flex-shrink-0'
+          style={{ backgroundColor: iconColor + '30' }}
         >
-          <Text style={{ fontSize: 18 }}>{notification.icon}</Text>
+          <CatIcon size={20} color={iconColor} strokeWidth={2.5} />
         </View>
       ) : (
         <View className='w-10 h-10 rounded-xl bg-lavender items-center justify-center flex-shrink-0'>
