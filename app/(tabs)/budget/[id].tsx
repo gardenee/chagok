@@ -155,7 +155,7 @@ export default function CategoryDetailScreen() {
           month={month}
           onPrev={prevMonth}
           onNext={nextMonth}
-          className='py-3'
+          className='pt-3 pb-5'
         />
 
         {/* 거래내역 리스트 */}

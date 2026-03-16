@@ -4,7 +4,6 @@ import { Colors } from '@/constants/colors';
 import { Shadows } from '@/constants/shadows';
 import {
   formatAmount,
-  formatAmountShortRounded,
   formatAmountInManwon,
 } from '@/utils/format';
 
@@ -16,9 +15,9 @@ type Props = {
 
 function DiffTag({ diff, positive }: { diff: number; positive: boolean }) {
   return (
-    <View className='bg-white/40 rounded-full px-2 py-0.5'>
-      <Text className='font-ibm-semibold text-sm text-neutral-700'>
-        {formatAmountShortRounded(Math.abs(diff))}원
+    <View className='bg-white/40 rounded-full px-1.5 py-0.5'>
+      <Text className='font-ibm-semibold text-xs text-neutral-700'>
+        {formatAmountInManwon(Math.abs(diff))}
         {positive ? ' 절약' : ' 초과'}
       </Text>
     </View>
@@ -40,14 +39,14 @@ export function BudgetSummaryCards({
       {/* 결산 카드 */}
       <View className='bg-white rounded-3xl px-4 py-3' style={Shadows.primary}>
         <View className='flex-row items-center justify-between'>
-          <View className='flex-row items-center gap-2'>
-            <Scale size={16} color={Colors.brownDark} strokeWidth={2.5} />
+          <View className='flex-row items-center gap-2 px-1 py-3'>
+            <Scale size={18} color={Colors.brownDark} strokeWidth={2.5} />
             <Text className='font-ibm-semibold text-base text-neutral-800'>
               이번달 결산
             </Text>
           </View>
           <Text
-            className='font-ibm-bold text-base'
+            className='font-ibm-bold text-lg'
             style={{
               color: isPositive ? Colors.oliveDarker : Colors.peachDarker,
             }}

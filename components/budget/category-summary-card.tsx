@@ -42,24 +42,17 @@ export function CategorySummaryCard({
 
   const inputLabel = isExpense ? '월 예산' : '예상 수입';
   const amountLabel = isExpense ? '이번달 지출' : '이번달 수입';
-  const amountColor = isExpense ? Colors.brownDarker : Colors.oliveDarker;
 
   return (
     <View
-      className='mx-4 mb-4 rounded-3xl p-5'
-      style={{ backgroundColor: '#EDE5CE', ...Shadows.soft }}
+      className='mx-4 mt-2 mb-4 rounded-3xl p-5 bg-cream-dark'
+      style={ Shadows.card }
     >
       {/* 지출/수입 금액 */}
-      <Text
-        className='font-ibm-regular text-base mb-1.5'
-        style={{ color: '#8C7A5E' }}
-      >
+      <Text className='font-ibm-semibold text-base mb-0.5 text-neutral-700'>
         {amountLabel}
       </Text>
-      <Text
-        className='font-ibm-bold text-4xl leading-[44px] mb-4'
-        style={{ color: amountColor }}
-      >
+      <Text className='font-ibm-bold text-4xl leading-[44px] mb-1 text-brown-darker'>
         {formatAmount(totalAmount)}원
       </Text>
 
@@ -67,10 +60,7 @@ export function CategorySummaryCard({
       {isExpense && budget > 0 && (
         <View className='mb-4'>
           <View className='flex-row justify-between mb-1.5'>
-            <Text
-              className='font-ibm-regular text-base'
-              style={{ color: '#8C7A5E' }}
-            >
+            <Text className='font-ibm-semibold text-base text-neutral-700'>
               {isExpense ? '예산' : '목표'} {formatAmount(budget)}원
             </Text>
             <View
@@ -78,7 +68,7 @@ export function CategorySummaryCard({
               style={{ backgroundColor: badgeBg }}
             >
               <Text
-                className='font-ibm-bold text-base'
+                className='font-ibm-bold text-sm'
                 style={{ color: badgeText }}
               >
                 {isExpense
@@ -106,18 +96,15 @@ export function CategorySummaryCard({
       {/* 예산 인풋 (지출만) */}
       {isExpense && (
         <View className='flex-row items-center gap-3'>
-          <Text
-            className='font-ibm-semibold text-base w-20'
-            style={{ color: '#8C7A5E' }}
-          >
+          <Text className='font-ibm-semibold text-base w-20 text-neutral-700'>
             {inputLabel}
           </Text>
           <View
-            className='flex-1 flex-row items-center rounded-xl px-3 bg-white'
-            style={{ height: 46, ...Shadows.soft }}
+            className='flex-1 flex-row items-center rounded-xl px-3 bg-neutral-100 h-[36px]'
+            style={ Shadows.soft }
           >
             <TextInput
-              className='flex-1 font-ibm-semibold text-base text-neutral-700'
+              className='flex-1 font-ibm-semibold text-base text-neutral-800'
               value={budgetInput}
               onChangeText={v => onBudgetChange(v.replace(/[^0-9]/g, ''))}
               keyboardType='numeric'
@@ -128,7 +115,7 @@ export function CategorySummaryCard({
               onSubmitEditing={onBudgetSave}
             />
             {budgetInput.length > 0 && (
-              <Text className='font-ibm-regular text-base text-neutral-400'>
+              <Text className='font-ibm-regular text-base text-neutral-600'>
                 원
               </Text>
             )}

@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { Transaction, FixedExpense } from '@/types/database';
+import type { Database, Transaction, FixedExpense } from '@/types/database';
 import { resolveFixedExpenseDate } from '@/utils/fixed-expense-date';
 
 export type TransactionRow = Transaction & {
@@ -19,6 +19,43 @@ export type TransactionInput = {
   asset_id?: string | null;
   fixed_expense_id?: string | null;
 };
+
+type TransactionInsert = Database['public']['Tables']['transactions']['Insert'];
+type TransactionUpdate = Database['public']['Tables']['transactions']['Update'];
+
+function toTransactionInsert(
+  coupleId: string,
+  userId: string,
+  input: TransactionInput,
+): TransactionInsert {
+  return {
+    couple_id: coupleId,
+    user_id: userId,
+    amount: input.amount,
+    type: input.type,
+    tag: input.tag ?? 'me',
+    memo: input.memo ?? null,
+    date: input.date,
+    category_id: input.category_id ?? null,
+    payment_method_id: input.payment_method_id ?? null,
+    asset_id: input.asset_id ?? null,
+    fixed_expense_id: input.fixed_expense_id ?? null,
+  };
+}
+
+function toTransactionUpdate(input: TransactionInput): TransactionUpdate {
+  return {
+    amount: input.amount,
+    type: input.type,
+    tag: input.tag ?? 'me',
+    memo: input.memo ?? null,
+    date: input.date,
+    category_id: input.category_id ?? null,
+    payment_method_id: input.payment_method_id ?? null,
+    asset_id: input.asset_id ?? null,
+    fixed_expense_id: input.fixed_expense_id ?? null,
+  };
+}
 
 export async function fetchMonthTransactions(
   coupleId: string,
@@ -62,7 +99,7 @@ export async function createTransaction(
 ): Promise<TransactionRow> {
   const { data, error } = await supabase
     .from('transactions')
-    .insert({ ...input, couple_id: coupleId, user_id: userId })
+    .insert(toTransactionInsert(coupleId, userId, input))
     .select(
       '*, categories(name, icon, color), payment_methods(name), assets(name)',
     )
@@ -77,7 +114,7 @@ export async function updateTransaction(
 ): Promise<TransactionRow> {
   const { data, error } = await supabase
     .from('transactions')
-    .update(input)
+    .update(toTransactionUpdate(input))
     .eq('id', id)
     .select(
       '*, categories(name, icon, color), payment_methods(name), assets(name)',

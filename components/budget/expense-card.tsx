@@ -33,7 +33,7 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
       <View className='bg-white rounded-3xl p-4' style={Shadows.primary}>
         {/* 1행: 아이콘 + 카테고리명 + 목표·사용 수치 */}
         <View
-          className={`flex-row items-center gap-2.5 ${hasBudget ? 'mb-2.5' : ''}`}
+          className={`flex-row items-center gap-2.5 ${hasBudget ? 'mb-1.5' : ''}`}
         >
           <IconBox color={color}>
             <CategoryIcon iconKey={c.icon} color={color} />
@@ -45,17 +45,17 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
             {c.name}
           </Text>
           {hasBudget ? (
-            <View className='flex-row items-baseline gap-1'>
-              <Text className='font-ibm-regular text-sm text-neutral-400'>
+            <View className='flex-row items-center gap-1.5'>
+              <Text className='font-ibm-regular text-sm text-neutral-500'>
                 목표
               </Text>
               <Text className='font-ibm-bold text-base text-neutral-700'>
                 {formatAmount(c.budget_amount)}원
               </Text>
-              <Text className='font-ibm-regular text-sm text-neutral-300'>
+              <Text className='font-ibm-regular text-sm text-neutral-500'>
                 ·
               </Text>
-              <Text className='font-ibm-regular text-sm text-neutral-400'>
+              <Text className='font-ibm-regular text-sm text-neutral-500'>
                 사용
               </Text>
               <Text
@@ -66,8 +66,8 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
               </Text>
             </View>
           ) : (
-            <View className='flex-row items-baseline gap-1'>
-              <Text className='font-ibm-regular text-sm text-neutral-400'>
+            <View className='flex-row items-center gap-1.5'>
+              <Text className='font-ibm-regular text-sm text-neutral-500'>
                 사용
               </Text>
               <Text className='font-ibm-bold text-base text-neutral-700'>
@@ -79,7 +79,7 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
 
         {/* 2행: 프로그레스바(flex:2 고정) + 차액 뱃지(flex:1) */}
         {hasBudget && (
-          <View className='flex-row items-center gap-2'>
+          <View className='flex-row items-center gap-1'>
             <View
               className='rounded-full overflow-hidden'
               style={{ flex: 2, height: 6, backgroundColor: '#f0f0f0' }}

@@ -14,7 +14,7 @@ export async function fetchTransactionComments(
     .eq('transaction_id', transactionId)
     .order('created_at', { ascending: true });
   if (error) throw error;
-  return data as CommentRow[];
+  return (data ?? []) as unknown as CommentRow[];
 }
 
 export async function createComment(
@@ -28,7 +28,7 @@ export async function createComment(
     .select('*, users(nickname)')
     .single();
   if (error) throw error;
-  return data as CommentRow;
+  return data as unknown as CommentRow;
 }
 
 export async function deleteComment(id: string): Promise<void> {

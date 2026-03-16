@@ -200,7 +200,7 @@ export default function BudgetIndex() {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setExpenseView('category');
                     }}
-                    className='px-3.5 py-1.5 rounded-full'
+                    className='px-3 py-1 rounded-full'
                     style={{
                       backgroundColor:
                         expenseView === 'category' ? 'white' : 'transparent',
@@ -224,7 +224,7 @@ export default function BudgetIndex() {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setExpenseView('payment');
                     }}
-                    className='px-3.5 py-1.5 rounded-full'
+                    className='px-3 py-1 rounded-full'
                     style={{
                       backgroundColor:
                         expenseView === 'payment' ? 'white' : 'transparent',
@@ -301,7 +301,7 @@ export default function BudgetIndex() {
                           미지정
                         </Text>
                         <View className='flex-row items-baseline gap-1'>
-                          <Text className='font-ibm-regular text-sm text-neutral-400'>
+                          <Text className='font-ibm-regular text-sm text-neutral-600'>
                             사용
                           </Text>
                           <Text className='font-ibm-bold text-base text-neutral-700'>

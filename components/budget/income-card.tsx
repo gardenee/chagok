@@ -28,8 +28,8 @@ export function IncomeCard({ c, income, onPress }: Props) {
           >
             {c.name}
           </Text>
-          <View className='flex-row items-baseline gap-1'>
-            <Text className='font-ibm-regular text-sm text-neutral-400'>
+          <View className='flex-row items-center gap-1.5'>
+            <Text className='font-ibm-regular text-sm text-neutral-500'>
               수입
             </Text>
             <Text className='font-ibm-bold text-base text-neutral-700'>

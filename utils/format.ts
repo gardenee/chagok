@@ -20,8 +20,11 @@ export function formatAmountShortRounded(n: number): string {
 
 export function formatAmountInManwon(n: number): string {
   const manwon = n / 10000;
-  if (n >= 100000) {
-    return `${Math.round(manwon)}만원`;
+  if (n >= 100000 || n === 0) {
+    return `${Math.round(manwon).toLocaleString('ko-KR')}만원`;
   }
-  return `${manwon.toFixed(1)}만원`;
+  return `${manwon.toLocaleString('ko-KR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })}만원`;
 }
