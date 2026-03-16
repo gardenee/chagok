@@ -35,7 +35,7 @@ export function NotificationItem({ notification, onPress }: Props) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={onPress ? 0.7 : 1}
-      className={`flex-row items-center gap-3.5 px-4 py-3.5 ${isUnread ? '' : 'opacity-75'}`}
+      className='flex-row items-center gap-3.5 px-8 py-3.5'
     >
       {/* 아이콘 박스 */}
       {CatIcon && iconColor ? (
@@ -58,23 +58,18 @@ export function NotificationItem({ notification, onPress }: Props) {
       {/* 텍스트 */}
       <View className='flex-1 min-w-0'>
         <Text
-          className='font-ibm-semibold text-base text-neutral-800'
+          className={`font-ibm-semibold text-base ${isUnread ? 'text-neutral-800' : 'text-neutral-700'}`}
           numberOfLines={1}
         >
           {notification.title}
         </Text>
         <Text
-          className='font-ibm-regular text-sm text-neutral-700 mt-1'
+          className={`font-ibm-regular text-sm mt-1 ${isUnread ? 'text-neutral-700' : 'text-neutral-600'}`}
           numberOfLines={1}
         >
           {notification.body} · {formatRelativeTime(notification.created_at)}
         </Text>
       </View>
-
-      {/* 읽음 점 */}
-      {isUnread && (
-        <View className='w-2 h-2 rounded-full bg-peach flex-shrink-0' />
-      )}
     </TouchableOpacity>
   );
 }

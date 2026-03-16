@@ -18,6 +18,7 @@ import {
 import type { Notification } from '@/hooks/use-notifications';
 import { NotificationItem } from '@/components/settings/notification-item';
 import { Colors } from '@/constants/colors';
+import { EmptyState } from '../ui/empty-state';
 
 type Props = {
   visible: boolean;
@@ -67,10 +68,10 @@ export function NotificationInbox({ visible, onClose }: Props) {
       presentationStyle='pageSheet'
       onRequestClose={onClose}
     >
-      <SafeAreaView className='flex-1 bg-cream'>
+      <SafeAreaView className='flex-1 bg-white'>
         {/* 헤더 */}
-        <View className='flex-row items-center justify-between px-6 pt-8 pb-5'>
-          <Text className='font-ibm-bold text-xl text-neutral-800'>알림</Text>
+        <View className='flex-row items-center justify-between px-8 pt-8 pb-5'>
+          <Text className='font-ibm-bold text-2xl text-brown-darker'>알림</Text>
           <TouchableOpacity
             onPress={onClose}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -85,12 +86,12 @@ export function NotificationInbox({ visible, onClose }: Props) {
             <ActivityIndicator color={Colors.brown} />
           </View>
         ) : notifications.length === 0 ? (
-          <View className='flex-1 items-center justify-center gap-2'>
-            <Bell size={36} color='#D4D4D4' strokeWidth={1.5} />
-            <Text className='font-ibm-semibold text-base text-brown/40'>
-              아직 알림이 없어요
-            </Text>
-          </View>
+          <EmptyState
+            icon={Bell}
+            title='아직 알림이 없어요'
+            description='알림이 없습니다'
+            containerClassName='mx-4 mt-5'
+          />
         ) : (
           <FlatList
             data={notifications}
@@ -102,10 +103,7 @@ export function NotificationInbox({ visible, onClose }: Props) {
               />
             )}
             ItemSeparatorComponent={() => (
-              <View
-                className='mx-4'
-                style={{ height: 1, backgroundColor: Colors.cream }}
-              />
+              <View className='h-px bg-cream-dark mx-8' />
             )}
             contentContainerStyle={{ paddingVertical: 8 }}
             showsVerticalScrollIndicator={false}
