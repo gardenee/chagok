@@ -77,12 +77,12 @@ export default function TransactionFormScreen() {
   const initialForm: TxFormData = {
     amount: params.amount ?? '',
     type: (params.type as TxFormData['type']) ?? 'expense',
-    tag: (params.tag as TxFormData['tag']) ?? null,
+    tag: (params.tag as TxFormData['tag']) || null,
     memo: params.memo ?? '',
     date: dateParam,
-    category_id: params.category_id ?? null,
-    payment_method_id: params.payment_method_id ?? null,
-    asset_id: params.asset_id ?? null,
+    category_id: params.category_id || null,
+    payment_method_id: params.payment_method_id || null,
+    asset_id: params.asset_id || null,
   };
 
   const [txModal, setTxModal] = useState<TxModalState>({
