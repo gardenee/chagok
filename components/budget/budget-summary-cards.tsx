@@ -2,10 +2,7 @@ import { View, Text } from 'react-native';
 import { TrendingUp, Wallet, Scale } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { Shadows } from '@/constants/shadows';
-import {
-  formatAmount,
-  formatAmountInManwon,
-} from '@/utils/format';
+import { formatAmount, formatAmountInManwon } from '@/utils/format';
 
 type Props = {
   totalIncome: number;

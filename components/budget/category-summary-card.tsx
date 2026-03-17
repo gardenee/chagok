@@ -46,7 +46,7 @@ export function CategorySummaryCard({
   return (
     <View
       className='mx-4 mt-2 mb-4 rounded-3xl p-5 bg-cream-dark'
-      style={ Shadows.card }
+      style={Shadows.card}
     >
       {/* 지출/수입 금액 */}
       <Text className='font-ibm-semibold text-base mb-0.5 text-neutral-700'>
@@ -101,7 +101,7 @@ export function CategorySummaryCard({
           </Text>
           <View
             className='flex-1 flex-row items-center rounded-xl px-3 bg-neutral-100 h-[36px]'
-            style={ Shadows.soft }
+            style={Shadows.soft}
           >
             <TextInput
               className='flex-1 font-ibm-semibold text-base text-neutral-800'

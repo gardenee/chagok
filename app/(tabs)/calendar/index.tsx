@@ -40,12 +40,7 @@ import {
   useDeleteTransaction,
   type TransactionRow,
 } from '@/hooks/use-transactions';
-import {
-  useMonthSchedules,
-  useCreateSchedule,
-  useUpdateSchedule,
-  useDeleteSchedule,
-} from '@/hooks/use-schedules';
+import { useMonthSchedules } from '@/hooks/use-schedules';
 import {
   useTransactionComments,
   useCreateComment,
@@ -88,15 +83,12 @@ import {
   formatDateStr,
   getSelectedDateLabel,
   INITIAL_TX_FORM,
-  INITIAL_SCHEDULE_FORM,
   type TxModalState,
-  type ScheduleModalState,
   type DayCell,
 } from '@/components/calendar/types';
 import { CalendarGrid } from '@/components/calendar/calendar-grid';
 import { TransactionDetailModal } from '@/components/calendar/transaction-detail-modal';
 import { TransactionFormSheet } from '@/components/calendar/transaction-form-sheet';
-import { ScheduleFormSheet } from '@/components/calendar/schedule-form-sheet';
 import { YearMonthPicker } from '@/components/calendar/year-month-picker';
 import {
   FixedExpenseForm,
@@ -190,16 +182,8 @@ export default function CalendarTab() {
     pmForm: INITIAL_PM_FORM,
     fixedExpenseId: null,
   });
-  const [scheduleModal, setScheduleModal] = useState<ScheduleModalState>({
-    visible: false,
-    editingId: null,
-    form: INITIAL_SCHEDULE_FORM,
-  });
   const [originalTxForm, setOriginalTxForm] = useState<
     TxModalState['form'] | null
-  >(null);
-  const [originalScheduleForm, setOriginalScheduleForm] = useState<
-    ScheduleModalState['form'] | null
   >(null);
   const [detailTx, setDetailTx] = useState<TransactionRow | null>(null);
   const [commentText, setCommentText] = useState('');
@@ -267,9 +251,6 @@ export default function CalendarTab() {
   const createTx = useCreateTransaction();
   const updateTx = useUpdateTransaction();
   const deleteTx = useDeleteTransaction();
-  const createSchedule = useCreateSchedule();
-  const updateSchedule = useUpdateSchedule();
-  const deleteSchedule = useDeleteSchedule();
   const createComment = useCreateComment();
   const deleteComment = useDeleteComment();
   const createCategory = useCreateCategory();
@@ -355,7 +336,6 @@ export default function CalendarTab() {
   }
 
   const isTxSaving = createTx.isPending || updateTx.isPending;
-  const isScheduleSaving = createSchedule.isPending || updateSchedule.isPending;
   const isCatSaving = createCategory.isPending || updateCategory.isPending;
 
   // ── 카테고리 핸들러 (거래 폼용) ──
@@ -856,79 +836,25 @@ export default function CalendarTab() {
 
   // ── 일정 핸들러 ──
   function openScheduleCreate() {
-    setScheduleModal({
-      visible: true,
-      editingId: null,
-      form: INITIAL_SCHEDULE_FORM,
+    router.push({
+      pathname: '/calendar/schedule-form',
+      params: { date: selectedDate },
     });
-    setOriginalScheduleForm(null);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   function openScheduleEdit(s: Schedule) {
-    const scheduleForm = {
-      title: s.title,
-      tag: s.tag,
-      time: s.start_time ?? null,
-    };
-    setScheduleModal({
-      visible: true,
-      editingId: s.id,
-      form: scheduleForm,
+    router.push({
+      pathname: '/calendar/schedule-form',
+      params: {
+        editingId: s.id,
+        title: s.title,
+        tag: s.tag,
+        date: s.date,
+        time: s.start_time ?? 'none',
+      },
     });
-    setOriginalScheduleForm(scheduleForm);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
-  async function handleScheduleSave() {
-    // no-op check for edit
-    if (scheduleModal.editingId && originalScheduleForm) {
-      const f = scheduleModal.form;
-      const noChange =
-        f.title.trim() === originalScheduleForm.title.trim() &&
-        f.tag === originalScheduleForm.tag &&
-        f.time === originalScheduleForm.time;
-      if (noChange) {
-        setScheduleModal(s => ({ ...s, visible: false }));
-        return;
-      }
-    }
-
-    const payload = {
-      title: scheduleModal.form.title.trim(),
-      tag: scheduleModal.form.tag ?? ('me' as const),
-      date: selectedDate,
-      start_time: scheduleModal.form.time ?? null,
-    };
-    try {
-      if (scheduleModal.editingId)
-        await updateSchedule.mutateAsync({
-          id: scheduleModal.editingId,
-          ...payload,
-        });
-      else await createSchedule.mutateAsync(payload);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setScheduleModal(s => ({ ...s, visible: false }));
-    } catch {
-      Alert.alert('오류', '저장 중 문제가 발생했어요');
-    }
-  }
-  function handleScheduleDelete(id: string) {
-    Alert.alert('일정 삭제', '이 일정을 삭제할까요?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteSchedule.mutateAsync(id);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          } catch {
-            Alert.alert('오류', '삭제 중 문제가 발생했어요');
-          }
-        },
-      },
-    ]);
-  }
-
   // ── 댓글 핸들러 ──
   async function handleCommentSend() {
     if (!commentText.trim() || !detailTx) return;
@@ -1283,17 +1209,6 @@ export default function CalendarTab() {
         onCatDelete={handleCatDelete}
         onPmSave={handlePmSave}
         onPmDelete={handlePmDelete}
-      />
-
-      {/* 일정 추가/수정 */}
-      <ScheduleFormSheet
-        scheduleModal={scheduleModal}
-        onClose={() => setScheduleModal(s => ({ ...s, visible: false }))}
-        onFormChange={form => setScheduleModal(s => ({ ...s, form }))}
-        onSave={handleScheduleSave}
-        onDelete={scheduleModal.editingId ? handleScheduleDelete : undefined}
-        tagOptions={tagOptions}
-        isSaving={isScheduleSaving}
       />
 
       {/* 년월 선택 */}

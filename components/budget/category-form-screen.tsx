@@ -131,7 +131,9 @@ export function CategoryFormScreen({
               onChange({ ...form, name: v });
               if (nameError) setNameError(false);
             }}
-            placeholder={categoryType === 'expense' ? '예: 식비, 교통비' : '예: 월급, 용돈'}
+            placeholder={
+              categoryType === 'expense' ? '예: 식비, 교통비' : '예: 월급, 용돈'
+            }
             maxLength={10}
             className='mb-6'
             error={nameError}

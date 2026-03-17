@@ -33,13 +33,20 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-router", "expo-web-browser", "expo-apple-authentication", "expo-font", "expo-notifications"],
+    "plugins": [
+      "expo-router",
+      "expo-web-browser",
+      "expo-apple-authentication",
+      "expo-font",
+      "expo-notifications",
+      "@react-native-community/datetimepicker"
+    ],
     "extra": {
       "router": {},
       "eas": {
         "projectId": "8a74f3f1-7b18-44bf-b206-11f6bae94bad"
       }
     },
-    "owner": "gardenee"
+    "owner": "garden"
   }
 }

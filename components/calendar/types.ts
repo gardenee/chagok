@@ -14,6 +14,7 @@ export type TxFormData = {
 export type ScheduleFormData = {
   title: string;
   tag: 'me' | 'partner' | 'together' | null;
+  date: string;
   time: string | null;
 };
 
@@ -70,6 +71,7 @@ export const INITIAL_TX_FORM: TxFormData = {
 export const INITIAL_SCHEDULE_FORM: ScheduleFormData = {
   title: '',
   tag: 'me',
+  date: '',
   time: null,
 };
 
