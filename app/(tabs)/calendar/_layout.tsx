@@ -8,6 +8,10 @@ export default function CalendarLayout() {
         name='schedule-form'
         options={{ presentation: 'fullScreenModal' }}
       />
+      <Stack.Screen
+        name='transaction-form'
+        options={{ presentation: 'fullScreenModal' }}
+      />
     </Stack>
   );
 }

@@ -9,12 +9,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   X,
   ChevronLeft,
   ChevronRight,
   Plus,
   Wallet,
+  CalendarDays,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
@@ -54,6 +56,7 @@ interface TransactionFormSheetProps {
   isTxSaving: boolean;
   isCatSaving: boolean;
   isPmSaving: boolean;
+  onClose: () => void;
   onTxSave: () => void;
   onTxDelete: (id: string) => void;
   onCatCreate: () => void;
@@ -76,6 +79,7 @@ export function TransactionFormSheet({
   isTxSaving,
   isCatSaving,
   isPmSaving,
+  onClose,
   onTxSave,
   onTxDelete,
   onCatCreate,
@@ -88,8 +92,8 @@ export function TransactionFormSheet({
   const [amountErrorMsg, setAmountErrorMsg] = useState('');
 
   useEffect(() => {
-    if (!txModal.visible) setAmountErrorMsg('');
-  }, [txModal.visible]);
+    setAmountErrorMsg('');
+  }, []);
 
   // 동일 메모의 최근 항목이 있으면 카테고리 자동 선택 (신규 입력 시에만)
   useEffect(() => {
@@ -124,132 +128,257 @@ export function TransactionFormSheet({
     onTxSave();
   }
 
-  const closeTx = () => setTxModal(s => ({ ...s, visible: false, view: 'tx' }));
+  const dateValue = txModal.form.date
+    ? (() => {
+        const [y, m, d] = txModal.form.date.split('-').map(Number);
+        return new Date(y, m - 1, d);
+      })()
+    : new Date();
 
   return (
     <>
-      {/* 거래 추가/수정 풀사이즈 모달 */}
-      <Modal
-        visible={txModal.visible && txModal.view === 'tx'}
-        animationType='slide'
-        onRequestClose={closeTx}
-      >
-        <SafeAreaView className='flex-1 bg-white'>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            className='flex-1'
-          >
-            {/* 헤더 */}
-            <View className='flex-row items-center justify-between px-6 pt-5 mb-6'>
-              <View style={{ width: 22 }} />
-              <Text className='font-ibm-bold text-lg text-neutral-800'>
-                {txModal.editingId
-                  ? '내역 수정'
-                  : `${getSelectedDateLabel(selectedDate)} 내역 추가`}
-              </Text>
-              <TouchableOpacity
-                onPress={closeTx}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <X size={22} color={Colors.neutralLight} strokeWidth={2} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 24,
-                paddingBottom: 24,
-              }}
-              keyboardShouldPersistTaps='handled'
+      {/* 거래 추가/수정 */}
+      <SafeAreaView className='flex-1 bg-white'>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className='flex-1'
+        >
+          {/* 헤더 */}
+          <View className='flex-row items-center justify-between px-6 pt-5 mb-6'>
+            <View style={{ width: 22 }} />
+            <Text className='font-ibm-bold text-lg text-neutral-800'>
+              {txModal.editingId
+                ? '내역 수정'
+                : `${getSelectedDateLabel(txModal.form.date || selectedDate)} 내역 추가`}
+            </Text>
+            <TouchableOpacity
+              onPress={onClose}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              {!txModal.editingId && (
-                <SegmentControl
-                  options={[
-                    { value: 'expense' as const, label: '지출' },
-                    { value: 'income' as const, label: '수입' },
-                  ]}
-                  value={txModal.form.type}
-                  onChange={type =>
+              <X size={22} color={Colors.neutralLight} strokeWidth={2} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 24,
+              paddingBottom: 24,
+            }}
+            keyboardShouldPersistTaps='handled'
+          >
+            {!txModal.editingId && (
+              <SegmentControl
+                options={[
+                  { value: 'expense' as const, label: '지출' },
+                  { value: 'income' as const, label: '수입' },
+                ]}
+                value={txModal.form.type}
+                onChange={type =>
+                  setTxModal(s => ({
+                    ...s,
+                    form: {
+                      ...s.form,
+                      type,
+                      category_id: null,
+                      ...(type === 'income'
+                        ? { payment_method_id: null, asset_id: null }
+                        : {}),
+                    },
+                  }))
+                }
+                bgClassName='bg-neutral-100 rounded-2xl'
+                className='mb-5'
+                activeTextClassName='text-neutral-800'
+                inactiveTextClassName='text-neutral-500'
+              />
+            )}
+
+            <View className='mb-2 flex-row items-center ml-1'>
+              <Text className='font-ibm-semibold text-base text-neutral-600'>
+                금액
+              </Text>
+              <Text
+                className='font-ibm-semibold text-base ml-0.5'
+                style={{ color: '#C8562E' }}
+              >
+                *
+              </Text>
+            </View>
+            <AmountInput
+              value={txModal.form.amount}
+              onChangeText={v => {
+                setTxModal(s => ({ ...s, form: { ...s.form, amount: v } }));
+                const n = parseInt(v, 10);
+                setAmountErrorMsg(
+                  n > 2_147_483_647 ? '최대 입력값을 초과했어요' : '',
+                );
+              }}
+              className={amountErrorMsg ? 'mb-1' : 'mb-3'}
+              error={!!amountErrorMsg}
+              maxLength={10}
+            />
+            {!!amountErrorMsg && (
+              <Text
+                className='font-ibm-regular text-sm mb-3 ml-1'
+                style={{ color: '#C8562E' }}
+              >
+                {amountErrorMsg}
+              </Text>
+            )}
+
+            <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
+              항목명
+            </Text>
+            <ModalTextInput
+              value={txModal.form.memo}
+              onChangeText={v =>
+                setTxModal(s => ({ ...s, form: { ...s.form, memo: v } }))
+              }
+              placeholder={
+                txModal.form.type === 'expense'
+                  ? '예: 장보기, 넷플릭스'
+                  : '예: 월급, 용돈'
+              }
+              maxLength={50}
+              className='mb-4'
+            />
+
+            {/* 날짜 */}
+            <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
+              날짜
+            </Text>
+            <View
+              className='bg-neutral-100 rounded-2xl px-4 mb-4 flex-row items-center'
+              style={{ minHeight: 52 }}
+            >
+              <CalendarDays
+                size={16}
+                color={Colors.neutralDark}
+                strokeWidth={2}
+              />
+              <View
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  alignItems: 'center',
+                }}
+                pointerEvents='box-none'
+              >
+                <DateTimePicker
+                  value={dateValue}
+                  mode='date'
+                  display={Platform.OS === 'ios' ? 'compact' : 'default'}
+                  onChange={(_event, date) => {
+                    if (!date) return;
+                    const y = date.getFullYear();
+                    const m = String(date.getMonth() + 1).padStart(2, '0');
+                    const d = String(date.getDate()).padStart(2, '0');
                     setTxModal(s => ({
                       ...s,
-                      form: {
-                        ...s.form,
-                        type,
-                        category_id: null,
-                        ...(type === 'income'
-                          ? { payment_method_id: null, asset_id: null }
-                          : {}),
-                      },
-                    }))
-                  }
-                  bgClassName='bg-neutral-100 rounded-2xl'
-                  className='mb-5'
-                  activeTextClassName='text-neutral-800'
-                  inactiveTextClassName='text-neutral-500'
+                      form: { ...s.form, date: `${y}-${m}-${d}` },
+                    }));
+                  }}
+                  locale='ko-KR'
+                  accentColor={Colors.brownDark}
                 />
-              )}
-
-              <View className='mb-2 flex-row items-center ml-1'>
-                <Text className='font-ibm-semibold text-base text-neutral-600'>
-                  금액
-                </Text>
-                <Text
-                  className='font-ibm-semibold text-base ml-0.5'
-                  style={{ color: '#C8562E' }}
-                >
-                  *
-                </Text>
               </View>
-              <AmountInput
-                value={txModal.form.amount}
-                onChangeText={v => {
-                  setTxModal(s => ({ ...s, form: { ...s.form, amount: v } }));
-                  const n = parseInt(v, 10);
-                  setAmountErrorMsg(
-                    n > 2_147_483_647 ? '최대 입력값을 초과했어요' : '',
-                  );
-                }}
-                className={amountErrorMsg ? 'mb-1' : 'mb-3'}
-                error={!!amountErrorMsg}
-                maxLength={10}
-              />
-              {!!amountErrorMsg && (
-                <Text
-                  className='font-ibm-regular text-sm mb-3 ml-1'
-                  style={{ color: '#C8562E' }}
-                >
-                  {amountErrorMsg}
+            </View>
+
+            {/* 카테고리 선택 */}
+            <View className='mb-4'>
+              <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
+                <Text className='font-ibm-semibold text-base text-neutral-600'>
+                  카테고리
                 </Text>
-              )}
+                {categories.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setTxModal(s => ({ ...s, view: 'catMgmt' }))}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text className='font-ibm-semibold text-sm text-neutral-600 bg-neutral-200 rounded-2xl px-2.5 py-1'>
+                      수정
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyboardShouldPersistTaps='handled'
+              >
+                <View className='flex-row gap-2 pr-2'>
+                  {categories
+                    .filter(c => c.type === txModal.form.type)
+                    .map(c => {
+                      const Icon = ICON_MAP[c.icon] ?? Wallet;
+                      const isSelected = txModal.form.category_id === c.id;
+                      const cColor = resolveColor(c.color);
+                      return (
+                        <TouchableOpacity
+                          key={c.id}
+                          onPress={() => {
+                            setTxModal(s => ({
+                              ...s,
+                              form: {
+                                ...s.form,
+                                category_id: isSelected ? null : c.id,
+                              },
+                            }));
+                            Haptics.impactAsync(
+                              Haptics.ImpactFeedbackStyle.Light,
+                            );
+                          }}
+                          className='items-center gap-1'
+                          activeOpacity={0.7}
+                        >
+                          <View
+                            className='w-12 h-12 rounded-2xl items-center justify-center'
+                            style={{
+                              backgroundColor: cColor + '30',
+                              borderWidth: isSelected ? 2 : 0,
+                              borderColor: isSelected ? cColor : 'transparent',
+                            }}
+                          >
+                            <Icon size={20} color={cColor} strokeWidth={2.5} />
+                          </View>
+                          <Text
+                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                          >
+                            {c.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  <TouchableOpacity
+                    onPress={onCatCreate}
+                    className='items-center gap-1'
+                    activeOpacity={0.7}
+                  >
+                    <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
+                      <Plus size={18} color='#A3A3A3' strokeWidth={2} />
+                    </View>
+                    <Text className='font-ibm-semibold text-[11px] text-neutral-600'>
+                      추가
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
 
-              <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-                항목명
-              </Text>
-              <ModalTextInput
-                value={txModal.form.memo}
-                onChangeText={v =>
-                  setTxModal(s => ({ ...s, form: { ...s.form, memo: v } }))
-                }
-                placeholder={
-                  txModal.form.type === 'expense'
-                    ? '예: 장보기, 넷플릭스'
-                    : '예: 월급, 용돈'
-                }
-                maxLength={50}
-                className='mb-4'
-              />
-
-              {/* 카테고리 선택 */}
+            {/* 결제수단 선택 (지출일 때) */}
+            {txModal.form.type === 'expense' && (
               <View className='mb-4'>
                 <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
                   <Text className='font-ibm-semibold text-base text-neutral-600'>
-                    카테고리
+                    결제수단
                   </Text>
-                  {categories.length > 0 && (
+                  {paymentMethods.length > 0 && (
                     <TouchableOpacity
                       onPress={() =>
-                        setTxModal(s => ({ ...s, view: 'catMgmt' }))
+                        setTxModal(s => ({ ...s, view: 'pmMgmt' }))
                       }
                       activeOpacity={0.7}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -266,56 +395,110 @@ export function TransactionFormSheet({
                   keyboardShouldPersistTaps='handled'
                 >
                   <View className='flex-row gap-2 pr-2'>
-                    {categories
-                      .filter(c => c.type === txModal.form.type)
-                      .map(c => {
-                        const Icon = ICON_MAP[c.icon] ?? Wallet;
-                        const isSelected = txModal.form.category_id === c.id;
-                        const cColor = resolveColor(c.color);
-                        return (
-                          <TouchableOpacity
-                            key={c.id}
-                            onPress={() => {
-                              setTxModal(s => ({
-                                ...s,
-                                form: {
-                                  ...s.form,
-                                  category_id: isSelected ? null : c.id,
-                                },
-                              }));
-                              Haptics.impactAsync(
-                                Haptics.ImpactFeedbackStyle.Light,
-                              );
+                    {paymentMethods.map(pm => {
+                      const isSelected =
+                        txModal.form.payment_method_id === pm.id;
+                      return (
+                        <TouchableOpacity
+                          key={pm.id}
+                          onPress={() => {
+                            setTxModal(s => ({
+                              ...s,
+                              form: {
+                                ...s.form,
+                                payment_method_id: isSelected ? null : pm.id,
+                                asset_id: null,
+                              },
+                            }));
+                            Haptics.impactAsync(
+                              Haptics.ImpactFeedbackStyle.Light,
+                            );
+                          }}
+                          className='items-center gap-1'
+                          activeOpacity={0.7}
+                        >
+                          <View
+                            className='w-12 h-12 rounded-2xl items-center justify-center'
+                            style={{
+                              backgroundColor: pm.color + '30',
+                              borderWidth: isSelected ? 2 : 0,
+                              borderColor: isSelected
+                                ? pm.color
+                                : 'transparent',
                             }}
-                            className='items-center gap-1'
-                            activeOpacity={0.7}
                           >
-                            <View
-                              className='w-12 h-12 rounded-2xl items-center justify-center'
-                              style={{
-                                backgroundColor: cColor + '30',
-                                borderWidth: isSelected ? 2 : 0,
-                                borderColor: isSelected
-                                  ? cColor
-                                  : 'transparent',
-                              }}
-                            >
-                              <Icon
-                                size={20}
-                                color={cColor}
-                                strokeWidth={2.5}
-                              />
-                            </View>
-                            <Text
-                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                            >
-                              {c.name}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
+                            <Wallet
+                              size={20}
+                              color={pm.color}
+                              strokeWidth={2.5}
+                            />
+                          </View>
+                          <Text
+                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                            numberOfLines={1}
+                          >
+                            {pm.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                    {bankCashAssets.map((asset: Asset) => {
+                      const isSelected = txModal.form.asset_id === asset.id;
+                      const { Icon: AssetIcon, color: assetColor } =
+                        getAssetTypeOption(asset.type);
+                      return (
+                        <TouchableOpacity
+                          key={`asset-${asset.id}`}
+                          onPress={() => {
+                            setTxModal(s => ({
+                              ...s,
+                              form: {
+                                ...s.form,
+                                asset_id: isSelected ? null : asset.id,
+                                payment_method_id: null,
+                              },
+                            }));
+                            Haptics.impactAsync(
+                              Haptics.ImpactFeedbackStyle.Light,
+                            );
+                          }}
+                          className='items-center gap-1'
+                          activeOpacity={0.7}
+                        >
+                          <View
+                            className='w-12 h-12 rounded-2xl items-center justify-center'
+                            style={{
+                              backgroundColor: assetColor + '30',
+                              borderWidth: isSelected ? 2 : 0,
+                              borderColor: isSelected
+                                ? assetColor
+                                : 'transparent',
+                            }}
+                          >
+                            <AssetIcon
+                              size={20}
+                              color={assetColor}
+                              strokeWidth={2.5}
+                            />
+                          </View>
+                          <Text
+                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                            numberOfLines={1}
+                          >
+                            {asset.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
                     <TouchableOpacity
-                      onPress={onCatCreate}
+                      onPress={() =>
+                        setTxModal(s => ({
+                          ...s,
+                          view: 'pmForm',
+                          pmEditingId: null,
+                          pmForm: INITIAL_PM_FORM,
+                        }))
+                      }
                       className='items-center gap-1'
                       activeOpacity={0.7}
                     >
@@ -329,211 +512,65 @@ export function TransactionFormSheet({
                   </View>
                 </ScrollView>
               </View>
+            )}
 
-              {/* 결제수단 선택 (지출일 때) */}
-              {txModal.form.type === 'expense' && (
-                <View className='mb-4'>
-                  <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-                    <Text className='font-ibm-semibold text-base text-neutral-600'>
-                      결제수단
-                    </Text>
-                    {paymentMethods.length > 0 && (
-                      <TouchableOpacity
-                        onPress={() =>
-                          setTxModal(s => ({ ...s, view: 'pmMgmt' }))
-                        }
-                        activeOpacity={0.7}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            <View className='mb-2'>
+              <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
+                누가
+              </Text>
+              <View className='flex-row gap-2'>
+                {tagOptions.map(({ value, label }) => {
+                  const isSelected = txModal.form.tag === value;
+                  return (
+                    <TouchableOpacity
+                      key={value}
+                      onPress={() =>
+                        setTxModal(s => ({
+                          ...s,
+                          form: {
+                            ...s.form,
+                            tag: isSelected ? null : value,
+                          },
+                        }))
+                      }
+                      className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
                       >
-                        <Text className='font-ibm-semibold text-sm text-neutral-600 bg-neutral-200 rounded-2xl px-2.5 py-1'>
-                          수정
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    keyboardShouldPersistTaps='handled'
-                  >
-                    <View className='flex-row gap-2 pr-2'>
-                      {paymentMethods.map(pm => {
-                        const isSelected =
-                          txModal.form.payment_method_id === pm.id;
-                        return (
-                          <TouchableOpacity
-                            key={pm.id}
-                            onPress={() => {
-                              setTxModal(s => ({
-                                ...s,
-                                form: {
-                                  ...s.form,
-                                  payment_method_id: isSelected ? null : pm.id,
-                                  asset_id: null,
-                                },
-                              }));
-                              Haptics.impactAsync(
-                                Haptics.ImpactFeedbackStyle.Light,
-                              );
-                            }}
-                            className='items-center gap-1'
-                            activeOpacity={0.7}
-                          >
-                            <View
-                              className='w-12 h-12 rounded-2xl items-center justify-center'
-                              style={{
-                                backgroundColor: pm.color + '30',
-                                borderWidth: isSelected ? 2 : 0,
-                                borderColor: isSelected
-                                  ? pm.color
-                                  : 'transparent',
-                              }}
-                            >
-                              <Wallet
-                                size={20}
-                                color={pm.color}
-                                strokeWidth={2.5}
-                              />
-                            </View>
-                            <Text
-                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                              numberOfLines={1}
-                            >
-                              {pm.name}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                      {bankCashAssets.map((asset: Asset) => {
-                        const isSelected = txModal.form.asset_id === asset.id;
-                        const { Icon: AssetIcon, color: assetColor } =
-                          getAssetTypeOption(asset.type);
-                        return (
-                          <TouchableOpacity
-                            key={`asset-${asset.id}`}
-                            onPress={() => {
-                              setTxModal(s => ({
-                                ...s,
-                                form: {
-                                  ...s.form,
-                                  asset_id: isSelected ? null : asset.id,
-                                  payment_method_id: null,
-                                },
-                              }));
-                              Haptics.impactAsync(
-                                Haptics.ImpactFeedbackStyle.Light,
-                              );
-                            }}
-                            className='items-center gap-1'
-                            activeOpacity={0.7}
-                          >
-                            <View
-                              className='w-12 h-12 rounded-2xl items-center justify-center'
-                              style={{
-                                backgroundColor: assetColor + '30',
-                                borderWidth: isSelected ? 2 : 0,
-                                borderColor: isSelected
-                                  ? assetColor
-                                  : 'transparent',
-                              }}
-                            >
-                              <AssetIcon
-                                size={20}
-                                color={assetColor}
-                                strokeWidth={2.5}
-                              />
-                            </View>
-                            <Text
-                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                              numberOfLines={1}
-                            >
-                              {asset.name}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                      <TouchableOpacity
-                        onPress={() =>
-                          setTxModal(s => ({
-                            ...s,
-                            view: 'pmForm',
-                            pmEditingId: null,
-                            pmForm: INITIAL_PM_FORM,
-                          }))
-                        }
-                        className='items-center gap-1'
-                        activeOpacity={0.7}
-                      >
-                        <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
-                          <Plus size={18} color='#A3A3A3' strokeWidth={2} />
-                        </View>
-                        <Text className='font-ibm-semibold text-[11px] text-neutral-600'>
-                          추가
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </ScrollView>
-                </View>
-              )}
-
-              <View className='mb-2'>
-                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-                  누가
-                </Text>
-                <View className='flex-row gap-2'>
-                  {tagOptions.map(({ value, label }) => {
-                    const isSelected = txModal.form.tag === value;
-                    return (
-                      <TouchableOpacity
-                        key={value}
-                        onPress={() =>
-                          setTxModal(s => ({
-                            ...s,
-                            form: {
-                              ...s.form,
-                              tag: isSelected ? null : value,
-                            },
-                          }))
-                        }
-                        className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                        activeOpacity={0.7}
-                      >
-                        <Text
-                          className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                        >
-                          {label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
+                        {label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-            </ScrollView>
-
-            {/* 하단 버튼 */}
-            <View
-              className='px-6 pb-6 pt-3 gap-3'
-              style={{ borderTopWidth: 1, borderTopColor: Colors.cream }}
-            >
-              {txModal.editingId && (
-                <DeleteButton
-                  onPress={() => onTxDelete(txModal.editingId!)}
-                  label='내역 삭제'
-                />
-              )}
-              <SaveButton
-                onPress={handleTxSavePress}
-                isSaving={isTxSaving}
-                label={txModal.editingId ? '수정 완료' : '저장'}
-              />
             </View>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </Modal>
+          </ScrollView>
+
+          {/* 하단 버튼 */}
+          <View
+            className='px-6 pb-6 pt-3 gap-3'
+            style={{ borderTopWidth: 1, borderTopColor: Colors.cream }}
+          >
+            {txModal.editingId && (
+              <DeleteButton
+                onPress={() => onTxDelete(txModal.editingId!)}
+                label='내역 삭제'
+              />
+            )}
+            <SaveButton
+              onPress={handleTxSavePress}
+              isSaving={isTxSaving}
+              label={txModal.editingId ? '수정 완료' : '저장'}
+            />
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
 
       {/* 카테고리 관리 모달 */}
       <Modal
-        visible={txModal.visible && txModal.view === 'catMgmt'}
+        visible={txModal.view === 'catMgmt'}
         animationType='none'
         onRequestClose={() => setTxModal(s => ({ ...s, view: 'tx' }))}
       >
@@ -549,7 +586,7 @@ export function TransactionFormSheet({
 
       {/* 카테고리 추가/수정 모달 */}
       <Modal
-        visible={txModal.visible && txModal.view === 'catForm'}
+        visible={txModal.view === 'catForm'}
         animationType='none'
         onRequestClose={() =>
           setTxModal(s => ({ ...s, view: s.catFormSource }))
@@ -576,7 +613,7 @@ export function TransactionFormSheet({
 
       {/* 결제수단 관리 모달 */}
       <Modal
-        visible={txModal.visible && txModal.view === 'pmMgmt'}
+        visible={txModal.view === 'pmMgmt'}
         animationType='none'
         onRequestClose={() => setTxModal(s => ({ ...s, view: 'tx' }))}
       >
@@ -665,7 +702,7 @@ export function TransactionFormSheet({
 
       {/* 결제수단 추가/수정 모달 */}
       <Modal
-        visible={txModal.visible && txModal.view === 'pmForm'}
+        visible={txModal.view === 'pmForm'}
         animationType='none'
         onRequestClose={() =>
           setTxModal(s => ({

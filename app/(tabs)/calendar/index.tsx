@@ -28,16 +28,12 @@ import {
   CategoryFormScreen,
   type CategoryFormData,
 } from '@/components/budget/category-form-screen';
-import { INITIAL_PM_FORM, getPmColor } from '@/constants/payment-method';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { resolveColor, resolveColorKey } from '@/constants/color-map';
 import { useAuthStore } from '@/store/auth';
 import {
   useMonthTransactions,
-  useCreateTransaction,
-  useUpdateTransaction,
-  useDeleteTransaction,
   type TransactionRow,
 } from '@/hooks/use-transactions';
 import { useMonthSchedules } from '@/hooks/use-schedules';
@@ -58,13 +54,6 @@ import {
   useUpdateCategory,
   useDeleteCategory,
 } from '@/hooks/use-categories';
-import {
-  usePaymentMethods,
-  useCreatePaymentMethod,
-  useUpdatePaymentMethod,
-  useDeletePaymentMethod,
-} from '@/hooks/use-payment-methods';
-import { useAssets } from '@/hooks/use-assets';
 import { useMaterializeFixedExpenses } from '@/hooks/use-materialize-fixed-expenses';
 import {
   updateLinkedTransactions,
@@ -77,18 +66,15 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { IconBox } from '@/components/ui/icon-box';
 import { ColorPill, TagPill } from '@/components/ui/color-pill';
 import { formatAmount } from '@/utils/format';
-import type { Schedule, FixedExpense, Asset, Category } from '@/types/database';
+import type { Schedule, FixedExpense, Category } from '@/types/database';
 
 import {
   formatDateStr,
   getSelectedDateLabel,
-  INITIAL_TX_FORM,
-  type TxModalState,
   type DayCell,
 } from '@/components/calendar/types';
 import { CalendarGrid } from '@/components/calendar/calendar-grid';
 import { TransactionDetailModal } from '@/components/calendar/transaction-detail-modal';
-import { TransactionFormSheet } from '@/components/calendar/transaction-form-sheet';
 import { YearMonthPicker } from '@/components/calendar/year-month-picker';
 import {
   FixedExpenseForm,
@@ -169,22 +155,6 @@ export default function CalendarTab() {
     router.setParams({ openTxId: undefined });
   }, [openTxId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [txModal, setTxModal] = useState<TxModalState>({
-    visible: false,
-    editingId: null,
-    form: INITIAL_TX_FORM,
-    view: 'tx',
-    catEditingId: null,
-    catCategoryType: 'expense',
-    catForm: INITIAL_CATEGORY_FORM,
-    catFormSource: 'tx',
-    pmEditingId: null,
-    pmForm: INITIAL_PM_FORM,
-    fixedExpenseId: null,
-  });
-  const [originalTxForm, setOriginalTxForm] = useState<
-    TxModalState['form'] | null
-  >(null);
   const [detailTx, setDetailTx] = useState<TransactionRow | null>(null);
   const [commentText, setCommentText] = useState('');
   const [fixedEditState, setFixedEditState] =
@@ -201,15 +171,7 @@ export default function CalendarTab() {
     useMonthSchedules(currentYear, currentMonth);
   const { data: fixedExpenses = [] } = useFixedExpenses();
   const { data: categories = [] } = useCategories();
-  const { data: paymentMethods = [] } = usePaymentMethods();
-  const { data: allAssets = [] } = useAssets();
-  const bankCashAssets = allAssets.filter(
-    (a: Asset) => a.type === 'bank' || a.type === 'cash',
-  );
   const expenseCategories = categories.filter(c => c.type === 'expense');
-  const createPaymentMethod = useCreatePaymentMethod();
-  const updatePaymentMethod = useUpdatePaymentMethod();
-  const deletePaymentMethod = useDeletePaymentMethod();
   const { data: comments = [], isLoading: commentsLoading } =
     useTransactionComments(detailTx?.id ?? '');
   const { data: members = [] } = useCoupleMembers();
@@ -241,184 +203,14 @@ export default function CalendarTab() {
     return isMyExpense ? Colors.butter : Colors.peach;
   }
 
-  const tagOptions = [
-    { value: 'me' as const, label: myNickname },
-    { value: 'partner' as const, label: partnerNickname },
-    { value: 'together' as const, label: '함께' },
-  ];
-
   const updateFixedExpense = useUpdateFixedExpense();
-  const createTx = useCreateTransaction();
-  const updateTx = useUpdateTransaction();
-  const deleteTx = useDeleteTransaction();
   const createComment = useCreateComment();
   const deleteComment = useDeleteComment();
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
 
-  // ── 결제수단 핸들러 ──
-  async function handlePmSave() {
-    const name = txModal.pmForm.name.trim();
-    const color = getPmColor(txModal.pmForm.type);
-    try {
-      if (txModal.pmEditingId) {
-        // no-op check
-        const origPm = paymentMethods.find(p => p.id === txModal.pmEditingId);
-        if (origPm) {
-          const noChange =
-            name === origPm.name.trim() && txModal.pmForm.type === origPm.type;
-          if (noChange) {
-            setTxModal(s => ({
-              ...s,
-              view: 'pmMgmt',
-              pmEditingId: null,
-              pmForm: INITIAL_PM_FORM,
-            }));
-            return;
-          }
-        }
-        await updatePaymentMethod.mutateAsync({
-          id: txModal.pmEditingId,
-          name,
-          type: txModal.pmForm.type,
-          color,
-        });
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTxModal(s => ({
-          ...s,
-          view: 'pmMgmt',
-          pmEditingId: null,
-          pmForm: INITIAL_PM_FORM,
-        }));
-      } else {
-        const created = await createPaymentMethod.mutateAsync({
-          name,
-          type: txModal.pmForm.type,
-          color,
-          sort_order: paymentMethods.length,
-        });
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTxModal(s => ({
-          ...s,
-          view: 'tx',
-          pmForm: INITIAL_PM_FORM,
-          form: { ...s.form, payment_method_id: created.id },
-        }));
-      }
-    } catch {
-      Alert.alert('오류', '저장 중 문제가 발생했어요');
-    }
-  }
-
-  function handlePmDelete(id: string) {
-    Alert.alert('결제수단 삭제', '이 결제수단을 삭제할까요?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deletePaymentMethod.mutateAsync(id);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setTxModal(s => ({
-              ...s,
-              view: 'pmMgmt',
-              pmEditingId: null,
-              pmForm: INITIAL_PM_FORM,
-            }));
-          } catch {
-            Alert.alert('오류', '삭제 중 문제가 발생했어요');
-          }
-        },
-      },
-    ]);
-  }
-
-  const isTxSaving = createTx.isPending || updateTx.isPending;
   const isCatSaving = createCategory.isPending || updateCategory.isPending;
-
-  // ── 카테고리 핸들러 (거래 폼용) ──
-  function openCatCreate() {
-    setTxModal(s => ({
-      ...s,
-      catEditingId: null,
-      catCategoryType: s.form.type,
-      catForm: INITIAL_CATEGORY_FORM,
-      catFormSource: s.view as 'tx' | 'catMgmt',
-    }));
-    requestAnimationFrame(() => setTxModal(s => ({ ...s, view: 'catForm' })));
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  }
-  function openCatEdit(c: Category) {
-    setTxModal(s => ({
-      ...s,
-      catEditingId: c.id,
-      catCategoryType: c.type,
-      catForm: { name: c.name, icon: c.icon, color: resolveColorKey(c.color) },
-      catFormSource: 'catMgmt',
-    }));
-    requestAnimationFrame(() => setTxModal(s => ({ ...s, view: 'catForm' })));
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  }
-  async function handleCatSave() {
-    const name = txModal.catForm.name.trim();
-    try {
-      if (txModal.catEditingId) {
-        // no-op check
-        const origCat = categories.find(c => c.id === txModal.catEditingId);
-        if (origCat) {
-          const origColor = resolveColorKey(origCat.color);
-          const noChange =
-            name === origCat.name.trim() &&
-            txModal.catForm.icon === origCat.icon &&
-            txModal.catForm.color === origColor;
-          if (noChange) {
-            setTxModal(s => ({ ...s, view: s.catFormSource }));
-            return;
-          }
-        }
-        await updateCategory.mutateAsync({
-          id: txModal.catEditingId,
-          name,
-          icon: txModal.catForm.icon,
-          color: resolveColor(txModal.catForm.color),
-        });
-      } else {
-        await createCategory.mutateAsync({
-          name,
-          icon: txModal.catForm.icon,
-          color: resolveColor(txModal.catForm.color),
-          budget_amount: 0,
-          sort_order: categories.length,
-          type: txModal.catCategoryType,
-        });
-      }
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setTxModal(s => ({ ...s, view: s.catFormSource }));
-    } catch (err) {
-      console.error('[handleCatSave]', err);
-      Alert.alert('오류', '저장 중 문제가 발생했어요');
-    }
-  }
-  function handleCatDelete(id: string) {
-    Alert.alert('카테고리 삭제', '삭제하면 관련 예산도 사라져요. 삭제할까요?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteCategory.mutateAsync(id);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setTxModal(s => ({ ...s, view: s.catFormSource }));
-          } catch {
-            Alert.alert('오류', '삭제 중 문제가 발생했어요');
-          }
-        },
-      },
-    ]);
-  }
 
   // ── 고정지출 템플릿 수정 핸들러 ──
   function openFixedTemplateEdit(fixedExpenseId: string) {
@@ -712,41 +504,33 @@ export default function CalendarTab() {
 
   // ── 거래 핸들러 ──
   function openTxCreate() {
-    setTxModal(s => ({
-      ...s,
-      visible: true,
-      editingId: null,
-      form: INITIAL_TX_FORM,
-      view: 'tx',
-      fixedExpenseId: null,
-    }));
-    setOriginalTxForm(null);
+    router.push({
+      pathname: '/calendar/transaction-form',
+      params: { date: selectedDate },
+    });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
   function openTxEdit(t: TransactionRow) {
-    const txForm = {
-      amount: String(t.amount),
-      type: t.type,
-      tag: t.tag,
-      memo: t.memo ?? '',
-      category_id: t.category_id ?? null,
-      payment_method_id: t.payment_method_id ?? null,
-      asset_id: t.asset_id ?? null,
-    };
     if (t.fixed_expense_id) {
       Alert.alert('수정 방법', '어떻게 수정할까요?', [
         {
           text: '이 내역만',
           onPress: () => {
-            setTxModal(s => ({
-              ...s,
-              visible: true,
-              editingId: t.id,
-              fixedExpenseId: t.fixed_expense_id ?? null,
-              form: txForm,
-              view: 'tx',
-            }));
-            setOriginalTxForm(txForm);
+            router.push({
+              pathname: '/calendar/transaction-form',
+              params: {
+                editingId: t.id,
+                date: t.date,
+                amount: String(t.amount),
+                type: t.type,
+                tag: t.tag ?? '',
+                memo: t.memo ?? '',
+                category_id: t.category_id ?? '',
+                payment_method_id: t.payment_method_id ?? '',
+                asset_id: t.asset_id ?? '',
+                fixedExpenseId: t.fixed_expense_id,
+              },
+            });
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           },
         },
@@ -757,81 +541,22 @@ export default function CalendarTab() {
         { text: '취소', style: 'cancel' },
       ]);
     } else {
-      setTxModal(s => ({
-        ...s,
-        visible: true,
-        editingId: t.id,
-        fixedExpenseId: null,
-        form: txForm,
-        view: 'tx',
-      }));
-      setOriginalTxForm(txForm);
+      router.push({
+        pathname: '/calendar/transaction-form',
+        params: {
+          editingId: t.id,
+          date: t.date,
+          amount: String(t.amount),
+          type: t.type,
+          tag: t.tag ?? '',
+          memo: t.memo ?? '',
+          category_id: t.category_id ?? '',
+          payment_method_id: t.payment_method_id ?? '',
+          asset_id: t.asset_id ?? '',
+        },
+      });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-  }
-  async function handleTxSave() {
-    const amount = parseInt(txModal.form.amount.replace(/[^0-9]/g, ''), 10);
-
-    // no-op check for edit
-    if (txModal.editingId && originalTxForm) {
-      const f = txModal.form;
-      const noChange =
-        f.amount === originalTxForm.amount &&
-        f.type === originalTxForm.type &&
-        f.tag === originalTxForm.tag &&
-        f.memo === originalTxForm.memo &&
-        f.category_id === originalTxForm.category_id &&
-        f.payment_method_id === originalTxForm.payment_method_id &&
-        f.asset_id === originalTxForm.asset_id;
-      if (noChange) {
-        setTxModal(s => ({ ...s, visible: false, view: 'tx' }));
-        return;
-      }
-    }
-
-    const payload = {
-      amount,
-      type: txModal.form.type,
-      ...(txModal.form.tag ? { tag: txModal.form.tag } : {}),
-      memo: txModal.form.memo.trim() || null,
-      category_id: txModal.form.category_id,
-      payment_method_id: txModal.form.payment_method_id,
-      asset_id: txModal.form.asset_id,
-      date: selectedDate,
-      fixed_expense_id: txModal.fixedExpenseId,
-    };
-    try {
-      if (txModal.editingId)
-        await updateTx.mutateAsync({ id: txModal.editingId, ...payload });
-      else await createTx.mutateAsync(payload);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setTxModal(s => ({
-        ...s,
-        visible: false,
-        view: 'tx',
-        fixedExpenseId: null,
-      }));
-    } catch (err) {
-      console.error('[handleTxSave] error:', err);
-      Alert.alert('오류', '저장 중 문제가 발생했어요');
-    }
-  }
-  function handleTxDelete(id: string) {
-    Alert.alert('내역 삭제', '이 내역을 삭제할까요?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteTx.mutateAsync(id);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          } catch {
-            Alert.alert('오류', '삭제 중 문제가 발생했어요');
-          }
-        },
-      },
-    ]);
   }
 
   // ── 일정 핸들러 ──
@@ -1142,7 +867,7 @@ export default function CalendarTab() {
               <View className='gap-2.5'>
                 {/* 공휴일 */}
                 {holidaysByDate[selectedDate] && (
-                  <ItemCard>
+                  <ItemCard className='py-5'>
                     <TagPill
                       tag='holiday'
                       label='공휴일'
@@ -1154,7 +879,11 @@ export default function CalendarTab() {
                   </ItemCard>
                 )}
                 {selectedSchedules.map(s => (
-                  <ItemCard key={s.id} onPress={() => openScheduleEdit(s)}>
+                  <ItemCard
+                    key={s.id}
+                    onPress={() => openScheduleEdit(s)}
+                    className='py-5'
+                  >
                     <View className='flex-row items-center gap-3'>
                       <TagPill
                         tag={s.tag}
@@ -1185,31 +914,6 @@ export default function CalendarTab() {
             ))}
         </View>
       </ScrollView>
-
-      {/* 거래 추가/수정 + 카테고리/결제수단 관리 */}
-      <TransactionFormSheet
-        txModal={txModal}
-        setTxModal={setTxModal}
-        selectedDate={selectedDate}
-        categories={categories}
-        paymentMethods={paymentMethods}
-        bankCashAssets={bankCashAssets}
-        transactions={transactions}
-        tagOptions={tagOptions}
-        isTxSaving={isTxSaving}
-        isCatSaving={isCatSaving}
-        isPmSaving={
-          createPaymentMethod.isPending || updatePaymentMethod.isPending
-        }
-        onTxSave={handleTxSave}
-        onTxDelete={handleTxDelete}
-        onCatCreate={openCatCreate}
-        onCatEdit={openCatEdit}
-        onCatSave={handleCatSave}
-        onCatDelete={handleCatDelete}
-        onPmSave={handlePmSave}
-        onPmDelete={handlePmDelete}
-      />
 
       {/* 년월 선택 */}
       <YearMonthPicker

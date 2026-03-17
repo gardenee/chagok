@@ -4,12 +4,13 @@ import { Shadows } from '@/constants/shadows';
 type ItemCardProps = {
   onPress?: () => void;
   children: React.ReactNode;
+  className?: string;
 };
 
-export function ItemCard({ onPress, children }: ItemCardProps) {
+export function ItemCard({ onPress, children, className }: ItemCardProps) {
   const content = (
     <View
-      className='bg-white rounded-xl px-4 py-4 flex-row items-center gap-3'
+      className={`bg-white rounded-xl px-4 py-4 flex-row items-center gap-3${className ? ` ${className}` : ''}`}
       style={Shadows.primary}
     >
       {children}

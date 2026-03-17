@@ -135,9 +135,7 @@ export function ScheduleFormSheet({
           <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
             날짜
           </Text>
-          <View
-            className='bg-neutral-100 rounded-2xl px-4 mb-6 flex-row items-center h-16'
-          >
+          <View className='bg-neutral-100 rounded-2xl px-4 mb-6 flex-row items-center h-16'>
             <CalendarDays
               size={16}
               color={Colors.neutralDark}

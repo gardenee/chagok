@@ -6,6 +6,7 @@ export type TxFormData = {
   type: 'expense' | 'income';
   tag: 'me' | 'partner' | 'together' | null;
   memo: string;
+  date: string;
   category_id: string | null;
   payment_method_id: string | null;
   asset_id: string | null;
@@ -63,6 +64,7 @@ export const INITIAL_TX_FORM: TxFormData = {
   type: 'expense',
   tag: null,
   memo: '',
+  date: '',
   category_id: null,
   payment_method_id: null,
   asset_id: null,
