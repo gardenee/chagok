@@ -18,15 +18,36 @@ import {
 import { useAuthStore } from '@/store/auth';
 import { supabase } from '@/lib/supabase';
 import { registerMyPushToken } from '@/services/notifications';
+import { useNotificationSettingsStore } from '@/store/notification-settings';
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+  handleNotification: async notification => {
+    const {
+      partnerTransaction,
+      comment,
+      fixedExpenseReminder,
+      budgetExceeded,
+      mySchedule,
+      togetherSchedule,
+    } = useNotificationSettingsStore.getState();
+    const type = notification.request.content.data?.type as string | undefined;
+
+    let shouldShow = true;
+    if (type === 'PARTNER_TRANSACTION') shouldShow = partnerTransaction;
+    else if (type === 'PARTNER_COMMENT') shouldShow = comment;
+    else if (type === 'FIXED_EXPENSE') shouldShow = fixedExpenseReminder;
+    else if (type === 'BUDGET_EXCEEDED') shouldShow = budgetExceeded;
+    else if (type === 'MY_SCHEDULE') shouldShow = mySchedule;
+    else if (type === 'TOGETHER_SCHEDULE') shouldShow = togetherSchedule;
+
+    return {
+      shouldShowAlert: shouldShow,
+      shouldPlaySound: shouldShow,
+      shouldSetBadge: false,
+      shouldShowBanner: shouldShow,
+      shouldShowList: shouldShow,
+    };
+  },
 });
 
 SplashScreen.preventAutoHideAsync();

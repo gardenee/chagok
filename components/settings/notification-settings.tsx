@@ -10,9 +10,15 @@ export function NotificationSettings() {
     partnerTransaction,
     comment,
     fixedExpenseReminder,
+    budgetExceeded,
+    mySchedule,
+    togetherSchedule,
     setPartnerTransaction,
     setComment,
     setFixedExpenseReminder,
+    setBudgetExceeded,
+    setMySchedule,
+    setTogetherSchedule,
   } = useNotificationSettingsStore();
 
   return (
@@ -40,6 +46,30 @@ export function NotificationSettings() {
           onToggle: (v: boolean) => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setFixedExpenseReminder(v);
+          },
+        },
+        {
+          label: '예산 초과 알림',
+          value: budgetExceeded,
+          onToggle: (v: boolean) => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setBudgetExceeded(v);
+          },
+        },
+        {
+          label: '내 일정 알림',
+          value: mySchedule,
+          onToggle: (v: boolean) => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setMySchedule(v);
+          },
+        },
+        {
+          label: '함께 일정 알림',
+          value: togetherSchedule,
+          onToggle: (v: boolean) => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setTogetherSchedule(v);
           },
         },
       ].map((item, i) => (

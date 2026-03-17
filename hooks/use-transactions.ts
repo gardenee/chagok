@@ -10,7 +10,10 @@ import {
   type TransactionRow,
   type TransactionInput,
 } from '@/services/transactions';
-import { sendPartnerTransactionPush } from '@/services/notifications';
+import {
+  sendPartnerTransactionPush,
+  checkAndNotifyBudgetThresholds,
+} from '@/services/notifications';
 import { useNotificationSettingsStore } from '@/store/notification-settings';
 
 export type { TransactionRow, TransactionInput };
@@ -52,7 +55,10 @@ export function useMonthTransactions(year: number, month: number) {
 export function useCreateTransaction() {
   const queryClient = useQueryClient();
   const { userProfile, session } = useAuthStore();
-  const { partnerTransaction: notifyEnabled } = useNotificationSettingsStore();
+  const {
+    partnerTransaction: notifyEnabled,
+    budgetExceeded: budgetNotifyEnabled,
+  } = useNotificationSettingsStore();
 
   return useMutation({
     mutationFn: (input: TransactionInput) => {
@@ -75,6 +81,21 @@ export function useCreateTransaction() {
           amount: newTransaction.amount,
           type: newTransaction.type,
           categoryName: newTransaction.categories?.name,
+        }).catch(() => {});
+      }
+
+      if (
+        budgetNotifyEnabled &&
+        coupleId &&
+        newTransaction.type === 'expense' &&
+        newTransaction.category_id &&
+        newTransaction.categories?.name
+      ) {
+        checkAndNotifyBudgetThresholds({
+          coupleId,
+          categoryId: newTransaction.category_id,
+          categoryName: newTransaction.categories.name,
+          newAmount: newTransaction.amount,
         }).catch(() => {});
       }
     },
