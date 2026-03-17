@@ -1,8 +1,17 @@
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { supabase } from '@/lib/supabase';
-import type { FixedExpense, Notification } from '@/types/database';
+import type { FixedExpense, Notification, Schedule } from '@/types/database';
 import { resolveFixedExpenseDate } from '@/utils/fixed-expense-date';
+
+async function cancelNotificationsByTypes(types: string[]): Promise<void> {
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  await Promise.all(
+    scheduled
+      .filter(n => types.includes(n.content.data?.type as string))
+      .map(n => Notifications.cancelScheduledNotificationAsync(n.identifier)),
+  );
+}
 
 function isExpoPushToken(token: string): boolean {
   return (
@@ -152,7 +161,7 @@ export async function sendPartnerCommentPush({
 export async function scheduleFixedExpenseReminders(
   fixedExpenses: FixedExpense[],
 ): Promise<void> {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  await cancelNotificationsByTypes(['FIXED_EXPENSE']);
 
   const now = new Date();
 
@@ -205,4 +214,116 @@ export async function markAllNotificationsAsRead(
     .eq('is_read', false);
 
   if (error) throw error;
+}
+
+const BUDGET_THRESHOLDS: { rate: number; title: string }[] = [
+  { rate: 0.5, title: '예산 50% 도달' },
+  { rate: 0.7, title: '예산 70% 도달' },
+  { rate: 0.9, title: '예산 90% 도달' },
+  { rate: 1.0, title: '예산 초과' },
+];
+
+export async function checkAndNotifyBudgetThresholds({
+  coupleId,
+  categoryId,
+  categoryName,
+  newAmount,
+}: {
+  coupleId: string;
+  categoryId: string;
+  categoryName: string;
+  newAmount: number;
+}): Promise<void> {
+  const { data: category } = await supabase
+    .from('categories')
+    .select('budget_amount')
+    .eq('id', categoryId)
+    .single();
+
+  if (!category || category.budget_amount <= 0) return;
+
+  const budget = category.budget_amount;
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+  const { data: txs } = await supabase
+    .from('transactions')
+    .select('amount')
+    .eq('couple_id', coupleId)
+    .eq('category_id', categoryId)
+    .eq('type', 'expense')
+    .gte('date', startDate)
+    .lte('date', endDate);
+
+  const total = (txs ?? []).reduce((sum, t) => sum + t.amount, 0);
+  const prevTotal = total - newAmount;
+
+  const crossed = BUDGET_THRESHOLDS.filter(
+    ({ rate }) => prevTotal / budget < rate && total / budget >= rate,
+  );
+
+  for (const threshold of crossed) {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: threshold.title,
+        body: `${categoryName} ${total.toLocaleString()}원 / 예산 ${budget.toLocaleString()}원`,
+        sound: true,
+        data: { type: 'BUDGET_EXCEEDED', categoryId },
+      },
+      trigger: null,
+    });
+  }
+}
+
+export async function scheduleEventReminders(
+  schedules: Schedule[],
+  userId: string,
+  myScheduleEnabled: boolean,
+  togetherScheduleEnabled: boolean,
+): Promise<void> {
+  await cancelNotificationsByTypes(['MY_SCHEDULE', 'TOGETHER_SCHEDULE']);
+
+  const now = new Date();
+
+  for (const schedule of schedules) {
+    const isMySchedule = schedule.tag === 'me' && schedule.user_id === userId;
+    const isTogetherSchedule = schedule.tag === 'together';
+
+    if (isMySchedule && !myScheduleEnabled) continue;
+    if (isTogetherSchedule && !togetherScheduleEnabled) continue;
+    if (!isMySchedule && !isTogetherSchedule) continue;
+
+    const [year, month, day] = schedule.date.split('-').map(Number);
+    let triggerDate: Date;
+
+    if (schedule.start_time) {
+      const [hours, minutes] = schedule.start_time.split(':').map(Number);
+      triggerDate = new Date(year, month - 1, day, hours, minutes, 0);
+      triggerDate = new Date(triggerDate.getTime() - 60 * 60 * 1000);
+    } else {
+      triggerDate = new Date(year, month - 1, day - 1, 21, 0, 0);
+    }
+
+    if (triggerDate <= now) continue;
+
+    const type = isTogetherSchedule ? 'TOGETHER_SCHEDULE' : 'MY_SCHEDULE';
+    const title = isTogetherSchedule ? '함께 일정' : '내 일정';
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body: schedule.title,
+        sound: true,
+        data: { type, id: schedule.id },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: triggerDate,
+      },
+    });
+  }
 }

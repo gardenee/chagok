@@ -59,3 +59,22 @@ export async function deleteSchedule(id: string): Promise<void> {
   const { error } = await supabase.from('schedules').delete().eq('id', id);
   if (error) throw error;
 }
+
+export async function fetchUpcomingSchedules(
+  coupleId: string,
+): Promise<Schedule[]> {
+  const now = new Date();
+  const fromDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const threeMonthsLater = new Date(now.getFullYear(), now.getMonth() + 3, 0);
+  const toDate = `${threeMonthsLater.getFullYear()}-${String(threeMonthsLater.getMonth() + 1).padStart(2, '0')}-${String(threeMonthsLater.getDate()).padStart(2, '0')}`;
+
+  const { data, error } = await supabase
+    .from('schedules')
+    .select('*')
+    .eq('couple_id', coupleId)
+    .gte('date', fromDate)
+    .lte('date', toDate)
+    .order('date', { ascending: true });
+  if (error) throw error;
+  return data;
+}

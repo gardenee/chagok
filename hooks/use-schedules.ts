@@ -4,11 +4,14 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/store/auth';
 import {
   fetchMonthSchedules,
+  fetchUpcomingSchedules,
   createSchedule,
   updateSchedule,
   deleteSchedule,
   type ScheduleInput,
 } from '@/services/schedules';
+import { scheduleEventReminders } from '@/services/notifications';
+import { useNotificationSettingsStore } from '@/store/notification-settings';
 import type { Schedule } from '@/types/database';
 
 export function useMonthSchedules(year: number, month: number) {
@@ -58,6 +61,7 @@ export function useCreateSchedule() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming-schedules'] });
     },
   });
 }
@@ -70,6 +74,7 @@ export function useUpdateSchedule() {
       updateSchedule(id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming-schedules'] });
     },
   });
 }
@@ -81,6 +86,30 @@ export function useDeleteSchedule() {
     mutationFn: (id: string) => deleteSchedule(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      queryClient.invalidateQueries({ queryKey: ['upcoming-schedules'] });
     },
   });
+}
+
+export function useScheduleReminders() {
+  const { userProfile } = useAuthStore();
+  const coupleId = userProfile?.couple_id;
+  const userId = userProfile?.id;
+  const { mySchedule, togetherSchedule } = useNotificationSettingsStore();
+
+  const query = useQuery<Schedule[]>({
+    queryKey: ['upcoming-schedules', coupleId],
+    queryFn: () => fetchUpcomingSchedules(coupleId!),
+    enabled: !!coupleId,
+  });
+
+  useEffect(() => {
+    if (!query.data || !userId) return;
+    scheduleEventReminders(
+      query.data,
+      userId,
+      mySchedule,
+      togetherSchedule,
+    ).catch(() => {});
+  }, [query.data, userId, mySchedule, togetherSchedule]);
 }

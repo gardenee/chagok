@@ -8,9 +8,11 @@ import {
 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/colors';
+import { useScheduleReminders } from '@/hooks/use-schedules';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  useScheduleReminders();
 
   return (
     <Tabs
