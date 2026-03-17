@@ -27,6 +27,7 @@ export function useCouple() {
     queryKey: ['couple', coupleId],
     queryFn: () => getCoupleInfo(coupleId!),
     enabled: !!coupleId,
+    staleTime: Infinity,
   });
 }
 

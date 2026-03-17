@@ -24,6 +24,7 @@ export function useAssets() {
       return fetchAssets(coupleId);
     },
     enabled: !!coupleId,
+    staleTime: Infinity, // mutation setQueryData로 즉시 반영
   });
 }
 
@@ -43,14 +44,20 @@ export function useCreateAsset() {
       if (error) throw error;
       return data as Asset;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    onSuccess: newItem => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      queryClient.setQueryData<Asset[]>(['assets', coupleId], old => [
+        ...(old ?? []),
+        newItem,
+      ]);
     },
   });
 }
 
 export function useUpdateAsset() {
   const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
 
   return useMutation({
     mutationFn: async ({
@@ -66,22 +73,33 @@ export function useUpdateAsset() {
       if (error) throw error;
       return data as Asset;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    onSuccess: updatedItem => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      queryClient.setQueryData<Asset[]>(['assets', coupleId], old =>
+        (old ?? []).map(item =>
+          item.id === updatedItem.id ? updatedItem : item,
+        ),
+      );
     },
   });
 }
 
 export function useDeleteAsset() {
   const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
 
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('assets').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['assets'] });
+    onSuccess: (_, id) => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      queryClient.setQueryData<Asset[]>(['assets', coupleId], old =>
+        (old ?? []).filter(item => item.id !== id),
+      );
     },
   });
 }

@@ -9,6 +9,8 @@ import { fetchCategories } from '@/services/categories';
 import { fetchPaymentMethods } from '@/services/payment-methods';
 import { fetchAssets } from '@/services/assets';
 import { fetchFixedExpenses } from '@/services/fixed-expenses';
+import { fetchMonthTransactions } from '@/services/transactions';
+import { fetchMonthSchedules } from '@/services/schedules';
 import {
   useFonts,
   IBMPlexSansKR_400Regular,
@@ -202,6 +204,31 @@ function RootLayoutNav() {
       queryKey: ['fixed-expenses', coupleId],
       queryFn: () => fetchFixedExpenses(coupleId),
     });
+
+    // 캘린더·예산 탭 월 이동 시 즉시 표시를 위해 인접 월 미리 로드
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth(); // 0-indexed
+
+    const prevY = m === 0 ? y - 1 : y;
+    const prevM = m === 0 ? 11 : m - 1;
+    const nextY = m === 11 ? y + 1 : y;
+    const nextM = m === 11 ? 0 : m + 1;
+
+    for (const [py, pm] of [
+      [y, m],
+      [prevY, prevM],
+      [nextY, nextM],
+    ] as [number, number][]) {
+      queryClient.prefetchQuery({
+        queryKey: ['transactions', py, pm, coupleId],
+        queryFn: () => fetchMonthTransactions(coupleId, py, pm),
+      });
+      queryClient.prefetchQuery({
+        queryKey: ['schedules', py, pm, coupleId],
+        queryFn: () => fetchMonthSchedules(coupleId, py, pm),
+      });
+    }
   }, [userProfile?.couple_id]);
 
   // 알림 탭 리스너 (앱 실행 중 / 백그라운드)

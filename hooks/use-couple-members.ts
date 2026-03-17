@@ -46,5 +46,6 @@ export function useCoupleMembers() {
       return data;
     },
     enabled: !!coupleId,
+    staleTime: Infinity,
   });
 }

@@ -19,7 +19,7 @@ export function useCategories() {
     queryKey: ['categories', coupleId],
     queryFn: () => fetchCategories(coupleId!),
     enabled: !!coupleId,
-    staleTime: 30 * 1000, // 커플 공유 데이터: 30초마다 최신화
+    staleTime: Infinity, // mutation setQueryData로 즉시 반영되므로 주기적 refetch 불필요
   });
 }
 

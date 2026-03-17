@@ -63,7 +63,7 @@ export default function NotificationSettingsScreen() {
         >
           <ChevronLeft size={28} color={Colors.brownDarker} strokeWidth={2.5} />
         </TouchableOpacity>
-        <Text className='font-ibm-bold text-3xl text-brown-darker'>
+        <Text className='font-ibm-bold text-2xl text-brown-darker'>
           알림 설정
         </Text>
       </View>
@@ -72,7 +72,7 @@ export default function NotificationSettingsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}
       >
-        <Text className='font-ibm-semibold text-xs text-neutral-400 px-6 mb-1.5'>
+        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-1 mb-1'>
           파트너
         </Text>
         <SettingsCard>
@@ -91,7 +91,7 @@ export default function NotificationSettingsScreen() {
           />
         </SettingsCard>
 
-        <Text className='font-ibm-semibold text-xs text-neutral-400 px-6 mt-5 mb-1.5'>
+        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-3 mb-1'>
           예산
         </Text>
         <SettingsCard>
@@ -113,7 +113,7 @@ export default function NotificationSettingsScreen() {
           />
         </SettingsCard>
 
-        <Text className='font-ibm-semibold text-xs text-neutral-400 px-6 mt-5 mb-1.5'>
+        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-3 mb-1'>
           일정
         </Text>
         <SettingsCard>
