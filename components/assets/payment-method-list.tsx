@@ -63,7 +63,7 @@ export function PaymentMethodList({
       description='+ 버튼으로 추가해보세요'
     />
   ) : (
-    <View className='gap-2'>
+    <View className='gap-2.5'>
       {paymentMethods.map(pm => {
         const pmType = getPaymentMethodType(pm.type);
         return (
@@ -76,7 +76,7 @@ export function PaymentMethodList({
                 <Text className='font-ibm-semibold text-base text-neutral-800'>
                   {pm.name}
                 </Text>
-                <Text className='font-ibm-regular text-sm text-neutral-500 mt-1'>
+                <Text className='font-ibm-regular text-sm text-neutral-600 mt-1'>
                   {getPmSubtitle(pm)}
                 </Text>
               </View>

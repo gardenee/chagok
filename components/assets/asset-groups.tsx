@@ -52,18 +52,18 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
       {/* 자산 섹션 */}
       {assetGroups.length > 0 && (
         <View>
-          <Text className='font-ibm-bold text-xl text-neutral-800 mb-1'>
+          <Text className='font-ibm-bold text-xl text-neutral-800 mb-3'>
             자산
           </Text>
-          <View className='gap-3'>
+          <View className='gap-5'>
             {assetGroups.map(group => {
               const groupTotal = group.items.reduce(
                 (s, a) => s + (a.amount ?? 0),
                 0,
               );
               return (
-                <View key={group.key} className='mb-4'>
-                  <View className='flex-row items-center justify-between mb-2.5'>
+                <View key={group.key}>
+                  <View className='flex-row items-center justify-between mb-2.5 px-1'>
                     <Text className='font-ibm-semibold text-base text-neutral-700'>
                       {group.label}
                     </Text>
@@ -71,7 +71,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
                       {formatAmount(groupTotal)}원
                     </Text>
                   </View>
-                  <View className='gap-3.5'>
+                  <View className='gap-2.5'>
                     {group.items.map(a => (
                       <SwipeableDeleteRow
                         key={a.id}
@@ -107,7 +107,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
       {/* 부채 섹션 */}
       {loanAssets.length > 0 && (
         <View>
-          <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5'>
+          <Text className='font-ibm-bold text-xl text-neutral-800 mb-2.5'>
             부채
           </Text>
           <View className='gap-2'>
@@ -137,7 +137,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
       {/* 보험 섹션 */}
       {insuranceAssets.length > 0 && (
         <View>
-          <Text className='font-ibm-bold text-lg text-neutral-700 mb-2.5'>
+          <Text className='font-ibm-bold text-xl text-neutral-800 mb-2.5'>
             보험
           </Text>
           <View className='gap-2'>
