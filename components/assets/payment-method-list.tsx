@@ -4,7 +4,7 @@ import { ItemCard } from '@/components/ui/item-card';
 import { IconBox } from '@/components/ui/icon-box';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
 import { EmptyState } from '@/components/ui/empty-state';
-import { LoadingState } from '@/components/ui/loading-state';
+import { PaymentMethodSkeleton } from '@/components/assets/payment-method-skeleton';
 import { PM_TYPE_OPTIONS } from '@/constants/payment-method';
 import {
   CREDIT_CARD_COMPANIES,
@@ -55,7 +55,7 @@ export function PaymentMethodList({
   }
 
   return isLoading ? (
-    <LoadingState />
+    <PaymentMethodSkeleton />
   ) : paymentMethods.length === 0 ? (
     <EmptyState
       icon={CreditCard}

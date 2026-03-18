@@ -7,9 +7,9 @@ import {
   Alert,
   Modal,
 } from 'react-native';
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useScrollToTop } from '@react-navigation/native';
+import { useScrollToTop, useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ChevronLeft,
@@ -32,6 +32,7 @@ import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { resolveColor, resolveColorKey } from '@/constants/color-map';
 import { useAuthStore } from '@/store/auth';
+import { useCalendarStore } from '@/store/calendar';
 import {
   useMonthTransactions,
   type TransactionRow,
@@ -60,6 +61,7 @@ import {
   fetchTransactionById,
 } from '@/services/transactions';
 import { LoadingState } from '@/components/ui/loading-state';
+import { CalendarListSkeleton } from '@/components/calendar/calendar-list-skeleton';
 import { SegmentControl } from '@/components/ui/segment-control';
 import { ItemCard } from '@/components/ui/item-card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -135,6 +137,19 @@ export default function CalendarTab() {
       scrollRef.current?.scrollTo({ y: 0, animated: true });
     });
   }, [navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const { pendingReturnDate, setPendingReturnDate } =
+        useCalendarStore.getState();
+      if (!pendingReturnDate) return;
+      const d = new Date(pendingReturnDate);
+      setCurrentYear(d.getFullYear());
+      setCurrentMonth(d.getMonth());
+      setSelectedDate(pendingReturnDate);
+      setPendingReturnDate(null);
+    }, []),
+  );
 
   useEffect(() => {
     if (!openTxId) return;
@@ -755,7 +770,7 @@ export default function CalendarTab() {
           {/* 가계부 탭 */}
           {activeTab === 'ledger' &&
             (txLoading ? (
-              <LoadingState className='py-6' />
+              <CalendarListSkeleton type='ledger' />
             ) : selectedTransactions.length === 0 ? (
               <EmptyState icon={CalendarX} title='거래 내역이 없어요' />
             ) : (
@@ -859,7 +874,7 @@ export default function CalendarTab() {
           {/* 일정 탭 */}
           {activeTab === 'schedule' &&
             (scheduleLoading ? (
-              <LoadingState className='py-6' />
+              <CalendarListSkeleton type='schedule' />
             ) : selectedSchedules.length === 0 &&
               !holidaysByDate[selectedDate] ? (
               <EmptyState icon={CalendarDays} title='등록된 일정이 없어요' />

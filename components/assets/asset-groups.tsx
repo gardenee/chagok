@@ -4,7 +4,7 @@ import { ItemCard } from '@/components/ui/item-card';
 import { IconBox } from '@/components/ui/icon-box';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
 import { EmptyState } from '@/components/ui/empty-state';
-import { LoadingState } from '@/components/ui/loading-state';
+import { AssetGroupsSkeleton } from '@/components/assets/asset-groups-skeleton';
 import { getAssetTypeOption, ASSET_TYPE_OPTIONS } from '@/constants/asset-type';
 import { formatAmount } from '@/utils/format';
 import type { Asset } from '@/types/database';
@@ -33,7 +33,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
     .filter(g => g.items.length > 0);
 
   if (isLoading) {
-    return <LoadingState className='py-16' />;
+    return <AssetGroupsSkeleton />;
   }
 
   if (assets.length === 0) {

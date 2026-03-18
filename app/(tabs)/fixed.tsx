@@ -19,6 +19,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SummaryCard } from '@/components/ui/summary-card';
 import { LoadingState } from '@/components/ui/loading-state';
+import { FixedExpenseSkeleton } from '@/components/fixed/fixed-expense-skeleton';
 import { FixedExpenseItem } from '@/components/fixed/fixed-expense-item';
 import {
   FixedExpenseForm,
@@ -273,7 +274,7 @@ export default function FixedScreen() {
         {/* 목록 */}
         <View className='mx-4 mt-5'>
           {isLoading ? (
-            <LoadingState />
+            <FixedExpenseSkeleton />
           ) : fixedExpenses.length === 0 ? (
             <EmptyState
               icon={Repeat}

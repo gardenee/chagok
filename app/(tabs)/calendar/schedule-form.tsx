@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { useCalendarStore } from '@/store/calendar';
 import { useAuthStore } from '@/store/auth';
 import { useCoupleMembers } from '@/hooks/use-couple-members';
 import {
@@ -44,6 +45,8 @@ export default function ScheduleFormScreen() {
 
   const [form, setForm] = useState<ScheduleFormData>(initialForm);
 
+  const setPendingReturnDate = useCalendarStore(s => s.setPendingReturnDate);
+
   const createSchedule = useCreateSchedule();
   const updateSchedule = useUpdateSchedule();
   const deleteSchedule = useDeleteSchedule();
@@ -73,6 +76,7 @@ export default function ScheduleFormScreen() {
         await updateSchedule.mutateAsync({ id: params.editingId, ...payload });
       else await createSchedule.mutateAsync(payload);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setPendingReturnDate(form.date);
       router.back();
     } catch {
       Alert.alert('오류', '저장 중 문제가 발생했어요');

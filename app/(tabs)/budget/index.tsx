@@ -19,6 +19,7 @@ import { useAuthStore } from '@/store/auth';
 import { useMonthTransactions } from '@/hooks/use-transactions';
 import { usePaymentMethods } from '@/hooks/use-payment-methods';
 import { LoadingState } from '@/components/ui/loading-state';
+import { BudgetSkeleton } from '@/components/budget/budget-skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { formatAmount } from '@/utils/format';
 import { BudgetSummaryCards } from '@/components/budget/budget-summary-cards';
@@ -152,7 +153,7 @@ export default function BudgetIndex() {
         />
 
         {isLoading ? (
-          <LoadingState />
+          <BudgetSkeleton />
         ) : (
           <>
             {/* 요약 카드 */}

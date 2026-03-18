@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { useCalendarStore } from '@/store/calendar';
 import { useAuthStore } from '@/store/auth';
 import { useCoupleMembers } from '@/hooks/use-couple-members';
 import {
@@ -99,6 +100,8 @@ export default function TransactionFormScreen() {
     fixedExpenseId: params.fixedExpenseId ?? null,
   });
 
+  const setPendingReturnDate = useCalendarStore(s => s.setPendingReturnDate);
+
   const createTx = useCreateTransaction();
   const updateTx = useUpdateTransaction();
   const deleteTx = useDeleteTransaction();
@@ -147,6 +150,7 @@ export default function TransactionFormScreen() {
         await updateTx.mutateAsync({ id: params.editingId, ...payload });
       else await createTx.mutateAsync(payload);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setPendingReturnDate(txModal.form.date || dateParam);
       router.back();
     } catch {
       Alert.alert('오류', '저장 중 문제가 발생했어요');
