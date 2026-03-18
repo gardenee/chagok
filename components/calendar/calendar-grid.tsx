@@ -10,7 +10,7 @@ function getAnniversaryColor(
 ): string {
   if (type === 'birthday_me') return '#FAD97A';
   if (type === 'birthday_partner') return '#F7B8A0';
-  return '#D4C5F0';
+  return '#A8BE6A';
 }
 
 interface CalendarGridProps {
