@@ -39,6 +39,10 @@ import {
 } from '@/hooks/use-transactions';
 import { useMonthSchedules } from '@/hooks/use-schedules';
 import {
+  useAnniversaries,
+  useAnniversaryReminders,
+} from '@/hooks/use-anniversaries';
+import {
   useTransactionComments,
   useCreateComment,
   useDeleteComment,
@@ -68,7 +72,12 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { IconBox } from '@/components/ui/icon-box';
 import { ColorPill, TagPill } from '@/components/ui/color-pill';
 import { formatAmount } from '@/utils/format';
-import type { Schedule, FixedExpense, Category } from '@/types/database';
+import type {
+  Schedule,
+  FixedExpense,
+  Category,
+  Anniversary,
+} from '@/types/database';
 
 import {
   formatDateStr,
@@ -184,6 +193,8 @@ export default function CalendarTab() {
     useMonthTransactions(currentYear, currentMonth);
   const { data: schedules = [], isLoading: scheduleLoading } =
     useMonthSchedules(currentYear, currentMonth);
+  const { data: anniversaries = [] } = useAnniversaries();
+  useAnniversaryReminders();
   const { data: fixedExpenses = [] } = useFixedExpenses();
   const { data: categories = [] } = useCategories();
   const expenseCategories = categories.filter(c => c.type === 'expense');
@@ -498,6 +509,22 @@ export default function CalendarTab() {
     return map;
   }, [schedules]);
 
+  const anniversariesByDate = useMemo(() => {
+    const map: Record<string, Anniversary[]> = {};
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    for (const a of anniversaries) {
+      const [mm, dd] = a.date.split('-').map(Number);
+      if (mm !== currentMonth + 1) continue;
+      if (dd < 1 || dd > daysInMonth) continue;
+      const dateStr = `${currentYear}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+      if (!map[dateStr]) map[dateStr] = [];
+      map[dateStr].push(a);
+    }
+    return map;
+  }, [anniversaries, currentYear, currentMonth]);
+
+  const selectedAnniversaries = anniversariesByDate[selectedDate] ?? [];
+
   const selectedTransactions = transactionsByDate[selectedDate] ?? [];
   const selectedSchedules = useMemo(() => {
     const list = schedulesByDate[selectedDate] ?? [];
@@ -706,6 +733,7 @@ export default function CalendarTab() {
           dailyTotals={dailyTotals}
           schedulesByDate={schedulesByDate}
           holidaysByDate={holidaysByDate}
+          anniversariesByDate={anniversariesByDate}
         />
 
         {/* 탭 콘텐츠 */}
@@ -876,7 +904,8 @@ export default function CalendarTab() {
             (scheduleLoading ? (
               <CalendarListSkeleton type='schedule' />
             ) : selectedSchedules.length === 0 &&
-              !holidaysByDate[selectedDate] ? (
+              !holidaysByDate[selectedDate] &&
+              selectedAnniversaries.length === 0 ? (
               <EmptyState icon={CalendarDays} title='등록된 일정이 없어요' />
             ) : (
               <View className='gap-2.5'>
@@ -893,6 +922,36 @@ export default function CalendarTab() {
                     </Text>
                   </ItemCard>
                 )}
+                {/* 기념일 */}
+                {selectedAnniversaries.map(a => {
+                  const label =
+                    a.type === 'birthday_me'
+                      ? '내 생일'
+                      : a.type === 'birthday_partner'
+                        ? '짝꿍 생일'
+                        : '기념일';
+                  const bgColor =
+                    a.type === 'birthday_me'
+                      ? Colors.butter
+                      : a.type === 'birthday_partner'
+                        ? Colors.peach
+                        : Colors.lavender;
+                  return (
+                    <ItemCard key={a.id} className='py-5'>
+                      <View className='flex-row items-center gap-3'>
+                        <TagPill
+                          tag='together'
+                          label={label}
+                          bgColor={bgColor}
+                          className='px-2 py-1'
+                        />
+                        <Text className='font-ibm-semibold text-base text-neutral-800'>
+                          {a.name}
+                        </Text>
+                      </View>
+                    </ItemCard>
+                  );
+                })}
                 {selectedSchedules.map(s => (
                   <ItemCard
                     key={s.id}

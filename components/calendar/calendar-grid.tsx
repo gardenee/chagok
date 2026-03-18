@@ -2,8 +2,16 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { formatAmountShort } from '@/utils/format';
 import { WEEKDAYS, getTagBgColor, type DayCell } from './types';
-import type { Schedule } from '@/types/database';
+import type { Schedule, Anniversary } from '@/types/database';
 import { Shadows } from '@/constants/shadows';
+
+function getAnniversaryColor(
+  type: 'birthday_me' | 'birthday_partner' | 'anniversary',
+): string {
+  if (type === 'birthday_me') return '#FAD97A';
+  if (type === 'birthday_partner') return '#F7B8A0';
+  return '#D4C5F0';
+}
 
 interface CalendarGridProps {
   calendarDays: DayCell[];
@@ -13,6 +21,7 @@ interface CalendarGridProps {
   dailyTotals: Record<string, { expense: number; income: number }>;
   schedulesByDate: Record<string, Schedule[]>;
   holidaysByDate: Record<string, string>;
+  anniversariesByDate: Record<string, Anniversary[]>;
 }
 
 export function CalendarGrid({
@@ -23,6 +32,7 @@ export function CalendarGrid({
   dailyTotals,
   schedulesByDate,
   holidaysByDate,
+  anniversariesByDate,
 }: CalendarGridProps) {
   return (
     <View
@@ -50,13 +60,18 @@ export function CalendarGrid({
           const dayExpense = dayTotals?.expense ?? 0;
           const dayIncome = dayTotals?.income ?? 0;
           const daySchedules = schedulesByDate[item.date] ?? [];
+          const dayAnniversaries = anniversariesByDate[item.date] ?? [];
 
-          // 공휴일 점 + 일정 점 통합 (공휴일이 항상 첫 번째)
+          // 공휴일 점 + 기념일 점 + 일정 점 통합 (공휴일 → 기념일 → 일정 순)
           type DotItem = { id: string; color: string };
           const allDots: DotItem[] = [
             ...(item.isCurrentMonth && isHoliday
               ? [{ id: '__holiday__', color: '#C8562E' }]
               : []),
+            ...dayAnniversaries.map(a => ({
+              id: `__anniversary__${a.id}`,
+              color: getAnniversaryColor(a.type),
+            })),
             ...daySchedules.map(s => ({
               id: s.id,
               color: getTagBgColor(s.tag),

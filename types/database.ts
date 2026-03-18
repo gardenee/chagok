@@ -367,6 +367,30 @@ export interface Database {
         };
         Relationships: never[];
       };
+      anniversaries: {
+        Row: {
+          id: string;
+          couple_id: string;
+          name: string;
+          date: string; // MM-DD format
+          type: 'birthday_me' | 'birthday_partner' | 'anniversary';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          couple_id: string;
+          name: string;
+          date: string;
+          type?: 'birthday_me' | 'birthday_partner' | 'anniversary';
+          created_at?: string;
+        };
+        Update: {
+          name?: string;
+          date?: string;
+          type?: 'birthday_me' | 'birthday_partner' | 'anniversary';
+        };
+        Relationships: never[];
+      };
     };
     Functions: {
       create_couple: {
@@ -399,6 +423,7 @@ export type PaymentMethod =
   Database['public']['Tables']['payment_methods']['Row'];
 export type Holiday = Database['public']['Tables']['holidays']['Row'];
 export type Notification = Database['public']['Tables']['notifications']['Row'];
+export type Anniversary = Database['public']['Tables']['anniversaries']['Row'];
 
 export type TransactionType = Transaction['type'];
 export type Tag = Transaction['tag'];

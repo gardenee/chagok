@@ -1,7 +1,12 @@
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { supabase } from '@/lib/supabase';
-import type { FixedExpense, Notification, Schedule } from '@/types/database';
+import type {
+  FixedExpense,
+  Notification,
+  Schedule,
+  Anniversary,
+} from '@/types/database';
 import { resolveFixedExpenseDate } from '@/utils/fixed-expense-date';
 
 async function cancelNotificationsByTypes(types: string[]): Promise<void> {
@@ -276,6 +281,47 @@ export async function checkAndNotifyBudgetThresholds({
       },
       trigger: null,
     });
+  }
+}
+
+export async function scheduleAnniversaryReminders(
+  anniversaries: Anniversary[],
+  enabled: boolean,
+): Promise<void> {
+  await cancelNotificationsByTypes(['ANNIVERSARY']);
+
+  if (!enabled || anniversaries.length === 0) return;
+
+  const now = new Date();
+
+  for (const anniversary of anniversaries) {
+    const [mm, dd] = anniversary.date.split('-').map(Number);
+
+    for (let yearOffset = 0; yearOffset <= 1; yearOffset++) {
+      const year = now.getFullYear() + yearOffset;
+      // Notify at 9 PM the day before
+      const triggerDate = new Date(year, mm - 1, dd - 1, 21, 0, 0);
+
+      if (triggerDate <= now) continue;
+
+      let title = '기념일 알림';
+      if (anniversary.type === 'birthday_me') title = '생일 알림';
+      else if (anniversary.type === 'birthday_partner')
+        title = '짝꿍 생일 알림';
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body: `내일은 ${anniversary.name}이에요`,
+          sound: true,
+          data: { type: 'ANNIVERSARY', id: anniversary.id },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: triggerDate,
+        },
+      });
+    }
   }
 }
 

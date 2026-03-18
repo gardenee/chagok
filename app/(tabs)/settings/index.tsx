@@ -18,6 +18,7 @@ import {
   LogOut,
   Users,
   Link,
+  Heart,
 } from 'lucide-react-native';
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
@@ -235,6 +236,17 @@ export default function SettingsScreen() {
 
         <View className='mt-3'>
           <SettingsCard>
+            <SettingsRow
+              icon={
+                <Heart size={16} color={Colors.neutralDarker} strokeWidth={2} />
+              }
+              label='기념일 설정'
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/(tabs)/settings/anniversary-settings');
+              }}
+            />
+            <Divider />
             <SettingsRow
               icon={
                 <Bell size={16} color={Colors.neutralDarker} strokeWidth={2} />

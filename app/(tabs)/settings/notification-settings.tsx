@@ -23,12 +23,14 @@ export default function NotificationSettingsScreen() {
     budgetExceeded,
     mySchedule,
     togetherSchedule,
+    anniversaryReminder,
     setPartnerTransaction,
     setComment,
     setFixedExpenseReminder,
     setBudgetExceeded,
     setMySchedule,
     setTogetherSchedule,
+    setAnniversaryReminder,
   } = useNotificationSettingsStore();
 
   function makeToggle(value: boolean, setter: (v: boolean) => void) {
@@ -129,6 +131,21 @@ export default function NotificationSettingsScreen() {
             label='함께 일정 알림'
             showChevron={false}
             rightElement={makeToggle(togetherSchedule, setTogetherSchedule)}
+          />
+        </SettingsCard>
+
+        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-3 mb-1'>
+          기념일
+        </Text>
+        <SettingsCard>
+          <SettingsRow
+            icon={bellIcon(anniversaryReminder)}
+            label='기념일 알림'
+            showChevron={false}
+            rightElement={makeToggle(
+              anniversaryReminder,
+              setAnniversaryReminder,
+            )}
           />
         </SettingsCard>
       </ScrollView>
