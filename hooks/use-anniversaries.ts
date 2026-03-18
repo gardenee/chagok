@@ -34,6 +34,31 @@ export function useCreateAnniversary() {
       if (!coupleId) throw new Error('커플 정보가 없습니다');
       return createAnniversary(coupleId, input);
     },
+    onMutate: async input => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      const queryKey = ['anniversaries', coupleId];
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<Anniversary[]>(queryKey);
+      const optimistic: Anniversary = {
+        id: `__optimistic__${Date.now()}`,
+        couple_id: coupleId,
+        name: input.name,
+        date: input.date,
+        type: input.type,
+        created_at: new Date().toISOString(),
+      };
+      queryClient.setQueryData<Anniversary[]>(queryKey, old => [
+        ...(old ?? []),
+        optimistic,
+      ]);
+      return { previousData, queryKey };
+    },
+    onError: (_, __, context) => {
+      if (context?.previousData !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['anniversaries'] });
     },
@@ -42,6 +67,7 @@ export function useCreateAnniversary() {
 
 export function useUpdateAnniversary() {
   const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
 
   return useMutation({
     mutationFn: ({
@@ -49,6 +75,22 @@ export function useUpdateAnniversary() {
       ...input
     }: Partial<AnniversaryInput> & { id: string }) =>
       updateAnniversary(id, input),
+    onMutate: async ({ id, ...input }) => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      const queryKey = ['anniversaries', coupleId];
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<Anniversary[]>(queryKey);
+      queryClient.setQueryData<Anniversary[]>(queryKey, old =>
+        (old ?? []).map(a => (a.id === id ? { ...a, ...input } : a)),
+      );
+      return { previousData, queryKey };
+    },
+    onError: (_, __, context) => {
+      if (context?.previousData !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['anniversaries'] });
     },
@@ -57,9 +99,26 @@ export function useUpdateAnniversary() {
 
 export function useDeleteAnniversary() {
   const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
 
   return useMutation({
     mutationFn: (id: string) => deleteAnniversary(id),
+    onMutate: async id => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      const queryKey = ['anniversaries', coupleId];
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<Anniversary[]>(queryKey);
+      queryClient.setQueryData<Anniversary[]>(queryKey, old =>
+        (old ?? []).filter(a => a.id !== id),
+      );
+      return { previousData, queryKey };
+    },
+    onError: (_, __, context) => {
+      if (context?.previousData !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['anniversaries'] });
     },
@@ -83,6 +142,40 @@ export function useUpsertBirthday() {
       const coupleId = userProfile?.couple_id;
       if (!coupleId) throw new Error('커플 정보가 없습니다');
       return upsertBirthday(coupleId, type, name, date);
+    },
+    onMutate: async ({ type, name, date }) => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      const queryKey = ['anniversaries', coupleId];
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData<Anniversary[]>(queryKey);
+      const existing = (previousData ?? []).find(a => a.type === type);
+      if (existing) {
+        queryClient.setQueryData<Anniversary[]>(queryKey, old =>
+          (old ?? []).map(a =>
+            a.id === existing.id ? { ...a, name, date } : a,
+          ),
+        );
+      } else {
+        const optimistic: Anniversary = {
+          id: `__optimistic__${Date.now()}`,
+          couple_id: coupleId,
+          name,
+          date,
+          type,
+          created_at: new Date().toISOString(),
+        };
+        queryClient.setQueryData<Anniversary[]>(queryKey, old => [
+          ...(old ?? []),
+          optimistic,
+        ]);
+      }
+      return { previousData, queryKey };
+    },
+    onError: (_, __, context) => {
+      if (context?.previousData !== undefined) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['anniversaries'] });

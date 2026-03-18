@@ -11,7 +11,8 @@ import {
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { ChevronLeft, Plus, Trash2, Heart, Cake } from 'lucide-react-native';
+import { ChevronLeft, Plus, Heart, Cake } from 'lucide-react-native';
+import { DeleteButton } from '@/components/ui/delete-button';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
@@ -22,6 +23,7 @@ import {
   useAnniversaries,
   useUpsertBirthday,
   useCreateAnniversary,
+  useUpdateAnniversary,
   useDeleteAnniversary,
 } from '@/hooks/use-anniversaries';
 import type { Anniversary } from '@/types/database';
@@ -32,15 +34,17 @@ type BirthdayPickerState = {
   date: Date;
 };
 
-type AddModalState = {
+type AnniversaryModalState = {
   visible: boolean;
+  editingId: string | null;
   name: string;
   date: Date;
 };
 
 function mmDdToDate(mmDd: string): Date {
   const [mm, dd] = mmDd.split('-').map(Number);
-  return new Date(2000, mm - 1, dd);
+  // year irrelevant for display, use current year
+  return new Date(new Date().getFullYear(), mm - 1, dd);
 }
 
 function dateToMmDd(date: Date): string {
@@ -66,6 +70,7 @@ export default function AnniversarySettingsScreen() {
   const { data: anniversaries = [] } = useAnniversaries();
   const upsertBirthday = useUpsertBirthday();
   const createAnniversary = useCreateAnniversary();
+  const updateAnniversary = useUpdateAnniversary();
   const deleteAnniversary = useDeleteAnniversary();
 
   const myBirthday = anniversaries.find(a => a.type === 'birthday_me');
@@ -79,14 +84,16 @@ export default function AnniversarySettingsScreen() {
   const [birthdayPicker, setBirthdayPicker] = useState<BirthdayPickerState>({
     visible: false,
     type: 'birthday_me',
-    date: new Date(2000, 0, 1),
+    date: new Date(),
   });
 
-  const [addModal, setAddModal] = useState<AddModalState>({
-    visible: false,
-    name: '',
-    date: new Date(2000, 0, 1),
-  });
+  const [anniversaryModal, setAnniversaryModal] =
+    useState<AnniversaryModalState>({
+      visible: false,
+      editingId: null,
+      name: '',
+      date: new Date(),
+    });
 
   function openBirthdayPicker(
     type: 'birthday_me' | 'birthday_partner',
@@ -96,7 +103,7 @@ export default function AnniversarySettingsScreen() {
     setBirthdayPicker({
       visible: true,
       type,
-      date: existing ? mmDdToDate(existing.date) : new Date(2000, 0, 1),
+      date: existing ? mmDdToDate(existing.date) : new Date(),
     });
   }
 
@@ -116,37 +123,64 @@ export default function AnniversarySettingsScreen() {
 
   function openAddModal() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setAddModal({ visible: true, name: '', date: new Date(2000, 0, 1) });
+    setAnniversaryModal({
+      visible: true,
+      editingId: null,
+      name: '',
+      date: new Date(),
+    });
+  }
+
+  function openEditModal(item: Anniversary) {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setAnniversaryModal({
+      visible: true,
+      editingId: item.id,
+      name: item.name,
+      date: mmDdToDate(item.date),
+    });
   }
 
   async function handleAnniversarySave() {
-    const { name, date } = addModal;
+    const { editingId, name, date } = anniversaryModal;
     if (!name.trim()) {
       Alert.alert('알림', '기념일 이름을 입력해주세요');
       return;
     }
+    const mmDd = dateToMmDd(date);
     try {
-      await createAnniversary.mutateAsync({
-        name: name.trim(),
-        date: dateToMmDd(date),
-        type: 'anniversary',
-      });
+      if (editingId) {
+        await updateAnniversary.mutateAsync({
+          id: editingId,
+          name: name.trim(),
+          date: mmDd,
+        });
+      } else {
+        await createAnniversary.mutateAsync({
+          name: name.trim(),
+          date: mmDd,
+          type: 'anniversary',
+        });
+      }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setAddModal(s => ({ ...s, visible: false }));
+      setAnniversaryModal(s => ({ ...s, visible: false }));
     } catch {
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
   }
 
-  function handleDeleteAnniversary(item: Anniversary) {
-    Alert.alert('기념일 삭제', `"${item.name}"을 삭제할까요?`, [
+  function handleDeleteAnniversary() {
+    const { editingId, name } = anniversaryModal;
+    if (!editingId) return;
+    Alert.alert('기념일 삭제', `"${name}"을 삭제할까요?`, [
       { text: '취소', style: 'cancel' },
       {
         text: '삭제',
         style: 'destructive',
         onPress: async () => {
           try {
-            await deleteAnniversary.mutateAsync(item.id);
+            setAnniversaryModal(s => ({ ...s, visible: false }));
+            await deleteAnniversary.mutateAsync(editingId);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           } catch {
             Alert.alert('오류', '삭제 중 문제가 발생했어요');
@@ -156,26 +190,10 @@ export default function AnniversarySettingsScreen() {
     ]);
   }
 
-  function handleDeleteBirthday(item: Anniversary) {
-    const label =
-      item.type === 'birthday_me'
-        ? `${myNickname} 생일`
-        : `${partnerNickname} 생일`;
-    Alert.alert(`${label} 삭제`, `${label} 설정을 삭제할까요?`, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteAnniversary.mutateAsync(item.id);
-          } catch {
-            Alert.alert('오류', '삭제 중 문제가 발생했어요');
-          }
-        },
-      },
-    ]);
-  }
+  const isSaving =
+    createAnniversary.isPending ||
+    updateAnniversary.isPending ||
+    upsertBirthday.isPending;
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -221,22 +239,6 @@ export default function AnniversarySettingsScreen() {
             label={`${myNickname} 생일`}
             value={myBirthday ? formatMmDd(myBirthday.date) : '미설정'}
             onPress={() => openBirthdayPicker('birthday_me', myBirthday)}
-            showChevron={true}
-            rightElement={
-              myBirthday ? (
-                <TouchableOpacity
-                  onPress={() => handleDeleteBirthday(myBirthday)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  className='ml-2'
-                >
-                  <Trash2
-                    size={15}
-                    color={Colors.neutralLighter}
-                    strokeWidth={2}
-                  />
-                </TouchableOpacity>
-              ) : undefined
-            }
           />
           <Divider />
           <SettingsRow
@@ -249,22 +251,6 @@ export default function AnniversarySettingsScreen() {
             }
             onPress={() =>
               openBirthdayPicker('birthday_partner', partnerBirthday)
-            }
-            showChevron={true}
-            rightElement={
-              partnerBirthday ? (
-                <TouchableOpacity
-                  onPress={() => handleDeleteBirthday(partnerBirthday)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  className='ml-2'
-                >
-                  <Trash2
-                    size={15}
-                    color={Colors.neutralLighter}
-                    strokeWidth={2}
-                  />
-                </TouchableOpacity>
-              ) : undefined
             }
           />
         </SettingsCard>
@@ -289,20 +275,7 @@ export default function AnniversarySettingsScreen() {
                     }
                     label={item.name}
                     value={formatMmDd(item.date)}
-                    showChevron={false}
-                    rightElement={
-                      <TouchableOpacity
-                        onPress={() => handleDeleteAnniversary(item)}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                        className='ml-2'
-                      >
-                        <Trash2
-                          size={15}
-                          color={Colors.neutralLighter}
-                          strokeWidth={2}
-                        />
-                      </TouchableOpacity>
-                    }
+                    onPress={() => openEditModal(item)}
                   />
                 </View>
               ))}
@@ -351,6 +324,7 @@ export default function AnniversarySettingsScreen() {
             </View>
             <TouchableOpacity
               onPress={handleBirthdaySave}
+              disabled={isSaving}
               className='bg-butter rounded-2xl py-4 items-center'
               activeOpacity={0.8}
             >
@@ -362,12 +336,14 @@ export default function AnniversarySettingsScreen() {
         </View>
       </Modal>
 
-      {/* 기념일 추가 */}
+      {/* 기념일 추가 / 수정 */}
       <Modal
-        visible={addModal.visible}
+        visible={anniversaryModal.visible}
         transparent
         animationType='fade'
-        onRequestClose={() => setAddModal(s => ({ ...s, visible: false }))}
+        onRequestClose={() =>
+          setAnniversaryModal(s => ({ ...s, visible: false }))
+        }
       >
         <View
           className='flex-1 justify-end'
@@ -376,25 +352,27 @@ export default function AnniversarySettingsScreen() {
           <TouchableOpacity
             className='flex-1'
             activeOpacity={1}
-            onPress={() => setAddModal(s => ({ ...s, visible: false }))}
+            onPress={() => setAnniversaryModal(s => ({ ...s, visible: false }))}
           />
           <View className='bg-white rounded-t-3xl px-6 pt-5 pb-8'>
             <Text className='font-ibm-bold text-xl text-brown-darker text-center mb-5'>
-              기념일 추가
+              {anniversaryModal.editingId ? '기념일 수정' : '기념일 추가'}
             </Text>
 
             <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
               이름
             </Text>
-            <View className='bg-neutral-100 rounded-2xl px-4 mb-5 h-14 flex-row items-center'>
+            <View className='bg-neutral-100 rounded-2xl px-4 mb-4 h-14 flex-row items-center'>
               <TextInput
-                value={addModal.name}
-                onChangeText={v => setAddModal(s => ({ ...s, name: v }))}
+                value={anniversaryModal.name}
+                onChangeText={v =>
+                  setAnniversaryModal(s => ({ ...s, name: v }))
+                }
                 placeholder='기념일 이름 (예: 첫 만남)'
                 placeholderTextColor={Colors.neutralLighter}
                 className='flex-1 font-ibm-regular text-base text-neutral-800'
                 maxLength={20}
-                autoFocus
+                autoFocus={!anniversaryModal.editingId}
                 returnKeyType='done'
               />
             </View>
@@ -404,25 +382,33 @@ export default function AnniversarySettingsScreen() {
             </Text>
             <View className='items-center mb-5'>
               <DateTimePicker
-                value={addModal.date}
+                value={anniversaryModal.date}
                 mode='date'
                 display='spinner'
                 onChange={(_event, date) => {
                   if (!date) return;
-                  setAddModal(s => ({ ...s, date }));
+                  setAnniversaryModal(s => ({ ...s, date }));
                 }}
                 locale='ko-KR'
                 accentColor={Colors.brownDark}
               />
             </View>
 
+            {anniversaryModal.editingId && (
+              <DeleteButton
+                onPress={handleDeleteAnniversary}
+                label='기념일 삭제'
+              />
+            )}
+
             <TouchableOpacity
               onPress={handleAnniversarySave}
-              className='bg-butter rounded-2xl py-4 items-center'
+              disabled={isSaving}
+              className='bg-butter rounded-2xl py-4 items-center mt-3'
               activeOpacity={0.8}
             >
               <Text className='font-ibm-bold text-base text-brown-darker'>
-                저장
+                {anniversaryModal.editingId ? '수정 완료' : '저장'}
               </Text>
             </TouchableOpacity>
           </View>

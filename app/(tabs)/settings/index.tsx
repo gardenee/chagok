@@ -32,6 +32,7 @@ import {
   useUnreadCount,
   useNotificationsSubscription,
 } from '@/hooks/use-notifications';
+import { useAnniversaries } from '@/hooks/use-anniversaries';
 import { SettingsRow } from '@/components/settings/settings-row';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
 import { EditModal } from '@/components/settings/edit-modal';
@@ -53,6 +54,7 @@ export default function SettingsScreen() {
   const [notifInboxVisible, setNotifInboxVisible] = useState(false);
   const { unreadCount } = useUnreadCount();
   useNotificationsSubscription();
+  useAnniversaries(); // prefetch for anniversary-settings
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 
   const partner = members.find(m => m.id !== userProfile?.id);
