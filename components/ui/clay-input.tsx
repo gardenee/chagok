@@ -37,7 +37,7 @@ export function ClayInput({
   const borderClass = error
     ? 'border-red-400'
     : isFocused
-      ? 'border-butter'
+      ? 'border-brown-dark'
       : 'border-transparent';
 
   const showBottom =
@@ -53,8 +53,8 @@ export function ClayInput({
       )}
       <View className='relative'>
         <TextInput
-          className={`w-full bg-brown/10 rounded-[20px] px-5 py-[18px] font-ibm-semibold text-xl text-neutral-700 border-2 ${borderClass}${showClearButton ? ' pr-12' : ''}${inputClassName ? ` ${inputClassName}` : ''}`}
-          placeholderTextColor={Colors.brown + '50'}
+          className={`w-full h-18 bg-brown/10 rounded-[20px] px-5 py-[18px] font-ibm-semibold text-xl text-neutral-700 border-2 ${borderClass}${showClearButton ? ' pr-12' : ''}${inputClassName ? ` ${inputClassName}` : ''}`}
+          placeholderTextColor={Colors.neutralLightest}
           maxLength={maxLength}
           value={value}
           onChangeText={onChangeText}

@@ -37,12 +37,7 @@ export function ClayButton({
   icon,
 }: ClayButtonProps) {
   const isGhost = variant === 'ghost';
-  const shadow =
-    variant === 'primary'
-      ? Shadows.primary
-      : variant === 'secondary'
-        ? Shadows.secondary
-        : undefined;
+  const shadow = Shadows.card;
 
   const innerContent = isGhost ? (
     <View
