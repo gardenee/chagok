@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.chagok.ios",
-      "usesAppleSignIn": false,
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -47,6 +47,6 @@
         "projectId": "8a74f3f1-7b18-44bf-b206-11f6bae94bad"
       }
     },
-    "owner": "garden"
+    "owner": "gardenee"
   }
 }
