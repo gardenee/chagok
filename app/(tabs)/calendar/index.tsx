@@ -136,16 +136,26 @@ export default function CalendarTab() {
   const [currentMonth, setCurrentMonth] = useState(todayDate.getMonth());
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
 
+  const resetToToday = useCallback(() => {
+    const now = new Date();
+    setCurrentYear(now.getFullYear());
+    setCurrentMonth(now.getMonth());
+    setSelectedDate(formatDateStr(now));
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  }, []);
+
   useEffect(() => {
-    return navigation.addListener('tabPress' as never, () => {
+    const parentNavigation = navigation.getParent();
+    if (!parentNavigation) return;
+
+    return parentNavigation.addListener('tabPress' as never, e => {
+      const parentState = parentNavigation.getState();
+      const currentTabKey = parentState.routes[parentState.index]?.key;
       if (!navigation.isFocused()) return;
-      const now = new Date();
-      setCurrentYear(now.getFullYear());
-      setCurrentMonth(now.getMonth());
-      setSelectedDate(formatDateStr(now));
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
+      if (e.target !== currentTabKey) return;
+      resetToToday();
     });
-  }, [navigation]);
+  }, [navigation, resetToToday]);
 
   useFocusEffect(
     useCallback(() => {
@@ -209,9 +219,10 @@ export default function CalendarTab() {
   const partnerNickname = partner?.nickname ?? '파트너';
 
   function resolveTagLabel(
-    tag: 'me' | 'partner' | 'together',
+    tag: 'me' | 'partner' | 'together' | null,
     creatorId: string,
-  ): string {
+  ): string | null {
+    if (!tag) return null;
     if (tag === 'together') return '함께';
     const createdByMe = creatorId === myId;
     if (createdByMe) return tag === 'me' ? myNickname : partnerNickname;
@@ -219,9 +230,10 @@ export default function CalendarTab() {
   }
 
   function resolveTagColor(
-    tag: 'me' | 'partner' | 'together',
+    tag: 'me' | 'partner' | 'together' | null,
     creatorId: string,
-  ): string {
+  ): string | null {
+    if (!tag) return null;
     if (tag === 'together') return Colors.lavender;
     const createdByMe = creatorId === myId;
     const isMyExpense =
@@ -869,17 +881,19 @@ export default function CalendarTab() {
                                           color={catColor}
                                         />
                                       )}
-                                      <TagPill
-                                        tag={t.tag}
-                                        label={resolveTagLabel(
-                                          t.tag,
-                                          t.user_id,
-                                        )}
-                                        bgColor={resolveTagColor(
-                                          t.tag,
-                                          t.user_id,
-                                        )}
-                                      />
+                                      {t.tag && (
+                                        <TagPill
+                                          tag={t.tag}
+                                          label={resolveTagLabel(
+                                            t.tag,
+                                            t.user_id,
+                                          )}
+                                          bgColor={resolveTagColor(
+                                            t.tag,
+                                            t.user_id,
+                                          )}
+                                        />
+                                      )}
                                     </>
                                   )}
                                 </View>
@@ -1004,8 +1018,7 @@ export default function CalendarTab() {
         }}
         onGoToday={() => {
           setPickerYear(todayDate.getFullYear());
-          setCurrentYear(todayDate.getFullYear());
-          setCurrentMonth(todayDate.getMonth());
+          resetToToday();
           setYearMonthModal(false);
         }}
       />

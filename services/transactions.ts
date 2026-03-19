@@ -33,7 +33,7 @@ function toTransactionInsert(
     user_id: userId,
     amount: input.amount,
     type: input.type,
-    tag: input.tag ?? 'me',
+    tag: input.tag ?? null,
     memo: input.memo ?? null,
     date: input.date,
     category_id: input.category_id ?? null,
@@ -47,7 +47,7 @@ function toTransactionUpdate(input: TransactionInput): TransactionUpdate {
   return {
     amount: input.amount,
     type: input.type,
-    tag: input.tag ?? 'me',
+    tag: input.tag ?? null,
     memo: input.memo ?? null,
     date: input.date,
     category_id: input.category_id ?? null,

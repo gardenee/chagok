@@ -328,12 +328,12 @@ export function AssetPaymentFormScreen({
                         onPress={() =>
                           handleCompanySelect(company.id, company.name)
                         }
-                        className={`px-3.5 py-2.5 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        className={`px-3.5 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                         activeOpacity={0.7}
                       >
                         <Text
-                          className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
-                        >
+                          className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                          >
                           {company.name}
                         </Text>
                       </TouchableOpacity>
@@ -366,7 +366,7 @@ export function AssetPaymentFormScreen({
                             activeOpacity={0.7}
                           >
                             <Text
-                              className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                              className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                             >
                               {day}일
                             </Text>
@@ -435,11 +435,11 @@ export function AssetPaymentFormScreen({
                         <TouchableOpacity
                           key={asset.id}
                           onPress={() => handleLinkedAssetSelect(asset)}
-                          className={`px-4 py-3 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                          className={`px-3.5 py-2 rounded-2xl ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                           activeOpacity={0.7}
                         >
                           <Text
-                            className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
+                            className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
                           >
                             {asset.name}
                           </Text>

@@ -36,13 +36,13 @@ interface TransactionDetailModalProps {
   onCommentDelete: (commentId: string) => void;
   isCommentSending: boolean;
   resolveTagLabel: (
-    tag: 'me' | 'partner' | 'together',
+    tag: 'me' | 'partner' | 'together' | null,
     creatorId: string,
-  ) => string;
+  ) => string | null;
   resolveTagColor: (
-    tag: 'me' | 'partner' | 'together',
+    tag: 'me' | 'partner' | 'together' | null,
     creatorId: string,
-  ) => string;
+  ) => string | null;
 }
 
 export function TransactionDetailModal({
@@ -165,14 +165,19 @@ export function TransactionDetailModal({
                           color={detailTx.categories.color}
                         />
                       )}
-                      <TagPill
-                        tag={detailTx.tag}
-                        label={resolveTagLabel(detailTx.tag, detailTx.user_id)}
-                        bgColor={resolveTagColor(
-                          detailTx.tag,
-                          detailTx.user_id,
-                        )}
-                      />
+                      {detailTx.tag && (
+                        <TagPill
+                          tag={detailTx.tag}
+                          label={
+                            resolveTagLabel(detailTx.tag, detailTx.user_id) ??
+                            ''
+                          }
+                          bgColor={
+                            resolveTagColor(detailTx.tag, detailTx.user_id) ??
+                            undefined
+                          }
+                        />
+                      )}
                     </>
                   )}
                 </View>

@@ -172,7 +172,7 @@ export interface Database {
           fixed_expense_id: string | null;
           amount: number;
           type: 'expense' | 'income';
-          tag: 'me' | 'partner' | 'together';
+          tag: 'me' | 'partner' | 'together' | null;
           memo: string | null;
           date: string;
           created_at: string;
@@ -187,7 +187,7 @@ export interface Database {
           fixed_expense_id?: string | null;
           amount: number;
           type: 'expense' | 'income';
-          tag: 'me' | 'partner' | 'together';
+          tag?: 'me' | 'partner' | 'together' | null;
           memo?: string | null;
           date: string;
           created_at?: string;
@@ -199,7 +199,7 @@ export interface Database {
           fixed_expense_id?: string | null;
           amount?: number;
           type?: 'expense' | 'income';
-          tag?: 'me' | 'partner' | 'together';
+          tag?: 'me' | 'partner' | 'together' | null;
           memo?: string | null;
           date?: string;
         };

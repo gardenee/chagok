@@ -8,6 +8,7 @@ import {
   ScrollView,
   SafeAreaView,
   KeyboardAvoidingView,
+  Modal,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
@@ -50,6 +51,8 @@ export function ScheduleFormSheet({
   const { form } = scheduleModal;
   const [titleError, setTitleError] = useState(false);
   const [tagError, setTagError] = useState(false);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [tempDate, setTempDate] = useState<Date>(new Date());
 
   useEffect(() => {
     if (!scheduleModal.visible) {
@@ -135,37 +138,27 @@ export function ScheduleFormSheet({
           <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
             날짜
           </Text>
-          <View className='bg-neutral-100 rounded-2xl px-4 mb-6 flex-row items-center h-16'>
+          <TouchableOpacity
+            onPress={() => {
+              setTempDate(dateValue);
+              setDatePickerVisible(true);
+            }}
+            activeOpacity={0.7}
+            className='bg-neutral-100 rounded-2xl px-4 mb-6 flex-row items-center gap-2.5 h-16'
+          >
             <CalendarDays
               size={16}
               color={Colors.neutralDark}
               strokeWidth={2}
             />
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                alignItems: 'center',
-              }}
-              pointerEvents='box-none'
-            >
-              <DateTimePicker
-                value={dateValue}
-                mode='date'
-                display={Platform.OS === 'ios' ? 'compact' : 'default'}
-                onChange={(_event, date) => {
-                  if (!date) return;
-                  const y = date.getFullYear();
-                  const m = String(date.getMonth() + 1).padStart(2, '0');
-                  const d = String(date.getDate()).padStart(2, '0');
-                  onFormChange({ ...form, date: `${y}-${m}-${d}` });
-                }}
-                locale='ko-KR'
-                accentColor={Colors.brownDark}
-              />
-            </View>
-          </View>
+            <Text className='font-ibm-semibold text-base text-neutral-700'>
+              {(() => {
+                const d = form.date;
+                const [y, m, day] = d.split('-').map(Number);
+                return `${y}년 ${m}월 ${day}일`;
+              })()}
+            </Text>
+          </TouchableOpacity>
 
           {/* 참여자 */}
           <View className='mb-5'>
@@ -359,6 +352,58 @@ export function ScheduleFormSheet({
           />
         </View>
       </KeyboardAvoidingView>
+
+      {/* 날짜 선택 모달 */}
+      <Modal
+        visible={datePickerVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={() => setDatePickerVisible(false)}
+      >
+        <View
+          className='flex-1 justify-end'
+          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+        >
+          <TouchableOpacity
+            className='flex-1'
+            activeOpacity={1}
+            onPress={() => setDatePickerVisible(false)}
+          />
+          <View className='bg-white rounded-t-3xl px-6 pt-5 pb-8'>
+            <Text className='font-ibm-bold text-xl text-brown-darker text-center mb-4'>
+              날짜 선택
+            </Text>
+            <View className='items-center mb-6'>
+              <DateTimePicker
+                value={tempDate}
+                mode='date'
+                display='spinner'
+                onChange={(_event, date) => {
+                  if (!date) return;
+                  setTempDate(date);
+                }}
+                locale='ko-KR'
+                accentColor={Colors.brownDark}
+              />
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                const y = tempDate.getFullYear();
+                const m = String(tempDate.getMonth() + 1).padStart(2, '0');
+                const d = String(tempDate.getDate()).padStart(2, '0');
+                onFormChange({ ...form, date: `${y}-${m}-${d}` });
+                setDatePickerVisible(false);
+              }}
+              className='bg-butter rounded-2xl py-4 items-center'
+              activeOpacity={0.8}
+            >
+              <Text className='font-ibm-bold text-base text-brown-darker'>
+                확인
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

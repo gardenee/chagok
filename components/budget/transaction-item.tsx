@@ -5,17 +5,12 @@ import { TagPill } from '@/components/ui/color-pill';
 import { formatAmount } from '@/utils/format';
 import type { Transaction } from '@/types/database';
 
-const TAG_LABELS: Record<string, string> = {
-  me: '나',
-  partner: '파트너',
-  together: '함께',
-};
-
 type Props = {
   transaction: Transaction;
+  tagLabel?: string;
 };
 
-export function TransactionItem({ transaction: t }: Props) {
+export function TransactionItem({ transaction: t, tagLabel }: Props) {
   const hasMemo = t.memo && t.memo.trim().length > 0;
 
   return (
@@ -37,7 +32,7 @@ export function TransactionItem({ transaction: t }: Props) {
       </Text>
 
       {/* 태그 */}
-      <TagPill tag={t.tag} label={TAG_LABELS[t.tag] ?? t.tag} />
+      {t.tag && tagLabel && <TagPill tag={t.tag} label={tagLabel} />}
 
       {/* 금액 */}
       <Text

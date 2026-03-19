@@ -13,6 +13,8 @@ import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { useCategories, useUpdateCategory } from '@/hooks/use-categories';
 import { useMonthTransactions } from '@/hooks/use-transactions';
+import { useAuthStore } from '@/store/auth';
+import { useCoupleMembers } from '@/hooks/use-couple-members';
 import { LoadingState } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
 import { CategorySummaryCard } from '@/components/budget/category-summary-card';
@@ -39,10 +41,28 @@ export default function CategoryDetailScreen() {
     monthParam ? parseInt(monthParam, 10) : today.getMonth(),
   );
 
+  const { session, userProfile } = useAuthStore();
+  const myId = session?.user.id ?? '';
+  const { data: members = [] } = useCoupleMembers();
+  const partner = members.find(m => m.id !== myId);
+  const myNickname = userProfile?.nickname ?? '나';
+  const partnerNickname = partner?.nickname ?? '파트너';
+
   const { data: categories = [], isLoading: catLoading } = useCategories();
   const { data: transactions = [], isLoading: txLoading } =
     useMonthTransactions(year, month);
   const updateCategory = useUpdateCategory();
+
+  function resolveTagLabel(
+    tag: 'me' | 'partner' | 'together' | null,
+    creatorId: string,
+  ): string | undefined {
+    if (!tag) return undefined;
+    if (tag === 'together') return '함께';
+    const createdByMe = creatorId === myId;
+    if (createdByMe) return tag === 'me' ? myNickname : partnerNickname;
+    return tag === 'me' ? partnerNickname : myNickname;
+  }
 
   const category = categories.find(c => c.id === id);
 
@@ -170,7 +190,11 @@ export default function CategoryDetailScreen() {
             />
           ) : (
             categoryTransactions.map(t => (
-              <TransactionItem key={t.id} transaction={t} />
+              <TransactionItem
+                key={t.id}
+                transaction={t}
+                tagLabel={resolveTagLabel(t.tag, t.user_id)}
+              />
             ))
           )}
         </View>
