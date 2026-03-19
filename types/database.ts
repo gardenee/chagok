@@ -391,6 +391,24 @@ export interface Database {
         };
         Relationships: never[];
       };
+      feedback: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: 'improvement' | 'feature' | 'cheer';
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: 'improvement' | 'feature' | 'cheer';
+          content: string;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: never[];
+      };
     };
     Functions: {
       create_couple: {
@@ -424,6 +442,8 @@ export type PaymentMethod =
 export type Holiday = Database['public']['Tables']['holidays']['Row'];
 export type Notification = Database['public']['Tables']['notifications']['Row'];
 export type Anniversary = Database['public']['Tables']['anniversaries']['Row'];
+export type Feedback = Database['public']['Tables']['feedback']['Row'];
+export type FeedbackType = Feedback['type'];
 
 export type TransactionType = Transaction['type'];
 export type Tag = Transaction['tag'];

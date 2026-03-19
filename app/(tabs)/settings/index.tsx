@@ -19,6 +19,8 @@ import {
   Users,
   Link,
   Heart,
+  MessageSquarePlus,
+  Info,
 } from 'lucide-react-native';
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
@@ -37,6 +39,7 @@ import { SettingsRow } from '@/components/settings/settings-row';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
 import { EditModal } from '@/components/settings/edit-modal';
 import { NotificationInbox } from '@/components/settings/notification-inbox';
+import { FeedbackModal } from '@/components/settings/feedback-modal';
 
 export default function SettingsScreen() {
   const scrollRef = useRef<ScrollView>(null);
@@ -52,6 +55,7 @@ export default function SettingsScreen() {
     type: 'bookName' | 'nickname' | null;
   }>({ type: null });
   const [notifInboxVisible, setNotifInboxVisible] = useState(false);
+  const [feedbackVisible, setFeedbackVisible] = useState(false);
   const { unreadCount } = useUnreadCount();
   useNotificationsSubscription();
   useAnniversaries(); // prefetch for anniversary-settings
@@ -142,6 +146,9 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
+        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-1 mb-1'>
+          내 정보
+        </Text>
         <SettingsCard>
           <SettingsRow
             icon={
@@ -153,7 +160,10 @@ export default function SettingsScreen() {
           />
         </SettingsCard>
 
-        <View className='mt-3'>
+        <View className='mt-5'>
+          <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mb-1'>
+            가계부 정보
+          </Text>
           <SettingsCard>
             <SettingsRow
               icon={
@@ -236,7 +246,10 @@ export default function SettingsScreen() {
           </SettingsCard>
         </View>
 
-        <View className='mt-3'>
+        <View className='mt-5'>
+          <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mb-1'>
+            앱 설정
+          </Text>
           <SettingsCard>
             <SettingsRow
               icon={
@@ -262,7 +275,38 @@ export default function SettingsScreen() {
           </SettingsCard>
         </View>
 
-        <View className='mt-3'>
+        <View className='mt-5'>
+          <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mb-1'>
+            앱 정보
+          </Text>
+          <SettingsCard>
+            <SettingsRow
+              icon={
+                <MessageSquarePlus
+                  size={16}
+                  color={Colors.neutralDarker}
+                  strokeWidth={2}
+                />
+              }
+              label='개발자에게 전하기'
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setFeedbackVisible(true);
+              }}
+            />
+            <Divider />
+            <SettingsRow
+              icon={
+                <Info size={16} color={Colors.neutralDarker} strokeWidth={2} />
+              }
+              label='버전'
+              value={appVersion}
+              showChevron={false}
+            />
+          </SettingsCard>
+        </View>
+
+        <View className='mt-6'>
           <SettingsCard>
             <SettingsRow
               icon={
@@ -277,15 +321,16 @@ export default function SettingsScreen() {
             />
           </SettingsCard>
         </View>
-
-        <Text className='font-ibm-regular text-sm text-neutral-600 text-center mt-6'>
-          버전 {appVersion}
-        </Text>
       </ScrollView>
 
       <NotificationInbox
         visible={notifInboxVisible}
         onClose={() => setNotifInboxVisible(false)}
+      />
+
+      <FeedbackModal
+        visible={feedbackVisible}
+        onClose={() => setFeedbackVisible(false)}
       />
 
       <EditModal
