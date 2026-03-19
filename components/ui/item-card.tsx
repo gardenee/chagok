@@ -3,11 +3,17 @@ import { Shadows } from '@/constants/shadows';
 
 type ItemCardProps = {
   onPress?: () => void;
+  onPressIn?: () => void;
   children: React.ReactNode;
   className?: string;
 };
 
-export function ItemCard({ onPress, children, className }: ItemCardProps) {
+export function ItemCard({
+  onPress,
+  onPressIn,
+  children,
+  className,
+}: ItemCardProps) {
   const content = (
     <View
       className={`bg-white rounded-xl px-4 py-4 flex-row items-center gap-3${className ? ` ${className}` : ''}`}
@@ -19,7 +25,11 @@ export function ItemCard({ onPress, children, className }: ItemCardProps) {
 
   if (!onPress) return content;
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity
+      onPress={onPress}
+      onPressIn={onPressIn}
+      activeOpacity={0.8}
+    >
       {content}
     </TouchableOpacity>
   );

@@ -64,10 +64,44 @@ export function useCreateComment() {
       if (!userId) throw new Error('로그인이 필요합니다');
       return createComment(userId, transactionId, content);
     },
-    onSuccess: newComment => {
+    onMutate: async ({ transactionId, content }) => {
+      await queryClient.cancelQueries({
+        queryKey: ['comments', transactionId],
+      });
+      const previous = queryClient.getQueryData<CommentRow[]>([
+        'comments',
+        transactionId,
+      ]);
+      const userId = session?.user.id ?? '';
+      const optimistic: CommentRow = {
+        id: `temp-${Date.now()}`,
+        transaction_id: transactionId,
+        user_id: userId,
+        content,
+        created_at: new Date().toISOString(),
+        users: userProfile?.nickname
+          ? { nickname: userProfile.nickname }
+          : null,
+      };
       queryClient.setQueryData<CommentRow[]>(
-        ['comments', newComment.transaction_id],
-        old => [...(old ?? []), newComment],
+        ['comments', transactionId],
+        old => [...(old ?? []), optimistic],
+      );
+      return { previous, transactionId };
+    },
+    onError: (_err, _vars, context) => {
+      if (context) {
+        queryClient.setQueryData(
+          ['comments', context.transactionId],
+          context.previous,
+        );
+      }
+    },
+    onSuccess: (newComment, _vars, context) => {
+      queryClient.setQueryData<CommentRow[]>(
+        ['comments', context?.transactionId ?? newComment.transaction_id],
+        old =>
+          (old ?? []).map(c => (c.id.startsWith('temp-') ? newComment : c)),
       );
 
       const coupleId = userProfile?.couple_id;

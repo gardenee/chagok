@@ -333,7 +333,7 @@ export function AssetPaymentFormScreen({
                       >
                         <Text
                           className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
-                          >
+                        >
                           {company.name}
                         </Text>
                       </TouchableOpacity>

@@ -47,6 +47,7 @@ import {
   useCreateComment,
   useDeleteComment,
 } from '@/hooks/use-comments';
+import { fetchTransactionComments } from '@/services/comments';
 import { useCoupleMembers } from '@/hooks/use-couple-members';
 import {
   useFixedExpenses,
@@ -740,6 +741,13 @@ export default function CalendarTab() {
               setCurrentMonth(d.getMonth());
             }
             setSelectedDate(date);
+            (transactionsByDate[date] ?? []).forEach(t => {
+              queryClient.prefetchQuery({
+                queryKey: ['comments', t.id],
+                queryFn: () => fetchTransactionComments(t.id),
+                staleTime: 30_000,
+              });
+            });
           }}
           activeTab={activeTab}
           dailyTotals={dailyTotals}

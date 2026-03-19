@@ -62,7 +62,7 @@ export const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 export const INITIAL_TX_FORM: TxFormData = {
   amount: '',
   type: 'expense',
-  tag: null,
+  tag: 'me',
   memo: '',
   date: '',
   category_id: null,

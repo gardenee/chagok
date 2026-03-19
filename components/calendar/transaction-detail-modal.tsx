@@ -11,6 +11,7 @@ import {
   PanResponder,
   Dimensions,
 } from 'react-native';
+import { DotsLoadingIndicator } from '@/components/ui/dots-loading-indicator';
 import { useRef } from 'react';
 import { Trash2, Send } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
@@ -20,6 +21,7 @@ import { formatTime } from './types';
 import type { TransactionRow } from '@/hooks/use-transactions';
 import type { CommentRow } from '@/hooks/use-comments';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Shadows } from '@/constants/shadows';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -193,8 +195,8 @@ export function TransactionDetailModal({
             showsVerticalScrollIndicator={false}
           >
             {commentsLoading ? (
-              <View className='pb-4 items-center'>
-                <ActivityIndicator color={Colors.butter} />
+              <View className='pb-2 items-center'>
+                <DotsLoadingIndicator />
               </View>
             ) : comments.length > 0 ? (
               <View className='gap-2 pb-3'>
@@ -208,19 +210,14 @@ export function TransactionDetailModal({
                       {/* 메시지 버블 */}
                       <View
                         className={`max-w-[72%] rounded-2xl px-3 py-2 ${isMine ? 'bg-butter' : 'bg-neutral-100'}`}
-                        style={{
-                          shadowColor: Colors.brown,
-                          shadowOpacity: 0.04,
-                          shadowRadius: 4,
-                          shadowOffset: { width: 0, height: 1 },
-                        }}
+                        style={Shadows.soft}
                       >
-                        <Text className='font-ibm-regular text-sm text-neutral-800'>
+                        <Text className='font-ibm-regular text-base text-neutral-800'>
                           {c.content}
                         </Text>
                       </View>
 
-                      {/* 시간 + 삭제 버튼 (버블 옆, 하단 정렬) */}
+                      {/* 시간 + 삭제 버튼 */}
                       <View
                         className={`flex-row items-center gap-1 pb-0.5 ${isMine ? 'items-end' : 'items-start'}`}
                       >
@@ -228,15 +225,16 @@ export function TransactionDetailModal({
                           <TouchableOpacity
                             onPress={() => onCommentDelete(c.id)}
                             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                            className='items-center justify-center'
                           >
                             <Trash2
-                              size={11}
-                              color={Colors.neutralLight}
+                              size={10}
+                              color={Colors.neutral}
                               strokeWidth={2}
                             />
                           </TouchableOpacity>
                         )}
-                        <Text className='font-ibm-regular text-[10px] text-neutral-600'>
+                        <Text className='font-ibm-regular text-xs text-neutral-600'>
                           {formatTime(c.created_at)}
                         </Text>
                       </View>
@@ -244,14 +242,18 @@ export function TransactionDetailModal({
                   );
                 })}
               </View>
-            ) : null}
+            ) : (
+              <Text className='font-ibm-regular text-sm text-neutral-400 text-center pb-5 my-3'>
+                첫 댓글을 달아보세요
+              </Text>
+            )}
           </ScrollView>
 
           {/* 댓글 입력 */}
           <View className='flex-row items-center gap-3 px-6'>
             <View className='flex-1 bg-neutral-100 rounded-2xl px-4 py-3'>
               <TextInput
-                className='font-ibm-regular text-sm text-brown'
+                className='font-ibm-regular text-base text-neutral-800'
                 placeholder='댓글을 입력하세요'
                 placeholderTextColor={Colors.neutralLight}
                 value={commentText}
@@ -264,19 +266,14 @@ export function TransactionDetailModal({
             <TouchableOpacity
               onPress={onCommentSend}
               disabled={!commentText.trim() || isCommentSending}
-              className='w-10 h-10 rounded-full bg-butter items-center justify-center'
+              className='w-12 h-12 rounded-full bg-butter items-center justify-center'
               activeOpacity={0.7}
-              style={{
-                shadowColor: '#000',
-                shadowOpacity: 0.08,
-                shadowRadius: 6,
-                shadowOffset: { width: 0, height: 2 },
-              }}
+              style={Shadows.primary}
             >
               {isCommentSending ? (
                 <ActivityIndicator size='small' color={Colors.brown} />
               ) : (
-                <Send size={16} color={Colors.brown} strokeWidth={2.5} />
+                <Send size={20} color={Colors.brownDark} strokeWidth={2.5} />
               )}
             </TouchableOpacity>
           </View>

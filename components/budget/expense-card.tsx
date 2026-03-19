@@ -60,7 +60,9 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
               </Text>
               <Text
                 className='font-ibm-bold text-base'
-                style={{ color: over ? Colors.peachDark : '#404040' }}
+                style={{
+                  color: over ? Colors.peachDarker : Colors.neutralDarker,
+                }}
               >
                 {formatAmount(spent)}원
               </Text>
@@ -105,7 +107,7 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
                   }}
                 >
                   {over
-                    ? `초과 ${formatAmount(Math.abs(diff))}원`
+                    ? `초과 -${formatAmount(Math.abs(diff))}원`
                     : `절약 +${formatAmount(diff)}원`}
                 </Text>
               </View>

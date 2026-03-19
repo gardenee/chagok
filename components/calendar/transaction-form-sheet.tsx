@@ -230,7 +230,7 @@ export function TransactionFormSheet({
             )}
 
             <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-              항목명
+              내역명
             </Text>
             <ModalTextInput
               value={txModal.form.memo}
