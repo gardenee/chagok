@@ -148,7 +148,7 @@ export function TransactionFormSheet({
           {/* 헤더 */}
           <View className='flex-row items-center justify-between px-6 pt-5 mb-6'>
             <View style={{ width: 22 }} />
-            <Text className='font-ibm-bold text-lg text-neutral-800'>
+            <Text className='font-ibm-bold text-xl text-neutral-800'>
               {txModal.editingId
                 ? '내역 수정'
                 : `${getSelectedDateLabel(txModal.form.date || selectedDate)} 내역 추가`}
@@ -520,7 +520,12 @@ export function TransactionFormSheet({
                           },
                         }))
                       }
-                      className={`flex-1 py-2.5 rounded-2xl items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                      className={`flex-1 py-2.5 items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                      style={{
+                        borderRadius: 16,
+                        borderWidth: 1.5,
+                        borderColor: 'transparent',
+                      }}
                       activeOpacity={0.7}
                     >
                       <Text
@@ -612,7 +617,7 @@ export function TransactionFormSheet({
             >
               <ChevronLeft size={22} color={Colors.brown} strokeWidth={2.5} />
             </TouchableOpacity>
-            <Text className='font-ibm-bold text-lg text-neutral-800'>
+            <Text className='font-ibm-bold text-xl text-neutral-800'>
               결제수단 관리
             </Text>
             <TouchableOpacity

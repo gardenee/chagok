@@ -1,6 +1,7 @@
-import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text } from 'react-native';
 import { Colors } from '@/constants/colors';
 import { Shadows } from '@/constants/shadows';
+import { DotsLoadingIndicator } from '@/components/ui/dots-loading-indicator';
 
 type SaveButtonProps = {
   onPress: () => void;
@@ -28,7 +29,7 @@ export function SaveButton({
       }}
     >
       {isSaving ? (
-        <ActivityIndicator color={Colors.brownDark} />
+        <DotsLoadingIndicator color={Colors.brownDark} size={7} />
       ) : (
         <Text className='font-ibm-bold text-base text-brown-dark'>{label}</Text>
       )}

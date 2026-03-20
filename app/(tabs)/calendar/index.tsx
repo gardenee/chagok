@@ -823,7 +823,7 @@ export default function CalendarTab() {
               <EmptyState icon={CalendarX} title='거래 내역이 없어요' />
             ) : (
               <View className='gap-5'>
-                {(['income', 'expense'] as const)
+                {(['expense', 'income'] as const)
                   .map(type => ({
                     type,
                     items: selectedTransactions.filter(t => t.type === type),

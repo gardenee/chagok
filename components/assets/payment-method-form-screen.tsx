@@ -71,7 +71,7 @@ export function PaymentMethodFormScreen({
             >
               <ChevronLeft size={22} color={Colors.brown} strokeWidth={2.5} />
             </TouchableOpacity>
-            <Text className='font-ibm-bold text-lg text-neutral-800'>
+            <Text className='font-ibm-bold text-xl text-neutral-800'>
               {editingId ? '결제수단 수정' : '결제수단 추가'}
             </Text>
             <View style={{ width: 22 }} />

@@ -163,32 +163,6 @@ export default function BudgetIndex() {
               totalBudget={totalBudget}
             />
 
-            {/* 수입 섹션 */}
-            <View className='mx-4 mb-6'>
-              <Text className='font-ibm-bold text-lg text-neutral-700 mb-3.5'>
-                수입
-              </Text>
-
-              {incomeCategories.length === 0 ? (
-                <EmptyState
-                  icon={TrendingUp}
-                  title='수입 카테고리가 없어요'
-                  description='연필 버튼으로 추가해보세요'
-                />
-              ) : (
-                <View className='gap-3'>
-                  {incomeCategories.map(c => (
-                    <IncomeCard
-                      key={c.id}
-                      c={c}
-                      income={incomeByCategory[c.id] ?? 0}
-                      onPress={() => goToDetail(c.id)}
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
-
             {/* 지출 섹션 */}
             <View className='mx-4'>
               <View className='flex-row items-center justify-between mb-3'>
@@ -315,6 +289,32 @@ export default function BudgetIndex() {
                       </View>
                     </View>
                   )}
+                </View>
+              )}
+            </View>
+
+            {/* 수입 섹션 */}
+            <View className='mx-4 mt-6'>
+              <Text className='font-ibm-bold text-lg text-neutral-700 mb-3.5'>
+                수입
+              </Text>
+
+              {incomeCategories.length === 0 ? (
+                <EmptyState
+                  icon={TrendingUp}
+                  title='수입 카테고리가 없어요'
+                  description='연필 버튼으로 추가해보세요'
+                />
+              ) : (
+                <View className='gap-3'>
+                  {incomeCategories.map(c => (
+                    <IncomeCard
+                      key={c.id}
+                      c={c}
+                      income={incomeByCategory[c.id] ?? 0}
+                      onPress={() => goToDetail(c.id)}
+                    />
+                  ))}
                 </View>
               )}
             </View>

@@ -57,12 +57,11 @@ export default function CategoriesScreen() {
 
   function openEdit(c: Category) {
     setModal({
-      visible: false,
+      visible: true,
       editingId: c.id,
       categoryType: c.type,
       form: { name: c.name, icon: c.icon, color: resolveColorKey(c.color) },
     });
-    requestAnimationFrame(() => setModal(s => ({ ...s, visible: true })));
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 

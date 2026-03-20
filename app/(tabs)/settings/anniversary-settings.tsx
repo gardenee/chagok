@@ -249,9 +249,13 @@ export default function AnniversarySettingsScreen() {
             value={
               partnerBirthday ? formatMmDd(partnerBirthday.date) : '미설정'
             }
-            onPress={() =>
-              openBirthdayPicker('birthday_partner', partnerBirthday)
-            }
+            onPress={() => {
+              if (!partner) {
+                Alert.alert('연동 전', '짝꿍이 아직 연동 전이에요');
+                return;
+              }
+              openBirthdayPicker('birthday_partner', partnerBirthday);
+            }}
           />
         </SettingsCard>
 
