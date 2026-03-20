@@ -153,7 +153,7 @@ export default function CalendarTab() {
     const parentNavigation = navigation.getParent();
     if (!parentNavigation) return;
 
-    return parentNavigation.addListener('tabPress' as never, e => {
+    return parentNavigation.addListener('tabPress' as never, (e: { target?: string }) => {
       const parentState = parentNavigation.getState();
       const currentTabKey = parentState.routes[parentState.index]?.key;
       if (!navigation.isFocused()) return;
@@ -902,11 +902,11 @@ export default function CalendarTab() {
                                           label={resolveTagLabel(
                                             t.tag,
                                             t.user_id,
-                                          )}
+                                          ) ?? ''}
                                           bgColor={resolveTagColor(
                                             t.tag,
                                             t.user_id,
-                                          )}
+                                          ) ?? undefined}
                                         />
                                       )}
                                     </>
@@ -990,8 +990,8 @@ export default function CalendarTab() {
                     <View className='flex-row items-center gap-3'>
                       <TagPill
                         tag={s.tag}
-                        label={resolveTagLabel(s.tag, s.user_id)}
-                        bgColor={resolveTagColor(s.tag, s.user_id)}
+                        label={resolveTagLabel(s.tag, s.user_id) ?? ''}
+                        bgColor={resolveTagColor(s.tag, s.user_id) ?? undefined}
                         className='px-2 py-1'
                       />
                       <Text className='font-ibm-semibold text-base text-neutral-800'>

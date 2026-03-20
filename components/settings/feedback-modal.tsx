@@ -103,7 +103,7 @@ export function FeedbackModal({ visible, onClose }: Props) {
               activeOpacity={0.8}
               className='flex-row items-center gap-1.5 px-3 py-2 rounded-full'
               style={{
-                backgroundColor: selected ? Colors.butter : Colors.neutral100,
+                backgroundColor: selected ? Colors.butter : Colors.neutral,
               }}
             >
               {opt.icon}
