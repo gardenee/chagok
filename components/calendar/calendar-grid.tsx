@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { formatAmountShort } from '@/utils/format';
-import { WEEKDAYS, getTagBgColor, type DayCell } from './types';
+import { getTagBgColor, type DayCell } from './types';
 import type { Schedule, Anniversary } from '@/types/database';
 import { Shadows } from '@/constants/shadows';
 
@@ -22,6 +22,8 @@ interface CalendarGridProps {
   schedulesByDate: Record<string, Schedule[]>;
   holidaysByDate: Record<string, string>;
   anniversariesByDate: Record<string, Anniversary[]>;
+  weekdays: string[];
+  weekStartsOnMonday: boolean;
 }
 
 export function CalendarGrid({
@@ -33,6 +35,8 @@ export function CalendarGrid({
   schedulesByDate,
   holidaysByDate,
   anniversariesByDate,
+  weekdays,
+  weekStartsOnMonday,
 }: CalendarGridProps) {
   return (
     <View
@@ -40,10 +44,10 @@ export function CalendarGrid({
       style={Shadows.primary}
     >
       <View className='flex-row mb-0.5'>
-        {WEEKDAYS.map((day, i) => (
+        {weekdays.map((day, i) => (
           <View key={day} className='flex-1 items-center py-1'>
             <Text
-              className={`font-ibm-semibold text-base ${i === 0 ? 'text-peach-dark' : 'text-neutral-600'}`}
+              className={`font-ibm-semibold text-base ${i === (weekStartsOnMonday ? 6 : 0) ? 'text-peach-dark' : 'text-neutral-600'}`}
             >
               {day}
             </Text>
@@ -114,7 +118,7 @@ export function CalendarGrid({
                   className={`font-ibm-semibold text-base ${
                     isSelected
                       ? 'text-brown-darker'
-                      : col === 0 || isHoliday
+                      : col === (weekStartsOnMonday ? 6 : 0) || isHoliday
                         ? 'text-peach-darker'
                         : 'text-neutral-800'
                   }`}

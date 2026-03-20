@@ -21,11 +21,13 @@ import {
   Heart,
   MessageSquarePlus,
   Info,
+  CalendarDays,
 } from 'lucide-react-native';
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/store/auth';
+import { useCalendarStore } from '@/store/calendar';
 import { supabase } from '@/lib/supabase';
 import { useCouple, useUpdateBookName } from '@/hooks/use-couple';
 import { useCoupleMembers } from '@/hooks/use-couple-members';
@@ -40,6 +42,7 @@ import { SettingsCard, Divider } from '@/components/settings/settings-card';
 import { EditModal } from '@/components/settings/edit-modal';
 import { NotificationInbox } from '@/components/settings/notification-inbox';
 import { FeedbackModal } from '@/components/settings/feedback-modal';
+import { OptionsSheet } from '@/components/ui/options-sheet';
 
 export default function SettingsScreen() {
   const scrollRef = useRef<ScrollView>(null);
@@ -47,6 +50,7 @@ export default function SettingsScreen() {
   const router = useRouter();
 
   const { userProfile } = useAuthStore();
+  const { weekStartsOnMonday, setWeekStartsOnMonday } = useCalendarStore();
   const { data: couple, isLoading: coupleLoading } = useCouple();
   const { data: members = [] } = useCoupleMembers();
   const updateBookName = useUpdateBookName();
@@ -56,6 +60,7 @@ export default function SettingsScreen() {
   }>({ type: null });
   const [notifInboxVisible, setNotifInboxVisible] = useState(false);
   const [feedbackVisible, setFeedbackVisible] = useState(false);
+  const [weekdaySheetVisible, setWeekdaySheetVisible] = useState(false);
   const { unreadCount } = useUnreadCount();
   useNotificationsSubscription();
   useAnniversaries(); // prefetch for anniversary-settings
@@ -253,6 +258,22 @@ export default function SettingsScreen() {
           <SettingsCard>
             <SettingsRow
               icon={
+                <CalendarDays
+                  size={16}
+                  color={Colors.neutralDarker}
+                  strokeWidth={2}
+                />
+              }
+              label='캘린더 시작 요일'
+              value={weekStartsOnMonday ? '월요일' : '일요일'}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setWeekdaySheetVisible(true);
+              }}
+            />
+            <Divider />
+            <SettingsRow
+              icon={
                 <Heart size={16} color={Colors.neutralDarker} strokeWidth={2} />
               }
               label='기념일 설정'
@@ -331,6 +352,18 @@ export default function SettingsScreen() {
       <FeedbackModal
         visible={feedbackVisible}
         onClose={() => setFeedbackVisible(false)}
+      />
+
+      <OptionsSheet
+        visible={weekdaySheetVisible}
+        onClose={() => setWeekdaySheetVisible(false)}
+        title='캘린더 시작 요일'
+        options={[
+          { label: '일요일', value: 'sunday' },
+          { label: '월요일', value: 'monday' },
+        ]}
+        selectedValue={weekStartsOnMonday ? 'monday' : 'sunday'}
+        onSelect={value => setWeekStartsOnMonday(value === 'monday')}
       />
 
       <EditModal

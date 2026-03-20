@@ -59,6 +59,12 @@ export type TagOption = {
 
 export const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
+export function getWeekdays(weekStartsOnMonday: boolean): string[] {
+  return weekStartsOnMonday
+    ? ['월', '화', '수', '목', '금', '토', '일']
+    : WEEKDAYS;
+}
+
 export const INITIAL_TX_FORM: TxFormData = {
   amount: '',
   type: 'expense',

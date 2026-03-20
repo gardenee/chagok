@@ -83,6 +83,7 @@ import type {
 import {
   formatDateStr,
   getSelectedDateLabel,
+  getWeekdays,
   type DayCell,
 } from '@/components/calendar/types';
 import { CalendarGrid } from '@/components/calendar/calendar-grid';
@@ -132,6 +133,9 @@ export default function CalendarTab() {
   const { openTxId } = useLocalSearchParams<{ openTxId?: string }>();
   useScrollToTop(scrollRef);
   const queryClient = useQueryClient();
+
+  const { weekStartsOnMonday } = useCalendarStore();
+  const weekdays = getWeekdays(weekStartsOnMonday);
 
   const [currentYear, setCurrentYear] = useState(todayDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(todayDate.getMonth());
@@ -459,11 +463,12 @@ export default function CalendarTab() {
   const calendarDays = useMemo((): DayCell[] => {
     const firstDay = new Date(currentYear, currentMonth, 1);
     const startDow = firstDay.getDay();
+    const offset = weekStartsOnMonday ? (startDow + 6) % 7 : startDow;
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
     const days: DayCell[] = [];
 
-    for (let i = startDow - 1; i >= 0; i--) {
+    for (let i = offset - 1; i >= 0; i--) {
       days.push({
         date: formatDateStr(
           new Date(currentYear, currentMonth - 1, prevMonthLastDay - i),
@@ -492,7 +497,7 @@ export default function CalendarTab() {
       });
     }
     return days;
-  }, [currentYear, currentMonth, todayStr]);
+  }, [currentYear, currentMonth, todayStr, weekStartsOnMonday]);
 
   const transactionsByDate = useMemo(() => {
     const map: Record<string, TransactionRow[]> = {};
@@ -754,6 +759,8 @@ export default function CalendarTab() {
           schedulesByDate={schedulesByDate}
           holidaysByDate={holidaysByDate}
           anniversariesByDate={anniversariesByDate}
+          weekdays={weekdays}
+          weekStartsOnMonday={weekStartsOnMonday}
         />
 
         {/* 탭 콘텐츠 */}
