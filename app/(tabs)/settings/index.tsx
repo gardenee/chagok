@@ -15,20 +15,19 @@ import {
   Hash,
   User,
   Bell,
-  LogOut,
   Users,
   Link,
   Heart,
   MessageSquarePlus,
   Info,
   CalendarDays,
+  UserCog,
 } from 'lucide-react-native';
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/store/auth';
 import { useCalendarStore } from '@/store/calendar';
-import { supabase } from '@/lib/supabase';
 import { useCouple, useUpdateBookName } from '@/hooks/use-couple';
 import { useCoupleMembers } from '@/hooks/use-couple-members';
 import { useUpdateNickname } from '@/hooks/use-user';
@@ -110,19 +109,6 @@ export default function SettingsScreen() {
     } catch {
       Alert.alert('오류', '공유하기 중 문제가 발생했어요');
     }
-  }
-
-  function handleLogout() {
-    Alert.alert('로그아웃', '정말 로그아웃할까요?', [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '로그아웃',
-        style: 'destructive',
-        onPress: async () => {
-          await supabase.auth.signOut();
-        },
-      },
-    ]);
   }
 
   return (
@@ -293,6 +279,21 @@ export default function SettingsScreen() {
                 router.push('/(tabs)/settings/notification-settings');
               }}
             />
+            <Divider />
+            <SettingsRow
+              icon={
+                <UserCog
+                  size={16}
+                  color={Colors.neutralDarker}
+                  strokeWidth={2}
+                />
+              }
+              label='계정 관리'
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/(tabs)/settings/account');
+              }}
+            />
           </SettingsCard>
         </View>
 
@@ -323,22 +324,6 @@ export default function SettingsScreen() {
               label='버전'
               value={appVersion}
               showChevron={false}
-            />
-          </SettingsCard>
-        </View>
-
-        <View className='mt-6'>
-          <SettingsCard>
-            <SettingsRow
-              icon={
-                <LogOut
-                  size={16}
-                  color={Colors.neutralDarker}
-                  strokeWidth={2}
-                />
-              }
-              label='로그아웃'
-              onPress={handleLogout}
             />
           </SettingsCard>
         </View>

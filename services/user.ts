@@ -24,6 +24,16 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
   return data;
 }
 
+export async function leaveCouple(): Promise<void> {
+  const { error } = await supabase.rpc('leave_couple');
+  if (error) throw error;
+}
+
+export async function deleteAccount(): Promise<void> {
+  const { error } = await supabase.rpc('delete_my_account');
+  if (error) throw error;
+}
+
 export async function updateNickname(
   userId: string,
   nickname: string,

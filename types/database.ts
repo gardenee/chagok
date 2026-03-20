@@ -423,6 +423,14 @@ export interface Database {
         Args: Record<string, never>;
         Returns: string;
       };
+      leave_couple: {
+        Args: Record<string, never>;
+        Returns: void;
+      };
+      delete_my_account: {
+        Args: Record<string, never>;
+        Returns: void;
+      };
     };
   };
 }
