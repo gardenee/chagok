@@ -5,6 +5,7 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  updateCategoryOrders,
   type CategoryInput,
 } from '@/services/categories';
 import type { Category } from '@/types/database';
@@ -20,6 +21,7 @@ export function useCategories() {
     queryFn: () => fetchCategories(coupleId!),
     enabled: !!coupleId,
     staleTime: Infinity, // mutation setQueryData로 즉시 반영되므로 주기적 refetch 불필요
+    select: data => [...data].sort((a, b) => a.sort_order - b.sort_order),
   });
 }
 
@@ -75,6 +77,37 @@ export function useUpdateCategory() {
           item.id === updatedItem.id ? updatedItem : item,
         ),
       );
+    },
+  });
+}
+
+export function useReorderCategories() {
+  const queryClient = useQueryClient();
+  const { userProfile } = useAuthStore();
+
+  return useMutation({
+    mutationFn: (updates: { id: string; sort_order: number }[]) =>
+      updateCategoryOrders(updates),
+    onMutate: async updates => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      await queryClient.cancelQueries({ queryKey: ['categories', coupleId] });
+      const previous = queryClient.getQueryData<Category[]>([
+        'categories',
+        coupleId,
+      ]);
+      queryClient.setQueryData<Category[]>(['categories', coupleId], old =>
+        (old ?? []).map(item => {
+          const update = updates.find(u => u.id === item.id);
+          return update ? { ...item, sort_order: update.sort_order } : item;
+        }),
+      );
+      return { previous };
+    },
+    onError: (_, __, context) => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId || !context?.previous) return;
+      queryClient.setQueryData(['categories', coupleId], context.previous);
     },
   });
 }

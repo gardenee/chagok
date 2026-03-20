@@ -164,7 +164,7 @@ export default function BudgetIndex() {
             />
 
             {/* 지출 섹션 */}
-            <View className='mx-4'>
+            <View className='mt-3 mx-4'>
               <View className='flex-row items-center justify-between mb-3'>
                 <Text className='font-ibm-bold text-lg text-neutral-700'>
                   지출
@@ -229,7 +229,7 @@ export default function BudgetIndex() {
                     description='연필 버튼으로 추가해보세요'
                   />
                 ) : (
-                  <View className='gap-3'>
+                  <View className='gap-3.5'>
                     {expenseCategories.map(c => (
                       <ExpenseCard
                         key={c.id}
@@ -249,7 +249,7 @@ export default function BudgetIndex() {
                   description='지출을 기록하면 여기에 표시돼요'
                 />
               ) : (
-                <View className='gap-3'>
+                <View className='gap-3.5'>
                   {paymentMethods
                     .filter(pm => (spendingByPaymentMethod[pm.id] ?? 0) > 0)
                     .map(pm => (
@@ -276,7 +276,7 @@ export default function BudgetIndex() {
                           미지정
                         </Text>
                         <View className='flex-row items-baseline gap-1'>
-                          <Text className='font-ibm-regular text-sm text-neutral-600'>
+                          <Text className='font-ibm-regular text-sm text-neutral-500'>
                             사용
                           </Text>
                           <Text className='font-ibm-bold text-base text-neutral-700'>
@@ -306,7 +306,7 @@ export default function BudgetIndex() {
                   description='연필 버튼으로 추가해보세요'
                 />
               ) : (
-                <View className='gap-3'>
+                <View className='gap-3.5'>
                   {incomeCategories.map(c => (
                     <IncomeCard
                       key={c.id}

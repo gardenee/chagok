@@ -55,7 +55,7 @@ export function BudgetSummaryCards({
         </View>
       </View>
 
-      <View className='flex-row gap-3 mt-3'>
+      <View className='flex-row gap-3 mt-3.5'>
         {/* 총 수입 카드 */}
         <View className='flex-1 bg-olive rounded-3xl p-4' style={Shadows.card}>
           <View className='flex-row justify-between items-center mb-1.5'>

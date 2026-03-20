@@ -28,7 +28,7 @@ export function PaymentMethodExpenseCard({ pm, spent }: Props) {
           {pm.name}
         </Text>
         <View className='flex-row items-baseline gap-1'>
-          <Text className='font-ibm-regular text-sm text-neutral-400'>
+          <Text className='font-ibm-regular text-sm text-neutral-500'>
             사용
           </Text>
           <Text className='font-ibm-bold text-base text-neutral-700'>

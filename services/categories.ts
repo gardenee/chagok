@@ -51,3 +51,13 @@ export async function deleteCategory(id: string): Promise<void> {
   const { error } = await supabase.from('categories').delete().eq('id', id);
   if (error) throw error;
 }
+
+export async function updateCategoryOrders(
+  updates: { id: string; sort_order: number }[],
+): Promise<void> {
+  await Promise.all(
+    updates.map(({ id, sort_order }) =>
+      supabase.from('categories').update({ sort_order }).eq('id', id),
+    ),
+  );
+}

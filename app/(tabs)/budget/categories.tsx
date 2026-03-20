@@ -7,6 +7,7 @@ import {
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
+  useReorderCategories,
 } from '@/hooks/use-categories';
 import {
   CategoryFormScreen,
@@ -37,6 +38,7 @@ export default function CategoriesScreen() {
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
+  const reorderCategories = useReorderCategories();
 
   const [modal, setModal] = useState<ModalState>(INITIAL_MODAL);
 
@@ -110,6 +112,18 @@ export default function CategoriesScreen() {
     }
   }
 
+  async function handleReorderConfirm(reordered: Category[]) {
+    const updates = reordered.map(c => ({
+      id: c.id,
+      sort_order: c.sort_order,
+    }));
+    try {
+      await reorderCategories.mutateAsync(updates);
+    } catch {
+      Alert.alert('오류', '순서 저장 중 문제가 발생했어요');
+    }
+  }
+
   function handleDelete(id: string) {
     Alert.alert('카테고리 삭제', '삭제하면 관련 예산도 사라져요. 삭제할까요?', [
       { text: '취소', style: 'cancel' },
@@ -137,6 +151,7 @@ export default function CategoriesScreen() {
         onCreate={() => openCreate('expense')}
         onEdit={openEdit}
         onDelete={handleDelete}
+        onReorderConfirm={handleReorderConfirm}
       />
 
       <Modal
