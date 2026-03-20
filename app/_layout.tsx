@@ -1,6 +1,6 @@
 import '../global.css';
 import { useEffect, useRef, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Image } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Slot, useRouter, useSegments, SplashScreen } from 'expo-router';
 import * as Linking from 'expo-linking';
@@ -310,14 +310,14 @@ function RootLayoutNav() {
       <Slot />
       {isLoading && (
         <View
-          className='absolute bg-cream items-center justify-center'
+          className='absolute bg-white items-center justify-center'
           style={{ top: 0, left: 0, right: 0, bottom: 0 }}
         >
-          {fontsLoaded && (
-            <Text className='text-4xl font-ibm-bold text-brown px-2 py-1'>
-              차곡
-            </Text>
-          )}
+          <Image
+            source={require('../assets/android-icon-foreground.png')}
+            style={{ width: 160, height: 160 }}
+            resizeMode='contain'
+          />
         </View>
       )}
     </>
