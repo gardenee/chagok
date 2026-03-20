@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   Platform,
   ScrollView,
   SafeAreaView,
@@ -11,13 +10,7 @@ import {
   Modal,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {
-  ChevronUp,
-  ChevronDown,
-  Clock,
-  X,
-  CalendarDays,
-} from 'lucide-react-native';
+import { Clock, X, CalendarDays } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { SaveButton } from '@/components/ui/save-button';
 import { DeleteButton } from '@/components/ui/delete-button';
@@ -27,6 +20,13 @@ import type { ScheduleModalState, TagOption } from './types';
 function parseDateStr(dateStr: string): Date {
   const [y, m, d] = dateStr.split('-').map(Number);
   return new Date(y, m - 1, d);
+}
+
+function parseTimeStr(timeStr: string): Date {
+  const [h, m] = timeStr.split(':').map(Number);
+  const date = new Date();
+  date.setHours(h, m, 0, 0);
+  return date;
 }
 
 interface ScheduleFormSheetProps {
@@ -53,6 +53,8 @@ export function ScheduleFormSheet({
   const [tagError, setTagError] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [tempDate, setTempDate] = useState<Date>(new Date());
+  const [timePickerVisible, setTimePickerVisible] = useState(false);
+  const [tempTime, setTempTime] = useState<Date>(new Date());
 
   useEffect(() => {
     if (!scheduleModal.visible) {
@@ -68,18 +70,6 @@ export function ScheduleFormSheet({
     if (tagEmpty) setTagError(true);
     if (titleEmpty || tagEmpty) return;
     onSave();
-  }
-
-  function adjustHour(delta: number) {
-    const [hStr, mStr] = (form.time ?? '09:00').split(':');
-    const h = (parseInt(hStr) + delta + 24) % 24;
-    onFormChange({ ...form, time: `${String(h).padStart(2, '0')}:${mStr}` });
-  }
-
-  function adjustMinute(delta: number) {
-    const [hStr, mStr] = (form.time ?? '09:00').split(':');
-    const m = (parseInt(mStr) + delta + 60) % 60;
-    onFormChange({ ...form, time: `${hStr}:${String(m).padStart(2, '0')}` });
   }
 
   const dateValue = form.date ? parseDateStr(form.date) : new Date();
@@ -216,8 +206,11 @@ export function ScheduleFormSheet({
           <View className='mb-8'>
             {form.time === null ? (
               <TouchableOpacity
-                onPress={() => onFormChange({ ...form, time: '09:00' })}
-                className='bg-neutral-100 rounded-2xl px-5 flex-row items-center h-[84px]'
+                onPress={() => {
+                  setTempTime(parseTimeStr('09:00'));
+                  setTimePickerVisible(true);
+                }}
+                className='bg-neutral-100 rounded-2xl px-5 flex-row items-center h-16'
                 activeOpacity={0.7}
               >
                 <Clock size={16} color={Colors.neutralDark} strokeWidth={2} />
@@ -236,94 +229,19 @@ export function ScheduleFormSheet({
                 </View>
               </TouchableOpacity>
             ) : (
-              <View className='bg-neutral-100 rounded-2xl py-3 px-5 flex-row items-center h-[84px]'>
+              <TouchableOpacity
+                onPress={() => {
+                  setTempTime(parseTimeStr(form.time!));
+                  setTimePickerVisible(true);
+                }}
+                className='bg-neutral-100 rounded-2xl px-5 flex-row items-center h-16'
+                activeOpacity={0.7}
+              >
                 <Clock size={16} color={Colors.neutralDark} strokeWidth={2} />
-                <View className='flex-1 flex-row items-center justify-center gap-3'>
-                  <View className='items-center gap-1'>
-                    <TouchableOpacity
-                      onPress={() => adjustHour(1)}
-                      activeOpacity={0.7}
-                      hitSlop={{ top: 8, bottom: 4, left: 16, right: 16 }}
-                    >
-                      <ChevronUp
-                        size={16}
-                        color={Colors.neutral}
-                        strokeWidth={2.5}
-                      />
-                    </TouchableOpacity>
-                    <TextInput
-                      value={form.time.slice(0, 2)}
-                      onChangeText={v => {
-                        const digits = v.replace(/[^0-9]/g, '');
-                        const n = Math.min(
-                          parseInt(digits.slice(-2) || '0', 10),
-                          23,
-                        );
-                        onFormChange({
-                          ...form,
-                          time: `${String(n).padStart(2, '0')}:${form.time?.slice(3, 5) ?? '00'}`,
-                        });
-                      }}
-                      keyboardType='number-pad'
-                      selectTextOnFocus
-                      className='font-ibm-bold text-xl text-neutral-800 w-10 text-center'
-                    />
-                    <TouchableOpacity
-                      onPress={() => adjustHour(-1)}
-                      activeOpacity={0.7}
-                      hitSlop={{ top: 4, bottom: 8, left: 16, right: 16 }}
-                    >
-                      <ChevronDown
-                        size={16}
-                        color={Colors.neutralDark}
-                        strokeWidth={2.5}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <Text className='font-ibm-bold text-xl text-neutral-600'>
-                    :
+                <View className='flex-1 items-center'>
+                  <Text className='font-ibm-bold text-xl text-neutral-800'>
+                    {form.time}
                   </Text>
-                  <View className='items-center gap-1'>
-                    <TouchableOpacity
-                      onPress={() => adjustMinute(5)}
-                      activeOpacity={0.7}
-                      hitSlop={{ top: 8, bottom: 4, left: 16, right: 16 }}
-                    >
-                      <ChevronUp
-                        size={16}
-                        color={Colors.neutralDark}
-                        strokeWidth={2.5}
-                      />
-                    </TouchableOpacity>
-                    <TextInput
-                      value={form.time.slice(3, 5)}
-                      onChangeText={v => {
-                        const digits = v.replace(/[^0-9]/g, '');
-                        const n = Math.min(
-                          parseInt(digits.slice(-2) || '0', 10),
-                          59,
-                        );
-                        onFormChange({
-                          ...form,
-                          time: `${form.time?.slice(0, 2) ?? '09'}:${String(n).padStart(2, '0')}`,
-                        });
-                      }}
-                      keyboardType='number-pad'
-                      selectTextOnFocus
-                      className='font-ibm-bold text-xl text-neutral-800 w-10 text-center'
-                    />
-                    <TouchableOpacity
-                      onPress={() => adjustMinute(-5)}
-                      activeOpacity={0.7}
-                      hitSlop={{ top: 4, bottom: 8, left: 16, right: 16 }}
-                    >
-                      <ChevronDown
-                        size={16}
-                        color={Colors.brown}
-                        strokeWidth={2.5}
-                      />
-                    </TouchableOpacity>
-                  </View>
                 </View>
                 <TouchableOpacity
                   onPress={() => onFormChange({ ...form, time: null })}
@@ -332,7 +250,7 @@ export function ScheduleFormSheet({
                 >
                   <X size={18} color={Colors.neutralLight} strokeWidth={2} />
                 </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             )}
           </View>
         </ScrollView>
@@ -352,6 +270,57 @@ export function ScheduleFormSheet({
           />
         </View>
       </KeyboardAvoidingView>
+
+      {/* 시간 선택 모달 */}
+      <Modal
+        visible={timePickerVisible}
+        transparent
+        animationType='fade'
+        onRequestClose={() => setTimePickerVisible(false)}
+      >
+        <View
+          className='flex-1 justify-end'
+          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+        >
+          <TouchableOpacity
+            className='flex-1'
+            activeOpacity={1}
+            onPress={() => setTimePickerVisible(false)}
+          />
+          <View className='bg-white rounded-t-3xl px-6 pt-5 pb-8'>
+            <Text className='font-ibm-bold text-xl text-brown-darker text-center mb-4'>
+              시간 선택
+            </Text>
+            <View className='items-center mb-6'>
+              <DateTimePicker
+                value={tempTime}
+                mode='time'
+                display='spinner'
+                onChange={(_event, date) => {
+                  if (!date) return;
+                  setTempTime(date);
+                }}
+                locale='ko-KR'
+                accentColor={Colors.brownDark}
+              />
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                const h = String(tempTime.getHours()).padStart(2, '0');
+                const m = String(tempTime.getMinutes()).padStart(2, '0');
+                onFormChange({ ...form, time: `${h}:${m}` });
+                setTimePickerVisible(false);
+              }}
+              className='bg-butter rounded-2xl py-4 items-center'
+              activeOpacity={0.8}
+            >
+              <Text className='font-ibm-bold text-base text-brown-darker'>
+                확인
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* 날짜 선택 모달 */}
       <Modal
