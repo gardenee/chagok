@@ -1,5 +1,5 @@
 import { View, ScrollView, SafeAreaView, Alert, Modal } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useScrollToTop } from '@react-navigation/native';
 import { Repeat } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -18,7 +18,6 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SummaryCard } from '@/components/ui/summary-card';
-import { LoadingState } from '@/components/ui/loading-state';
 import { FixedExpenseSkeleton } from '@/components/fixed/fixed-expense-skeleton';
 import { FixedExpenseItem } from '@/components/fixed/fixed-expense-item';
 import {
@@ -33,6 +32,7 @@ import {
 } from '@/components/budget/category-form-screen';
 import { resolveColor, resolveColorKey } from '@/constants/color-map';
 import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
+import { useFixedExpensePrefillStore } from '@/store/fixed-expense-prefill';
 import type { FixedExpense, Category } from '@/types/database';
 
 type FixedView = 'main' | 'catMgmt' | 'catForm';
@@ -64,6 +64,22 @@ export default function FixedScreen() {
   useScrollToTop(scrollRef);
 
   const [state, setState] = useState<State>(INITIAL_STATE);
+
+  const { prefill, clearPrefill } = useFixedExpensePrefillStore();
+
+  useEffect(() => {
+    if (!prefill) return;
+    const form: FormData = {
+      name: prefill.name,
+      amount: String(prefill.amount),
+      due_day: prefill.due_day,
+      due_day_mode: 'day',
+      business_day_adjust: 'none',
+      category_id: prefill.category_id,
+    };
+    setState({ ...INITIAL_STATE, visible: true, form });
+    clearPrefill();
+  }, [prefill]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: fixedExpenses = [], isLoading } = useFixedExpenses();
   const { data: categories = [] } = useExpenseCategories();

@@ -28,12 +28,30 @@ import { getPmColor, INITIAL_PM_FORM } from '@/constants/payment-method';
 import { resolveColor, resolveColorKey } from '@/constants/color-map';
 import { INITIAL_CATEGORY_FORM } from '@/components/budget/category-form-screen';
 import { TransactionFormSheet } from '@/components/calendar/transaction-form-sheet';
+import { RecurringSuggestionSheet } from '@/components/calendar/recurring-suggestion-sheet';
 import {
-  INITIAL_TX_FORM,
   type TxModalState,
   type TxFormData,
 } from '@/components/calendar/types';
+import {
+  isVariableCategory,
+  isWithinAmountTolerance,
+  isWithinDateTolerance,
+} from '@/constants/recurring-detection';
+import {
+  fetchPrevMonthMatchingTransactions,
+  isAlreadyFixedExpense,
+} from '@/services/recurring-detection';
+import { useRecurringSuggestionStore } from '@/store/recurring-suggestion';
+import { useFixedExpensePrefillStore } from '@/store/fixed-expense-prefill';
 import type { Asset, Category } from '@/types/database';
+
+type RecurringSuggestion = {
+  memo: string;
+  amount: number;
+  category_id: string | null;
+  due_day: number;
+};
 
 export default function TransactionFormScreen() {
   const router = useRouter();
@@ -101,6 +119,11 @@ export default function TransactionFormScreen() {
   });
 
   const setPendingReturnDate = useCalendarStore(s => s.setPendingReturnDate);
+  const { isIgnored, addIgnored } = useRecurringSuggestionStore();
+  const setPrefill = useFixedExpensePrefillStore(s => s.setPrefill);
+
+  const [recurringSuggestion, setRecurringSuggestion] =
+    useState<RecurringSuggestion | null>(null);
 
   const createTx = useCreateTransaction();
   const updateTx = useUpdateTransaction();
@@ -151,10 +174,87 @@ export default function TransactionFormScreen() {
       else await createTx.mutateAsync(payload);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setPendingReturnDate(txModal.form.date || dateParam);
+
+      // 신규 지출 저장 후 고정지출 패턴 감지
+      const shouldDetect =
+        !params.editingId &&
+        payload.type === 'expense' &&
+        !!payload.memo &&
+        !!payload.category_id;
+
+      if (shouldDetect) {
+        const memo = payload.memo!;
+        const categoryId = payload.category_id!;
+        const category = categories.find(c => c.id === categoryId);
+        const coupleId = userProfile?.couple_id;
+
+        const skipByCategory = category
+          ? isVariableCategory(category.name)
+          : false;
+        const skipByIgnored = isIgnored({ memo, category_id: categoryId });
+
+        if (!skipByCategory && !skipByIgnored && coupleId) {
+          const [alreadyFixed, prevMatches] = await Promise.all([
+            isAlreadyFixedExpense(coupleId, memo, categoryId),
+            fetchPrevMonthMatchingTransactions(
+              coupleId,
+              memo,
+              categoryId,
+              parseInt(dateParam.split('-')[0]),
+              parseInt(dateParam.split('-')[1]) - 1, // 0-indexed
+            ),
+          ]);
+
+          if (!alreadyFixed && prevMatches.length > 0) {
+            const currentDay = parseInt(dateParam.split('-')[2]);
+            const matched = prevMatches.some(
+              t =>
+                isWithinDateTolerance(
+                  currentDay,
+                  parseInt(t.date.split('-')[2]),
+                ) && isWithinAmountTolerance(amount, t.amount),
+            );
+
+            if (matched) {
+              setRecurringSuggestion({
+                memo,
+                amount,
+                category_id: categoryId,
+                due_day: currentDay,
+              });
+              return; // router.back() 는 시트 응답 후 처리
+            }
+          }
+        }
+      }
+
       router.back();
     } catch {
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
+  }
+
+  function handleSuggestionRegister() {
+    if (!recurringSuggestion) return;
+    setPrefill({
+      name: recurringSuggestion.memo,
+      amount: recurringSuggestion.amount,
+      category_id: recurringSuggestion.category_id,
+      due_day: recurringSuggestion.due_day,
+    });
+    setRecurringSuggestion(null);
+    router.back();
+    router.push('/(tabs)/fixed');
+  }
+
+  function handleSuggestionDismiss() {
+    if (!recurringSuggestion) return;
+    addIgnored({
+      memo: recurringSuggestion.memo,
+      category_id: recurringSuggestion.category_id,
+    });
+    setRecurringSuggestion(null);
+    router.back();
   }
 
   function handleTxDelete(id: string) {
@@ -335,27 +435,35 @@ export default function TransactionFormScreen() {
   }
 
   return (
-    <TransactionFormSheet
-      txModal={txModal}
-      setTxModal={setTxModal}
-      selectedDate={dateParam}
-      categories={categories}
-      paymentMethods={paymentMethods}
-      bankCashAssets={bankCashAssets}
-      transactions={transactions}
-      tagOptions={tagOptions}
-      isTxSaving={isTxSaving}
-      isCatSaving={isCatSaving}
-      isPmSaving={isPmSaving}
-      onClose={() => router.back()}
-      onTxSave={handleTxSave}
-      onTxDelete={handleTxDelete}
-      onCatCreate={openCatCreate}
-      onCatEdit={openCatEdit}
-      onCatSave={handleCatSave}
-      onCatDelete={handleCatDelete}
-      onPmSave={handlePmSave}
-      onPmDelete={handlePmDelete}
-    />
+    <>
+      <TransactionFormSheet
+        txModal={txModal}
+        setTxModal={setTxModal}
+        selectedDate={dateParam}
+        categories={categories}
+        paymentMethods={paymentMethods}
+        bankCashAssets={bankCashAssets}
+        transactions={transactions}
+        tagOptions={tagOptions}
+        isTxSaving={isTxSaving}
+        isCatSaving={isCatSaving}
+        isPmSaving={isPmSaving}
+        onClose={() => router.back()}
+        onTxSave={handleTxSave}
+        onTxDelete={handleTxDelete}
+        onCatCreate={openCatCreate}
+        onCatEdit={openCatEdit}
+        onCatSave={handleCatSave}
+        onCatDelete={handleCatDelete}
+        onPmSave={handlePmSave}
+        onPmDelete={handlePmDelete}
+      />
+      <RecurringSuggestionSheet
+        visible={!!recurringSuggestion}
+        memo={recurringSuggestion?.memo ?? ''}
+        onRegister={handleSuggestionRegister}
+        onDismiss={handleSuggestionDismiss}
+      />
+    </>
   );
 }
