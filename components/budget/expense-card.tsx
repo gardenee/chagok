@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native';
+import { ChevronRight } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { resolveColor } from '@/constants/color-map';
 import { Shadows } from '@/constants/shadows';
@@ -66,6 +67,11 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
               >
                 {formatAmount(spent)}원
               </Text>
+              <ChevronRight
+                size={16}
+                color={Colors.neutralLighter}
+                strokeWidth={2.5}
+              />
             </View>
           ) : (
             <View className='flex-row items-center gap-1.5'>
@@ -75,6 +81,11 @@ export function ExpenseCard({ c, spent, onPress }: Props) {
               <Text className='font-ibm-bold text-base text-neutral-700'>
                 {formatAmount(spent)}원
               </Text>
+              <ChevronRight
+                size={16}
+                color={Colors.neutralLighter}
+                strokeWidth={2.5}
+              />
             </View>
           )}
         </View>

@@ -15,6 +15,8 @@ import { Colors } from '@/constants/colors';
 import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
+import { FormLabel } from '@/components/ui/form-label';
+import { DayGrid } from '@/components/ui/day-grid';
 import { PM_TYPE_OPTIONS } from '@/constants/payment-method';
 import { ASSET_TYPE_OPTIONS } from '@/constants/asset-type';
 import {
@@ -244,9 +246,7 @@ export function AssetPaymentFormScreen({
 
             {showAssetGroups && (
               <View className='mb-6'>
-                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2.5 ml-1'>
-                  자산
-                </Text>
+                <FormLabel>자산</FormLabel>
                 <View className='flex-row flex-wrap gap-2'>
                   {ASSET_TYPE_OPTIONS.map(({ key, label }) => {
                     const isSelected =
@@ -278,9 +278,7 @@ export function AssetPaymentFormScreen({
 
             {showPmGroup && (
               <View className='mb-6'>
-                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2.5 ml-1'>
-                  결제수단
-                </Text>
+                <FormLabel>결제수단</FormLabel>
                 <View className='flex-row flex-wrap gap-2'>
                   {PM_TYPE_OPTIONS.map(({ key, label }) => {
                     const isSelected =
@@ -316,9 +314,7 @@ export function AssetPaymentFormScreen({
             {/* ── 신용카드 전용: 카드사 + 결제일 ── */}
             {isCreditCard && (
               <>
-                <Text className='font-ibm-bold text-base text-neutral-700 mb-2.5 ml-1'>
-                  카드사
-                </Text>
+                <FormLabel>카드사</FormLabel>
                 <View className='flex-row flex-wrap gap-2 mb-4'>
                   {CREDIT_CARD_COMPANIES.map(company => {
                     const isSelected = form.card_company === company.id;
@@ -343,37 +339,22 @@ export function AssetPaymentFormScreen({
 
                 {form.card_company && (
                   <>
-                    <Text className='font-ibm-bold text-base text-neutral-700 mb-2.5 ml-1'>
-                      결제일
-                    </Text>
-                    <View className='flex-row flex-wrap gap-1.5 mb-2'>
-                      {availableDays.map(day => {
-                        const isSelected = form.billing_day === day;
-                        return (
-                          <TouchableOpacity
-                            key={day}
-                            onPress={() => {
-                              setForm(s => ({
-                                ...s,
-                                billing_day: isSelected ? null : day,
-                              }));
-                              Haptics.impactAsync(
-                                Haptics.ImpactFeedbackStyle.Light,
-                              );
-                            }}
-                            className={`rounded-xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                            style={{ width: 52, height: 44 }}
-                            activeOpacity={0.7}
-                          >
-                            <Text
-                              className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-600'}`}
-                            >
-                              {day}일
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
+                    <FormLabel>결제일</FormLabel>
+                    <DayGrid
+                      days={availableDays}
+                      selected={form.billing_day}
+                      onSelect={day => {
+                        setForm(s => ({
+                          ...s,
+                          billing_day: s.billing_day === day ? null : day,
+                        }));
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      formatLabel={day => `${day}일`}
+                      itemWidth={52}
+                      itemHeight={44}
+                      className='mb-2'
+                    />
 
                     {billingPeriodLabel ? (
                       <View
@@ -414,9 +395,7 @@ export function AssetPaymentFormScreen({
             {/* ── 카드 공통: 연결 계좌 ── */}
             {isCard && (
               <>
-                <Text className='font-ibm-bold text-base text-neutral-700 mb-2.5 ml-1'>
-                  연결 계좌
-                </Text>
+                <FormLabel>연결 계좌</FormLabel>
                 {bankAssets.length === 0 ? (
                   <View
                     className='rounded-2xl px-4 py-3 mb-5'
@@ -452,17 +431,9 @@ export function AssetPaymentFormScreen({
             )}
 
             {/* ── 이름 ── */}
-            <View className='mb-2 flex-row items-center ml-1'>
-              <Text className='font-ibm-bold text-base text-neutral-700'>
-                이름
-              </Text>
-              <Text
-                className='font-ibm-bold text-base ml-0.5'
-                style={{ color: Colors.peachDarker }}
-              >
-                *
-              </Text>
-            </View>
+            <FormLabel required className='font-ibm-bold text-neutral-700'>
+              이름
+            </FormLabel>
             <ModalTextInput
               value={form.name}
               onChangeText={v => {
@@ -490,13 +461,11 @@ export function AssetPaymentFormScreen({
             {/* ── 자산: 금액 ── */}
             {form.category === 'asset' && (
               <>
-                <Text className='font-ibm-bold text-base text-neutral-700 mb-2.5 ml-1'>
-                  금액
-                </Text>
+                <FormLabel>금액</FormLabel>
                 <AmountInput
                   value={form.amount}
                   onChangeText={v => setForm(s => ({ ...s, amount: v }))}
-                  placeholder='현재 잔액'
+                  placeholder='잔액'
                   className='mb-2'
                   maxLength={15}
                 />

@@ -31,7 +31,7 @@ export function SaveButton({
       {isSaving ? (
         <DotsLoadingIndicator color={Colors.brownDark} size={7} />
       ) : (
-        <Text className='font-ibm-bold text-base text-brown-dark'>{label}</Text>
+        <Text className='font-ibm-bold text-lg text-brown-dark'>{label}</Text>
       )}
     </TouchableOpacity>
   );

@@ -15,6 +15,7 @@ import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { SegmentControl } from '@/components/ui/segment-control';
 import { ModalTextInput } from '@/components/ui/modal-inputs';
+import { FormLabel } from '@/components/ui/form-label';
 import { ICON_MAP } from '@/constants/icon-map';
 
 export const COLOR_OPTIONS = Object.keys(COLOR_MAP);
@@ -114,17 +115,7 @@ export function CategoryFormScreen({
           )}
 
           {/* 이름 */}
-          <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-base text-neutral-600'>
-              카테고리명
-            </Text>
-            <Text
-              className='font-ibm-semibold text-base ml-0.5'
-              style={{ color: Colors.peachDarker }}
-            >
-              *
-            </Text>
-          </View>
+          <FormLabel required>카테고리명</FormLabel>
           <ModalTextInput
             value={form.name}
             onChangeText={v => {
@@ -140,9 +131,7 @@ export function CategoryFormScreen({
           />
 
           {/* 아이콘 */}
-          <Text className='font-ibm-semibold text-base text-neutral-600 mb-2.5 ml-1'>
-            아이콘
-          </Text>
+          <FormLabel>아이콘</FormLabel>
           <View className='flex-row flex-wrap gap-2 mb-6'>
             {Object.entries(ICON_MAP).map(([key, Icon]) => {
               const isSelected = form.icon === key;
@@ -164,9 +153,7 @@ export function CategoryFormScreen({
           </View>
 
           {/* 색상 */}
-          <Text className='font-ibm-semibold text-base text-neutral-600 mb-2.5 ml-1'>
-            색상
-          </Text>
+          <FormLabel>색상</FormLabel>
           <View className='flex-row flex-wrap gap-2 mb-6'>
             {COLOR_OPTIONS.map(key => {
               const hex = COLOR_MAP[key];

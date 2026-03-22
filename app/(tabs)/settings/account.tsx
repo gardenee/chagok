@@ -1,12 +1,5 @@
-import {
-  View,
-  Text,
-  SafeAreaView,
-  Alert,
-  TouchableOpacity,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { ChevronLeft, LogOut, DoorOpen, UserX } from 'lucide-react-native';
+import { View, SafeAreaView, Alert } from 'react-native';
+import { LogOut, DoorOpen, UserX } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { supabase } from '@/lib/supabase';
@@ -14,9 +7,9 @@ import { useAuthStore } from '@/store/auth';
 import { useLeaveCouple, useDeleteAccount } from '@/hooks/use-user';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
 import { SettingsRow } from '@/components/settings/settings-row';
+import { SettingsSubHeader } from '@/components/settings/settings-sub-header';
 
 export default function AccountScreen() {
-  const router = useRouter();
   const { userProfile } = useAuthStore();
   const leaveCoupleAction = useLeaveCouple();
   const deleteAccountAction = useDeleteAccount();
@@ -81,18 +74,7 @@ export default function AccountScreen() {
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
-      <View className='px-6 pt-6 pb-4 flex-row items-center'>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          className='-ml-1 mr-1'
-        >
-          <ChevronLeft size={28} color={Colors.brownDarker} strokeWidth={2.5} />
-        </TouchableOpacity>
-        <Text className='font-ibm-bold text-2xl text-brown-darker'>
-          계정 관리
-        </Text>
-      </View>
+      <SettingsSubHeader title='계정 관리' />
 
       <View className='px-0 mt-2'>
         <SettingsCard>

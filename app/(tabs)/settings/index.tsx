@@ -38,6 +38,7 @@ import {
 import { useAnniversaries } from '@/hooks/use-anniversaries';
 import { SettingsRow } from '@/components/settings/settings-row';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
+import { SettingsSectionLabel } from '@/components/settings/settings-section-label';
 import { EditModal } from '@/components/settings/edit-modal';
 import { NotificationInbox } from '@/components/settings/notification-inbox';
 import { FeedbackModal } from '@/components/settings/feedback-modal';
@@ -137,9 +138,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-1 mb-1'>
-          내 정보
-        </Text>
+        <SettingsSectionLabel label='내 정보' className='mt-1' />
         <SettingsCard>
           <SettingsRow
             icon={
@@ -152,9 +151,7 @@ export default function SettingsScreen() {
         </SettingsCard>
 
         <View className='mt-5'>
-          <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mb-1'>
-            가계부 정보
-          </Text>
+          <SettingsSectionLabel label='가계부 정보' />
           <SettingsCard>
             <SettingsRow
               icon={
@@ -238,9 +235,7 @@ export default function SettingsScreen() {
         </View>
 
         <View className='mt-5'>
-          <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mb-1'>
-            앱 설정
-          </Text>
+          <SettingsSectionLabel label='앱 설정' />
           <SettingsCard>
             <SettingsRow
               icon={
@@ -298,9 +293,7 @@ export default function SettingsScreen() {
         </View>
 
         <View className='mt-5'>
-          <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mb-1'>
-            앱 정보
-          </Text>
+          <SettingsSectionLabel label='앱 정보' />
           <SettingsCard>
             <SettingsRow
               icon={

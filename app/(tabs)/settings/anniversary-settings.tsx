@@ -9,14 +9,15 @@ import {
   TextInput,
 } from 'react-native';
 import { useState } from 'react';
-import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { ChevronLeft, Plus, Heart, Cake } from 'lucide-react-native';
+import { Plus, Heart, Cake } from 'lucide-react-native';
 import { DeleteButton } from '@/components/ui/delete-button';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
 import { SettingsRow } from '@/components/settings/settings-row';
+import { SettingsSubHeader } from '@/components/settings/settings-sub-header';
+import { SettingsSectionLabel } from '@/components/settings/settings-section-label';
 import { useAuthStore } from '@/store/auth';
 import { useCoupleMembers } from '@/hooks/use-couple-members';
 import {
@@ -59,7 +60,6 @@ function formatMmDd(mmDd: string): string {
 }
 
 export default function AnniversarySettingsScreen() {
-  const router = useRouter();
   const { userProfile, session } = useAuthStore();
   const myId = session?.user.id ?? '';
   const { data: members = [] } = useCoupleMembers();
@@ -197,40 +197,23 @@ export default function AnniversarySettingsScreen() {
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
-      {/* 헤더 */}
-      <View className='px-6 pt-6 pb-4 flex-row items-center justify-between'>
-        <View className='flex-row items-center'>
+      <SettingsSubHeader
+        title='기념일 설정'
+        rightElement={
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={openAddModal}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            className='-ml-1 mr-1'
           >
-            <ChevronLeft
-              size={28}
-              color={Colors.brownDarker}
-              strokeWidth={2.5}
-            />
+            <Plus size={22} color={Colors.brownDarker} strokeWidth={2.5} />
           </TouchableOpacity>
-          <Text className='font-ibm-bold text-2xl text-brown-darker'>
-            기념일 설정
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={openAddModal}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Plus size={22} color={Colors.brownDarker} strokeWidth={2.5} />
-        </TouchableOpacity>
-      </View>
+        }
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}
       >
-        {/* 생일 섹션 */}
-        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-1 mb-1'>
-          생일
-        </Text>
+        <SettingsSectionLabel label='생일' className='mt-1' />
         <SettingsCard>
           <SettingsRow
             icon={
@@ -262,9 +245,7 @@ export default function AnniversarySettingsScreen() {
         {/* 기념일 섹션 */}
         {customAnniversaries.length > 0 && (
           <>
-            <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-3 mb-1'>
-              기념일
-            </Text>
+            <SettingsSectionLabel label='기념일' className='mt-3' />
             <SettingsCard>
               {customAnniversaries.map((item, idx) => (
                 <View key={item.id}>

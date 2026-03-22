@@ -13,6 +13,7 @@ import { Colors } from '@/constants/colors';
 import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput } from '@/components/ui/modal-inputs';
+import { FormLabel } from '@/components/ui/form-label';
 import {
   PM_TYPE_OPTIONS,
   type PaymentMethodFormData,
@@ -102,17 +103,9 @@ export function PaymentMethodFormScreen({
           </View>
 
           {/* 이름 입력 */}
-          <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-base text-neutral-500'>
-              이름
-            </Text>
-            <Text
-              className='font-ibm-semibold text-base ml-0.5'
-              style={{ color: Colors.peachDarker }}
-            >
-              *
-            </Text>
-          </View>
+          <FormLabel required className='text-neutral-500'>
+            이름
+          </FormLabel>
           <ModalTextInput
             value={form.name}
             onChangeText={v => {

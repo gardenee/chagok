@@ -1,10 +1,12 @@
 import { View, Text, TouchableOpacity } from 'react-native';
+import { ChevronRight } from 'lucide-react-native';
 import { Shadows } from '@/constants/shadows';
 import { resolveColor } from '@/constants/color-map';
 import { IconBox } from '@/components/ui/icon-box';
 import { CategoryIcon } from '@/components/budget/category-icon';
 import { formatAmount } from '@/utils/format';
 import type { Category } from '@/types/database';
+import { Colors } from '@/constants/colors';
 
 type Props = {
   c: Category;
@@ -35,6 +37,11 @@ export function IncomeCard({ c, income, onPress }: Props) {
             <Text className='font-ibm-bold text-base text-neutral-700'>
               {formatAmount(income)}원
             </Text>
+            <ChevronRight
+              size={16}
+              color={Colors.neutralLighter}
+              strokeWidth={2.5}
+            />
           </View>
         </View>
       </View>

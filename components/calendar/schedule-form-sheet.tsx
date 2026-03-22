@@ -7,27 +7,17 @@ import {
   ScrollView,
   SafeAreaView,
   KeyboardAvoidingView,
-  Modal,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Clock, X, CalendarDays } from 'lucide-react-native';
+import { Clock, X } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { SaveButton } from '@/components/ui/save-button';
 import { DeleteButton } from '@/components/ui/delete-button';
 import { ModalTextInput } from '@/components/ui/modal-inputs';
+import { FormLabel } from '@/components/ui/form-label';
+import { TagSelector } from '@/components/ui/tag-selector';
+import { DatePickerButton } from '@/components/ui/date-picker-button';
+import { DatePickerModal } from '@/components/ui/date-picker-modal';
 import type { ScheduleModalState, TagOption } from './types';
-
-function parseDateStr(dateStr: string): Date {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function parseTimeStr(timeStr: string): Date {
-  const [h, m] = timeStr.split(':').map(Number);
-  const date = new Date();
-  date.setHours(h, m, 0, 0);
-  return date;
-}
 
 interface ScheduleFormSheetProps {
   scheduleModal: ScheduleModalState;
@@ -52,9 +42,7 @@ export function ScheduleFormSheet({
   const [titleError, setTitleError] = useState(false);
   const [tagError, setTagError] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [tempDate, setTempDate] = useState<Date>(new Date());
   const [timePickerVisible, setTimePickerVisible] = useState(false);
-  const [tempTime, setTempTime] = useState<Date>(new Date());
 
   useEffect(() => {
     if (!scheduleModal.visible) {
@@ -71,8 +59,6 @@ export function ScheduleFormSheet({
     if (titleEmpty || tagEmpty) return;
     onSave();
   }
-
-  const dateValue = form.date ? parseDateStr(form.date) : new Date();
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -100,17 +86,7 @@ export function ScheduleFormSheet({
           </View>
 
           {/* 제목 */}
-          <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-base text-neutral-600'>
-              제목
-            </Text>
-            <Text
-              className='font-ibm-semibold text-base ml-0.5'
-              style={{ color: Colors.peachDarker }}
-            >
-              *
-            </Text>
-          </View>
+          <FormLabel required>제목</FormLabel>
           <ModalTextInput
             value={form.title}
             onChangeText={v => {
@@ -125,91 +101,30 @@ export function ScheduleFormSheet({
           />
 
           {/* 날짜 */}
-          <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-            날짜
-          </Text>
-          <TouchableOpacity
-            onPress={() => {
-              setTempDate(dateValue);
-              setDatePickerVisible(true);
-            }}
-            activeOpacity={0.7}
-            className='bg-neutral-100 rounded-2xl px-4 mb-6 flex-row items-center gap-2.5 h-16'
-          >
-            <CalendarDays
-              size={16}
-              color={Colors.neutralDark}
-              strokeWidth={2}
-            />
-            <Text className='font-ibm-semibold text-base text-neutral-700'>
-              {(() => {
-                const d = form.date;
-                const [y, m, day] = d.split('-').map(Number);
-                return `${y}년 ${m}월 ${day}일`;
-              })()}
-            </Text>
-          </TouchableOpacity>
+          <FormLabel>날짜</FormLabel>
+          <DatePickerButton
+            dateStr={form.date}
+            onPress={() => setDatePickerVisible(true)}
+            className='mb-6'
+          />
 
           {/* 참여자 */}
           <View className='mb-5'>
-            <View className='flex-row items-center mb-2 ml-1'>
-              <Text className='font-ibm-semibold text-base text-neutral-600'>
-                참여자
-              </Text>
-              <Text
-                className='font-ibm-semibold text-base ml-0.5'
-                style={{ color: Colors.peachDarker }}
-              >
-                *
-              </Text>
-            </View>
-            <View className='flex-row gap-2'>
-              {tagOptions.map(({ value, label }) => {
-                const isSelected = form.tag === value;
-                const showError = tagError && !form.tag;
-                return (
-                  <TouchableOpacity
-                    key={value}
-                    onPress={() =>
-                      onFormChange({ ...form, tag: isSelected ? null : value })
-                    }
-                    className={`flex-1 py-2.5 items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                    style={{
-                      borderRadius: 16,
-                      borderWidth: 1.5,
-                      borderColor: showError
-                        ? Colors.peachDarker
-                        : 'transparent',
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                    >
-                      {label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-            {tagError && !form.tag && (
-              <Text
-                className='font-ibm-regular text-sm mt-1 ml-1'
-                style={{ color: Colors.peachDarker }}
-              >
-                참여자를 선택해주세요
-              </Text>
-            )}
+            <FormLabel required>참여자</FormLabel>
+            <TagSelector
+              options={tagOptions}
+              value={form.tag}
+              onChange={tag => onFormChange({ ...form, tag })}
+              error={tagError && !form.tag}
+              errorMessage='참여자를 선택해주세요'
+            />
           </View>
 
           {/* 시간 */}
           <View className='mb-8'>
             {form.time === null ? (
               <TouchableOpacity
-                onPress={() => {
-                  setTempTime(parseTimeStr('09:00'));
-                  setTimePickerVisible(true);
-                }}
+                onPress={() => setTimePickerVisible(true)}
                 className='bg-neutral-100 rounded-2xl px-5 flex-row items-center h-16'
                 activeOpacity={0.7}
               >
@@ -230,10 +145,7 @@ export function ScheduleFormSheet({
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                onPress={() => {
-                  setTempTime(parseTimeStr(form.time!));
-                  setTimePickerVisible(true);
-                }}
+                onPress={() => setTimePickerVisible(true)}
                 className='bg-neutral-100 rounded-2xl px-5 flex-row items-center h-16'
                 activeOpacity={0.7}
               >
@@ -271,108 +183,27 @@ export function ScheduleFormSheet({
         </View>
       </KeyboardAvoidingView>
 
-      {/* 시간 선택 모달 */}
-      <Modal
+      <DatePickerModal
         visible={timePickerVisible}
-        transparent
-        animationType='fade'
-        onRequestClose={() => setTimePickerVisible(false)}
-      >
-        <View
-          className='flex-1 justify-end'
-          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-        >
-          <TouchableOpacity
-            className='flex-1'
-            activeOpacity={1}
-            onPress={() => setTimePickerVisible(false)}
-          />
-          <View className='bg-white rounded-t-3xl px-6 pt-5 pb-8'>
-            <Text className='font-ibm-bold text-xl text-brown-darker text-center mb-4'>
-              시간 선택
-            </Text>
-            <View className='items-center mb-6'>
-              <DateTimePicker
-                value={tempTime}
-                mode='time'
-                display='spinner'
-                onChange={(_event, date) => {
-                  if (!date) return;
-                  setTempTime(date);
-                }}
-                locale='ko-KR'
-                accentColor={Colors.brownDark}
-              />
-            </View>
-            <TouchableOpacity
-              onPress={() => {
-                const h = String(tempTime.getHours()).padStart(2, '0');
-                const m = String(tempTime.getMinutes()).padStart(2, '0');
-                onFormChange({ ...form, time: `${h}:${m}` });
-                setTimePickerVisible(false);
-              }}
-              className='bg-butter rounded-2xl py-4 items-center'
-              activeOpacity={0.8}
-            >
-              <Text className='font-ibm-bold text-base text-brown-darker'>
-                확인
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        mode='time'
+        timeStr={form.time ?? undefined}
+        onConfirm={timeStr => {
+          onFormChange({ ...form, time: timeStr });
+          setTimePickerVisible(false);
+        }}
+        onDismiss={() => setTimePickerVisible(false)}
+      />
 
-      {/* 날짜 선택 모달 */}
-      <Modal
+      <DatePickerModal
         visible={datePickerVisible}
-        transparent
-        animationType='fade'
-        onRequestClose={() => setDatePickerVisible(false)}
-      >
-        <View
-          className='flex-1 justify-end'
-          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-        >
-          <TouchableOpacity
-            className='flex-1'
-            activeOpacity={1}
-            onPress={() => setDatePickerVisible(false)}
-          />
-          <View className='bg-white rounded-t-3xl px-6 pt-5 pb-8'>
-            <Text className='font-ibm-bold text-xl text-brown-darker text-center mb-4'>
-              날짜 선택
-            </Text>
-            <View className='items-center mb-6'>
-              <DateTimePicker
-                value={tempDate}
-                mode='date'
-                display='spinner'
-                onChange={(_event, date) => {
-                  if (!date) return;
-                  setTempDate(date);
-                }}
-                locale='ko-KR'
-                accentColor={Colors.brownDark}
-              />
-            </View>
-            <TouchableOpacity
-              onPress={() => {
-                const y = tempDate.getFullYear();
-                const m = String(tempDate.getMonth() + 1).padStart(2, '0');
-                const d = String(tempDate.getDate()).padStart(2, '0');
-                onFormChange({ ...form, date: `${y}-${m}-${d}` });
-                setDatePickerVisible(false);
-              }}
-              className='bg-butter rounded-2xl py-4 items-center'
-              activeOpacity={0.8}
-            >
-              <Text className='font-ibm-bold text-base text-brown-darker'>
-                확인
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        mode='date'
+        dateStr={form.date}
+        onConfirm={dateStr => {
+          onFormChange({ ...form, date: dateStr });
+          setDatePickerVisible(false);
+        }}
+        onDismiss={() => setDatePickerVisible(false)}
+      />
     </SafeAreaView>
   );
 }

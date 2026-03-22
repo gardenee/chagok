@@ -1,21 +1,20 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Switch,
-  SafeAreaView,
-  TouchableOpacity,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { ChevronLeft, Bell } from 'lucide-react-native';
+import { View, Switch, SafeAreaView, ScrollView } from 'react-native';
+import { Bell } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { SettingsCard, Divider } from '@/components/settings/settings-card';
 import { SettingsRow } from '@/components/settings/settings-row';
+import { SettingsSubHeader } from '@/components/settings/settings-sub-header';
+import { SettingsSectionLabel } from '@/components/settings/settings-section-label';
 import { useNotificationSettingsStore } from '@/store/notification-settings';
 
+type ToggleItem = {
+  label: string;
+  value: boolean;
+  setter: (v: boolean) => void;
+};
+
 export default function NotificationSettingsScreen() {
-  const router = useRouter();
   const {
     partnerTransaction,
     comment,
@@ -33,121 +32,106 @@ export default function NotificationSettingsScreen() {
     setAnniversaryReminder,
   } = useNotificationSettingsStore();
 
-  function makeToggle(value: boolean, setter: (v: boolean) => void) {
-    return (
-      <Switch
-        value={value}
-        onValueChange={v => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          setter(v);
-        }}
-        trackColor={{ false: '#E5E5E5', true: Colors.butter }}
-        thumbColor='#fff'
-      />
-    );
-  }
-
-  const bellIcon = (active: boolean) => (
-    <Bell
-      size={16}
-      color={active ? Colors.neutralDarker : Colors.neutralLighter}
-      strokeWidth={2}
-    />
-  );
+  const sections: { title: string; items: ToggleItem[] }[] = [
+    {
+      title: '파트너',
+      items: [
+        {
+          label: '짝꿍 지출 알림',
+          value: partnerTransaction,
+          setter: setPartnerTransaction,
+        },
+        { label: '댓글 알림', value: comment, setter: setComment },
+      ],
+    },
+    {
+      title: '예산',
+      items: [
+        {
+          label: '예산 초과 알림',
+          value: budgetExceeded,
+          setter: setBudgetExceeded,
+        },
+        {
+          label: '고정지출 리마인더',
+          value: fixedExpenseReminder,
+          setter: setFixedExpenseReminder,
+        },
+      ],
+    },
+    {
+      title: '일정',
+      items: [
+        { label: '내 일정 알림', value: mySchedule, setter: setMySchedule },
+        {
+          label: '함께 일정 알림',
+          value: togetherSchedule,
+          setter: setTogetherSchedule,
+        },
+      ],
+    },
+    {
+      title: '기념일',
+      items: [
+        {
+          label: '기념일 알림',
+          value: anniversaryReminder,
+          setter: setAnniversaryReminder,
+        },
+      ],
+    },
+  ];
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
-      <View className='px-6 pt-6 pb-4 flex-row items-center'>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          className='-ml-1 mr-1'
-        >
-          <ChevronLeft size={28} color={Colors.brownDarker} strokeWidth={2.5} />
-        </TouchableOpacity>
-        <Text className='font-ibm-bold text-2xl text-brown-darker'>
-          알림 설정
-        </Text>
-      </View>
-
+      <SettingsSubHeader title='알림 설정' />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}
       >
-        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-1 mb-1'>
-          파트너
-        </Text>
-        <SettingsCard>
-          <SettingsRow
-            icon={bellIcon(partnerTransaction)}
-            label='짝꿍 지출 알림'
-            showChevron={false}
-            rightElement={makeToggle(partnerTransaction, setPartnerTransaction)}
-          />
-          <Divider />
-          <SettingsRow
-            icon={bellIcon(comment)}
-            label='댓글 알림'
-            showChevron={false}
-            rightElement={makeToggle(comment, setComment)}
-          />
-        </SettingsCard>
-
-        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-3 mb-1'>
-          예산
-        </Text>
-        <SettingsCard>
-          <SettingsRow
-            icon={bellIcon(budgetExceeded)}
-            label='예산 초과 알림'
-            showChevron={false}
-            rightElement={makeToggle(budgetExceeded, setBudgetExceeded)}
-          />
-          <Divider />
-          <SettingsRow
-            icon={bellIcon(fixedExpenseReminder)}
-            label='고정지출 리마인더'
-            showChevron={false}
-            rightElement={makeToggle(
-              fixedExpenseReminder,
-              setFixedExpenseReminder,
-            )}
-          />
-        </SettingsCard>
-
-        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-3 mb-1'>
-          일정
-        </Text>
-        <SettingsCard>
-          <SettingsRow
-            icon={bellIcon(mySchedule)}
-            label='내 일정 알림'
-            showChevron={false}
-            rightElement={makeToggle(mySchedule, setMySchedule)}
-          />
-          <Divider />
-          <SettingsRow
-            icon={bellIcon(togetherSchedule)}
-            label='함께 일정 알림'
-            showChevron={false}
-            rightElement={makeToggle(togetherSchedule, setTogetherSchedule)}
-          />
-        </SettingsCard>
-
-        <Text className='font-ibm-semibold text-base text-neutral-600 px-6 mt-3 mb-1'>
-          기념일
-        </Text>
-        <SettingsCard>
-          <SettingsRow
-            icon={bellIcon(anniversaryReminder)}
-            label='기념일 알림'
-            showChevron={false}
-            rightElement={makeToggle(
-              anniversaryReminder,
-              setAnniversaryReminder,
-            )}
-          />
-        </SettingsCard>
+        {sections.map((section, sIdx) => (
+          <View key={section.title}>
+            <SettingsSectionLabel
+              label={section.title}
+              className={sIdx === 0 ? 'mt-1' : 'mt-3'}
+            />
+            <SettingsCard>
+              {section.items.map((item, i) => (
+                <View key={item.label}>
+                  {i > 0 && <Divider />}
+                  <SettingsRow
+                    icon={
+                      <Bell
+                        size={16}
+                        color={
+                          item.value
+                            ? Colors.neutralDarker
+                            : Colors.neutralLighter
+                        }
+                        strokeWidth={2}
+                      />
+                    }
+                    label={item.label}
+                    showChevron={false}
+                    rightElement={
+                      <Switch
+                        value={item.value}
+                        onValueChange={v => {
+                          Haptics.impactAsync(
+                            Haptics.ImpactFeedbackStyle.Light,
+                          );
+                          item.setter(v);
+                        }}
+                        trackColor={{ false: '#E5E5E5', true: Colors.butter }}
+                        thumbColor='#fff'
+                      />
+                    }
+                  />
+                </View>
+              ))}
+            </SettingsCard>
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );

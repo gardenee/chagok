@@ -9,25 +9,26 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   X,
   ChevronLeft,
   ChevronRight,
   Plus,
   Wallet,
-  CalendarDays,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
-import { resolveColor } from '@/constants/color-map';
 import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { SegmentControl } from '@/components/ui/segment-control';
+import { FormLabel } from '@/components/ui/form-label';
+import { TagSelector } from '@/components/ui/tag-selector';
+import { CategoryIconPicker } from '@/components/ui/category-icon-picker';
+import { DatePickerButton } from '@/components/ui/date-picker-button';
+import { DatePickerModal } from '@/components/ui/date-picker-modal';
 import { CategoryFormScreen } from '@/components/budget/category-form-screen';
 import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
-import { ICON_MAP } from '@/constants/icon-map';
 import { PaymentMethodFormScreen } from '@/components/assets/payment-method-form-screen';
 import {
   PM_TYPE_OPTIONS,
@@ -91,7 +92,6 @@ export function TransactionFormSheet({
 }: TransactionFormSheetProps) {
   const [amountErrorMsg, setAmountErrorMsg] = useState('');
   const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [tempDate, setTempDate] = useState<Date>(new Date());
 
   useEffect(() => {
     setAmountErrorMsg('');
@@ -129,13 +129,6 @@ export function TransactionFormSheet({
     }
     onTxSave();
   }
-
-  const dateValue = txModal.form.date
-    ? (() => {
-        const [y, m, d] = txModal.form.date.split('-').map(Number);
-        return new Date(y, m - 1, d);
-      })()
-    : new Date();
 
   return (
     <>
@@ -196,17 +189,7 @@ export function TransactionFormSheet({
               />
             )}
 
-            <View className='mb-2 flex-row items-center ml-1'>
-              <Text className='font-ibm-semibold text-base text-neutral-600'>
-                금액
-              </Text>
-              <Text
-                className='font-ibm-semibold text-base ml-0.5'
-                style={{ color: '#C8562E' }}
-              >
-                *
-              </Text>
-            </View>
+            <FormLabel required>금액</FormLabel>
             <AmountInput
               value={txModal.form.amount}
               onChangeText={v => {
@@ -250,110 +233,25 @@ export function TransactionFormSheet({
             <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
               날짜
             </Text>
-            <TouchableOpacity
-              onPress={() => {
-                setTempDate(dateValue);
-                setDatePickerVisible(true);
-              }}
-              activeOpacity={0.7}
-              className='bg-neutral-100 rounded-2xl px-4 mb-4 flex-row items-center gap-2.5'
-              style={{ minHeight: 52 }}
-            >
-              <CalendarDays
-                size={16}
-                color={Colors.neutralDark}
-                strokeWidth={2}
-              />
-              <Text className='font-ibm-semibold text-base text-neutral-700'>
-                {(() => {
-                  const d = txModal.form.date || selectedDate;
-                  const [y, m, day] = d.split('-').map(Number);
-                  return `${y}년 ${m}월 ${day}일`;
-                })()}
-              </Text>
-            </TouchableOpacity>
+            <DatePickerButton
+              dateStr={txModal.form.date || selectedDate}
+              onPress={() => setDatePickerVisible(true)}
+              className='mb-4'
+            />
 
             {/* 카테고리 선택 */}
-            <View className='mb-4'>
-              <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-                <Text className='font-ibm-semibold text-base text-neutral-600'>
-                  카테고리
-                </Text>
-                {categories.length > 0 && (
-                  <TouchableOpacity
-                    onPress={() => setTxModal(s => ({ ...s, view: 'catMgmt' }))}
-                    activeOpacity={0.7}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Text className='font-ibm-semibold text-sm text-neutral-600 bg-neutral-200 rounded-2xl px-2.5 py-1'>
-                      수정
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                keyboardShouldPersistTaps='handled'
-              >
-                <View className='flex-row gap-2 pr-2'>
-                  {categories
-                    .filter(c => c.type === txModal.form.type)
-                    .map(c => {
-                      const Icon = ICON_MAP[c.icon] ?? Wallet;
-                      const isSelected = txModal.form.category_id === c.id;
-                      const cColor = resolveColor(c.color);
-                      return (
-                        <TouchableOpacity
-                          key={c.id}
-                          onPress={() => {
-                            setTxModal(s => ({
-                              ...s,
-                              form: {
-                                ...s.form,
-                                category_id: isSelected ? null : c.id,
-                              },
-                            }));
-                            Haptics.impactAsync(
-                              Haptics.ImpactFeedbackStyle.Light,
-                            );
-                          }}
-                          className='items-center gap-1'
-                          activeOpacity={0.7}
-                        >
-                          <View
-                            className='w-12 h-12 rounded-2xl items-center justify-center'
-                            style={{
-                              backgroundColor: cColor + '30',
-                              borderWidth: isSelected ? 2 : 0,
-                              borderColor: isSelected ? cColor : 'transparent',
-                            }}
-                          >
-                            <Icon size={20} color={cColor} strokeWidth={2.5} />
-                          </View>
-                          <Text
-                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                          >
-                            {c.name}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  <TouchableOpacity
-                    onPress={onCatCreate}
-                    className='items-center gap-1'
-                    activeOpacity={0.7}
-                  >
-                    <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
-                      <Plus size={18} color='#A3A3A3' strokeWidth={2} />
-                    </View>
-                    <Text className='font-ibm-semibold text-[11px] text-neutral-600'>
-                      추가
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
-            </View>
+            <CategoryIconPicker
+              categories={categories.filter(c => c.type === txModal.form.type)}
+              selectedId={txModal.form.category_id}
+              onSelect={id =>
+                setTxModal(s => ({
+                  ...s,
+                  form: { ...s.form, category_id: id },
+                }))
+              }
+              onAdd={onCatCreate}
+              onManage={() => setTxModal(s => ({ ...s, view: 'catMgmt' }))}
+            />
 
             {/* 결제수단 선택 (지출일 때) */}
             {txModal.form.type === 'expense' && (
@@ -505,38 +403,16 @@ export function TransactionFormSheet({
               <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
                 누가
               </Text>
-              <View className='flex-row gap-2'>
-                {tagOptions.map(({ value, label }) => {
-                  const isSelected = txModal.form.tag === value;
-                  return (
-                    <TouchableOpacity
-                      key={value}
-                      onPress={() =>
-                        setTxModal(s => ({
-                          ...s,
-                          form: {
-                            ...s.form,
-                            tag: isSelected ? null : value,
-                          },
-                        }))
-                      }
-                      className={`flex-1 py-2.5 items-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                      style={{
-                        borderRadius: 16,
-                        borderWidth: 1.5,
-                        borderColor: 'transparent',
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Text
-                        className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                      >
-                        {label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+              <TagSelector
+                options={tagOptions}
+                value={txModal.form.tag}
+                onChange={tag =>
+                  setTxModal(s => ({
+                    ...s,
+                    form: { ...s.form, tag },
+                  }))
+                }
+              />
             </View>
           </ScrollView>
 
@@ -725,60 +601,19 @@ export function TransactionFormSheet({
         />
       </Modal>
 
-      {/* 날짜 선택 모달 */}
-      <Modal
+      <DatePickerModal
         visible={datePickerVisible}
-        transparent
-        animationType='fade'
-        onRequestClose={() => setDatePickerVisible(false)}
-      >
-        <View
-          className='flex-1 justify-end'
-          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-        >
-          <TouchableOpacity
-            className='flex-1'
-            activeOpacity={1}
-            onPress={() => setDatePickerVisible(false)}
-          />
-          <View className='bg-white rounded-t-3xl px-6 pt-5 pb-8'>
-            <Text className='font-ibm-bold text-xl text-brown-darker text-center mb-4'>
-              날짜 선택
-            </Text>
-            <View className='items-center mb-6'>
-              <DateTimePicker
-                value={tempDate}
-                mode='date'
-                display='spinner'
-                onChange={(_event, date) => {
-                  if (!date) return;
-                  setTempDate(date);
-                }}
-                locale='ko-KR'
-                accentColor={Colors.brownDark}
-              />
-            </View>
-            <TouchableOpacity
-              onPress={() => {
-                const y = tempDate.getFullYear();
-                const m = String(tempDate.getMonth() + 1).padStart(2, '0');
-                const d = String(tempDate.getDate()).padStart(2, '0');
-                setTxModal(s => ({
-                  ...s,
-                  form: { ...s.form, date: `${y}-${m}-${d}` },
-                }));
-                setDatePickerVisible(false);
-              }}
-              className='bg-butter rounded-2xl py-4 items-center'
-              activeOpacity={0.8}
-            >
-              <Text className='font-ibm-bold text-base text-brown-darker'>
-                확인
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        mode='date'
+        dateStr={txModal.form.date || selectedDate}
+        onConfirm={dateStr => {
+          setTxModal(s => ({
+            ...s,
+            form: { ...s.form, date: dateStr },
+          }));
+          setDatePickerVisible(false);
+        }}
+        onDismiss={() => setDatePickerVisible(false)}
+      />
     </>
   );
 }

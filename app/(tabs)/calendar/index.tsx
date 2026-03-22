@@ -153,13 +153,16 @@ export default function CalendarTab() {
     const parentNavigation = navigation.getParent();
     if (!parentNavigation) return;
 
-    return parentNavigation.addListener('tabPress' as never, (e: { target?: string }) => {
-      const parentState = parentNavigation.getState();
-      const currentTabKey = parentState.routes[parentState.index]?.key;
-      if (!navigation.isFocused()) return;
-      if (e.target !== currentTabKey) return;
-      resetToToday();
-    });
+    return parentNavigation.addListener(
+      'tabPress' as never,
+      (e: { target?: string }) => {
+        const parentState = parentNavigation.getState();
+        const currentTabKey = parentState.routes[parentState.index]?.key;
+        if (!navigation.isFocused()) return;
+        if (e.target !== currentTabKey) return;
+        resetToToday();
+      },
+    );
   }, [navigation, resetToToday]);
 
   useFocusEffect(
@@ -899,14 +902,14 @@ export default function CalendarTab() {
                                       {t.tag && (
                                         <TagPill
                                           tag={t.tag}
-                                          label={resolveTagLabel(
-                                            t.tag,
-                                            t.user_id,
-                                          ) ?? ''}
-                                          bgColor={resolveTagColor(
-                                            t.tag,
-                                            t.user_id,
-                                          ) ?? undefined}
+                                          label={
+                                            resolveTagLabel(t.tag, t.user_id) ??
+                                            ''
+                                          }
+                                          bgColor={
+                                            resolveTagColor(t.tag, t.user_id) ??
+                                            undefined
+                                          }
                                         />
                                       )}
                                     </>

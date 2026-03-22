@@ -78,7 +78,7 @@ export default function TransactionFormScreen() {
   const initialForm: TxFormData = {
     amount: params.amount ?? '',
     type: (params.type as TxFormData['type']) ?? 'expense',
-    tag: (params.tag as TxFormData['tag']) || null,
+    tag: (params.tag as TxFormData['tag']) || 'me',
     memo: params.memo ?? '',
     date: dateParam,
     category_id: params.category_id || null,

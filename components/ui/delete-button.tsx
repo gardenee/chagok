@@ -26,7 +26,7 @@ export function DeleteButton({
       }}
     >
       <Text
-        className='font-ibm-bold text-base'
+        className='font-ibm-bold text-lg'
         style={{ color: Colors.peachDark }}
       >
         {label}

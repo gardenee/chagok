@@ -8,14 +8,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { X, Plus, Wallet } from 'lucide-react-native';
-import * as Haptics from 'expo-haptics';
+import { X } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
-import { resolveColor } from '@/constants/color-map';
-import { ICON_MAP } from '@/constants/icon-map';
 import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
 import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
+import { FormLabel } from '@/components/ui/form-label';
+import { CategoryIconPicker } from '@/components/ui/category-icon-picker';
+import { DayGrid } from '@/components/ui/day-grid';
 import type { Category } from '@/types/database';
 
 export type FormData = {
@@ -105,41 +105,25 @@ export function FixedExpenseForm({
           contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
           keyboardShouldPersistTaps='handled'
         >
-          <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-base text-neutral-600'>
-              항목 이름
-            </Text>
-            <Text
-              className='font-ibm-semibold text-base ml-0.5'
-              style={{ color: Colors.peachDarker }}
-            >
-              *
-            </Text>
-          </View>
+          <FormLabel required className='text-neutral-700'>
+            이름
+          </FormLabel>
           <ModalTextInput
             value={form.name}
             onChangeText={v => {
               onChange({ ...form, name: v });
               if (errors.name) setErrors(e => ({ ...e, name: false }));
             }}
-            placeholder='항목 이름 (예: 월세, 넷플릭스)'
+            placeholder='예: 월세, 넷플릭스'
             maxLength={20}
             autoFocus={!editingId}
             className='mb-4'
             error={errors.name}
           />
 
-          <View className='mb-2 flex-row items-center ml-1'>
-            <Text className='font-ibm-semibold text-base text-neutral-600'>
-              금액
-            </Text>
-            <Text
-              className='font-ibm-semibold text-base ml-0.5'
-              style={{ color: Colors.peachDarker }}
-            >
-              *
-            </Text>
-          </View>
+          <FormLabel required className='text-neutral-700'>
+            금액
+          </FormLabel>
           <AmountInput
             value={form.amount}
             onChangeText={v => {
@@ -164,83 +148,19 @@ export function FixedExpenseForm({
           )}
 
           {/* 카테고리 선택 */}
-          <View className='mb-4'>
-            <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-              <Text className='font-ibm-semibold text-base text-neutral-600'>
-                카테고리
-              </Text>
-              {categories.length > 0 && (
-                <TouchableOpacity
-                  onPress={onCatMgmt}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Text className='font-ibm-semibold text-sm text-neutral-600 bg-neutral-200 rounded-2xl px-2.5 py-1'>
-                    수정
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyboardShouldPersistTaps='handled'
-            >
-              <View className='flex-row gap-2 pr-2'>
-                {categories.map(c => {
-                  const Icon = ICON_MAP[c.icon] ?? Wallet;
-                  const isSelected = form.category_id === c.id;
-                  const cColor = resolveColor(c.color);
-                  return (
-                    <TouchableOpacity
-                      key={c.id}
-                      onPress={() => {
-                        onChange({
-                          ...form,
-                          category_id: isSelected ? null : c.id,
-                        });
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }}
-                      className='items-center gap-1'
-                      activeOpacity={0.7}
-                    >
-                      <View
-                        className='w-12 h-12 rounded-2xl items-center justify-center'
-                        style={{
-                          backgroundColor: cColor + '30',
-                          borderWidth: isSelected ? 2 : 0,
-                          borderColor: isSelected ? cColor : 'transparent',
-                        }}
-                      >
-                        <Icon size={20} color={cColor} strokeWidth={2.5} />
-                      </View>
-                      <Text
-                        className={`font-ibm-semibold text-sm ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                      >
-                        {c.name}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-                <TouchableOpacity
-                  onPress={onCatCreate}
-                  className='items-center gap-1'
-                  activeOpacity={0.7}
-                >
-                  <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
-                    <Plus size={18} color='#A3A3A3' strokeWidth={2} />
-                  </View>
-                  <Text className='font-ibm-semibold text-sm text-neutral-600'>
-                    추가
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </View>
+          <CategoryIconPicker
+            categories={categories}
+            selectedId={form.category_id}
+            onSelect={id => onChange({ ...form, category_id: id })}
+            onAdd={onCatCreate}
+            onManage={onCatMgmt}
+            nameClassName='text-sm'
+            labelClassName='text-neutral-700'
+          />
 
           {/* 납부일 */}
           <View className='mb-6'>
-            <Text className='font-ibm-semibold text-base text-neutral-500 mb-2.5 ml-1'>
+            <Text className='font-ibm-semibold text-base text-neutral-700 mb-2.5 ml-1'>
               납부일
             </Text>
             <View className='flex-row gap-2 mb-2'>
@@ -256,30 +176,14 @@ export function FixedExpenseForm({
                 </Text>
               </TouchableOpacity>
             </View>
-            <View className='flex-row flex-wrap gap-1.5'>
-              {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
-                const isSelected =
-                  form.due_day_mode === 'day' && form.due_day === day;
-                return (
-                  <TouchableOpacity
-                    key={day}
-                    onPress={() =>
-                      onChange({ ...form, due_day: day, due_day_mode: 'day' })
-                    }
-                    className={`rounded-xl items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
-                    style={{ width: 42, height: 40 }}
-                    activeOpacity={0.7}
-                  >
-                    <Text
-                      className={`${isSelected ? 'font-ibm-bold' : 'font-ibm-semibold'} text-sm ${isSelected ? 'text-neutral-700' : 'text-neutral-500'}`}
-                    >
-                      {day}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-            <Text className='font-ibm-semibold text-base text-neutral-500 mt-4 mb-2.5 ml-1'>
+            <DayGrid
+              days={Array.from({ length: 31 }, (_, i) => i + 1)}
+              selected={form.due_day_mode === 'day' ? form.due_day : null}
+              onSelect={day =>
+                onChange({ ...form, due_day: day, due_day_mode: 'day' })
+              }
+            />
+            <Text className='font-ibm-semibold text-base text-neutral-700 mt-4 mb-2.5 ml-1'>
               영업일 보정
             </Text>
             <View className='flex-row gap-2'>
