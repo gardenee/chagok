@@ -103,12 +103,12 @@ export function FeedbackModal({ visible, onClose }: Props) {
               activeOpacity={0.8}
               className='flex-row items-center gap-1.5 px-3 py-2 rounded-full'
               style={{
-                backgroundColor: selected ? Colors.butter : Colors.neutral,
+                backgroundColor: selected ? Colors.butter : Colors.cream,
               }}
             >
               {opt.icon}
               <Text
-                className={`font-ibm-semibold text-sm ${selected ? 'text-brown-darker' : 'text-neutral-400'}`}
+                className={`font-ibm-semibold text-sm ${selected ? 'text-neutral-800' : 'text-neutral-700'}`}
               >
                 {opt.label}
               </Text>
