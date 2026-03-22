@@ -9,10 +9,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/colors';
 import { useScheduleReminders } from '@/hooks/use-schedules';
+import { useCouple } from '@/hooks/use-couple';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   useScheduleReminders();
+  useCouple();
 
   return (
     <Tabs
