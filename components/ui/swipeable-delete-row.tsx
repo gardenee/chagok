@@ -20,11 +20,13 @@ export function SwipeableDeleteRow({ onDelete, children }: Props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [btnLayout, setBtnLayout] = useState<BtnLayout | null>(null);
   const rowRef = useRef<View>(null);
+  const cachedLayout = useRef<BtnLayout | null>(null);
 
   const close = useCallback(() => {
     isOpen.current = false;
     setModalVisible(false);
     setBtnLayout(null);
+    cachedLayout.current = null;
     Animated.spring(translateX, {
       toValue: 0,
       useNativeDriver: true,
@@ -33,16 +35,25 @@ export function SwipeableDeleteRow({ onDelete, children }: Props) {
   }, [translateX]);
 
   const openRow = useCallback(() => {
-    rowRef.current?.measureInWindow((x, y, width, height) => {
-      setBtnLayout({
-        x: x + width - DELETE_WIDTH,
-        y,
-        width: DELETE_WIDTH,
-        height,
-      });
+    const cached = cachedLayout.current;
+    if (cached) {
+      setBtnLayout(cached);
       isOpen.current = true;
       setModalVisible(true);
-    });
+    } else {
+      rowRef.current?.measureInWindow((x, y, width, height) => {
+        const layout = {
+          x: x + width - DELETE_WIDTH,
+          y,
+          width: DELETE_WIDTH,
+          height,
+        };
+        cachedLayout.current = layout;
+        setBtnLayout(layout);
+        isOpen.current = true;
+        setModalVisible(true);
+      });
+    }
   }, []);
 
   const panResponder = useRef(
@@ -51,6 +62,15 @@ export function SwipeableDeleteRow({ onDelete, children }: Props) {
         Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
       onPanResponderGrant: () => {
         translateX.stopAnimation();
+        // 릴리즈 시 즉시 표시할 수 있도록 미리 레이아웃 측정
+        rowRef.current?.measureInWindow((x, y, width, height) => {
+          cachedLayout.current = {
+            x: x + width - DELETE_WIDTH,
+            y,
+            width: DELETE_WIDTH,
+            height,
+          };
+        });
       },
       onPanResponderMove: (_, g) => {
         const base = isOpen.current ? -DELETE_WIDTH : 0;
@@ -61,18 +81,19 @@ export function SwipeableDeleteRow({ onDelete, children }: Props) {
         const base = isOpen.current ? -DELETE_WIDTH : 0;
         const projected = base + g.dx;
         const shouldOpen = projected < -DELETE_WIDTH / 2;
-        Animated.spring(translateX, {
-          toValue: shouldOpen ? -DELETE_WIDTH : 0,
-          useNativeDriver: true,
-          bounciness: 0,
-        }).start();
         if (shouldOpen && !isOpen.current) {
+          // 스냅 애니메이션 전에 삭제 UI를 먼저 표시
           openRow();
         } else if (!shouldOpen && isOpen.current) {
           isOpen.current = false;
           setModalVisible(false);
           setBtnLayout(null);
         }
+        Animated.spring(translateX, {
+          toValue: shouldOpen ? -DELETE_WIDTH : 0,
+          useNativeDriver: true,
+          bounciness: 0,
+        }).start();
       },
       onPanResponderTerminate: () => {
         Animated.spring(translateX, {

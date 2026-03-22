@@ -1,4 +1,7 @@
+import { useRef } from 'react';
 import { Text, View } from 'react-native';
+import type { ScrollView } from 'react-native';
+import type { RefObject, MutableRefObject } from 'react';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -17,17 +20,26 @@ import type { Category } from '@/types/database';
 import type { SharedValue } from 'react-native-reanimated';
 
 const ITEM_HEIGHT = 60;
+const MAX_SCROLL_SPEED = 12;
 
 type Props = {
   expenseCategories: Category[];
   incomeCategories: Category[];
   onOrderChange: (reordered: Category[]) => void;
+  scrollRef?: RefObject<ScrollView | null>;
+  scrollOffsetRef?: MutableRefObject<number>;
+  scrollAreaTopRef?: MutableRefObject<number>;
+  scrollAreaBottomRef?: MutableRefObject<number>;
 };
 
 export function SortableCategoryList({
   expenseCategories,
   incomeCategories,
   onOrderChange,
+  scrollRef,
+  scrollOffsetRef,
+  scrollAreaTopRef,
+  scrollAreaBottomRef,
 }: Props) {
   function handleExpenseReorder(orderedIds: string[]) {
     const reordered = orderedIds.map((id, i) => ({
@@ -55,6 +67,10 @@ export function SortableCategoryList({
           <SortableSection
             items={expenseCategories}
             onReorder={handleExpenseReorder}
+            scrollRef={scrollRef}
+            scrollOffsetRef={scrollOffsetRef}
+            scrollAreaTopRef={scrollAreaTopRef}
+            scrollAreaBottomRef={scrollAreaBottomRef}
           />
         )}
       </View>
@@ -66,6 +82,10 @@ export function SortableCategoryList({
           <SortableSection
             items={incomeCategories}
             onReorder={handleIncomeReorder}
+            scrollRef={scrollRef}
+            scrollOffsetRef={scrollOffsetRef}
+            scrollAreaTopRef={scrollAreaTopRef}
+            scrollAreaBottomRef={scrollAreaBottomRef}
           />
         )}
       </View>
@@ -76,9 +96,17 @@ export function SortableCategoryList({
 function SortableSection({
   items,
   onReorder,
+  scrollRef,
+  scrollOffsetRef,
+  scrollAreaTopRef,
+  scrollAreaBottomRef,
 }: {
   items: Category[];
   onReorder: (ids: string[]) => void;
+  scrollRef?: RefObject<ScrollView | null>;
+  scrollOffsetRef?: MutableRefObject<number>;
+  scrollAreaTopRef?: MutableRefObject<number>;
+  scrollAreaBottomRef?: MutableRefObject<number>;
 }) {
   const positions = useSharedValue<Record<string, number>>(
     Object.fromEntries(items.map((item, i) => [item.id, i])),
@@ -101,6 +129,10 @@ function SortableSection({
           itemCount={items.length}
           positions={positions}
           onDragEnd={handleDragEnd}
+          scrollRef={scrollRef}
+          scrollOffsetRef={scrollOffsetRef}
+          scrollAreaTopRef={scrollAreaTopRef}
+          scrollAreaBottomRef={scrollAreaBottomRef}
         />
       ))}
     </View>
@@ -113,6 +145,10 @@ type RowProps = {
   itemCount: number;
   positions: SharedValue<Record<string, number>>;
   onDragEnd: (posMap: Record<string, number>) => void;
+  scrollRef?: RefObject<ScrollView | null>;
+  scrollOffsetRef?: MutableRefObject<number>;
+  scrollAreaTopRef?: MutableRefObject<number>;
+  scrollAreaBottomRef?: MutableRefObject<number>;
 };
 
 function SortableRow({
@@ -121,10 +157,73 @@ function SortableRow({
   itemCount,
   positions,
   onDragEnd,
+  scrollRef,
+  scrollOffsetRef,
+  scrollAreaTopRef,
+  scrollAreaBottomRef,
 }: RowProps) {
   const isActive = useSharedValue(false);
   const startY = useSharedValue(index * ITEM_HEIGHT);
   const translateY = useSharedValue(0);
+
+  const autoScrollDirectionRef = useRef<'up' | 'down' | null>(null);
+  const autoScrollSpeedRef = useRef(0);
+  const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function applyAutoScroll(direction: 'up' | 'down' | null, speed: number) {
+    autoScrollDirectionRef.current = direction;
+    autoScrollSpeedRef.current = speed;
+
+    if (direction && !scrollIntervalRef.current) {
+      scrollIntervalRef.current = setInterval(() => {
+        const dir = autoScrollDirectionRef.current;
+        const spd = autoScrollSpeedRef.current;
+        if (!dir || !scrollRef?.current || !scrollOffsetRef) return;
+        const delta = dir === 'up' ? -spd : spd;
+        const newY = Math.max(0, scrollOffsetRef.current + delta);
+        scrollOffsetRef.current = newY;
+        scrollRef.current.scrollTo({ y: newY, animated: false });
+      }, 16);
+    } else if (!direction && scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+  }
+
+  function computeAutoScroll(absY: number) {
+    const areaTop = scrollAreaTopRef?.current ?? 0;
+    const areaBottom = scrollAreaBottomRef?.current ?? 0;
+    if (!scrollRef?.current || !scrollOffsetRef || areaTop === 0) return;
+
+    const itemTop = absY - ITEM_HEIGHT / 2;
+    const itemBottom = absY + ITEM_HEIGHT / 2;
+
+    if (itemTop < areaTop) {
+      const overshoot = areaTop - itemTop;
+      const speed = Math.max(
+        1,
+        Math.min(MAX_SCROLL_SPEED, Math.round(overshoot / 3)),
+      );
+      applyAutoScroll('up', speed);
+    } else if (itemBottom > areaBottom) {
+      const overshoot = itemBottom - areaBottom;
+      const speed = Math.max(
+        1,
+        Math.min(MAX_SCROLL_SPEED, Math.round(overshoot / 3)),
+      );
+      applyAutoScroll('down', speed);
+    } else {
+      applyAutoScroll(null, 0);
+    }
+  }
+
+  function stopAutoScroll() {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+    autoScrollDirectionRef.current = null;
+  }
 
   const triggerHaptic = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -139,6 +238,8 @@ function SortableRow({
     })
     .onUpdate(e => {
       translateY.value = e.translationY;
+
+      runOnJS(computeAutoScroll)(e.absoluteY);
 
       const rawY = startY.value + e.translationY;
       const targetIndex = Math.max(
@@ -163,6 +264,7 @@ function SortableRow({
     .onEnd(() => {
       isActive.value = false;
       translateY.value = withTiming(0, { duration: 150 });
+      runOnJS(stopAutoScroll)();
       const snapshot = { ...positions.value };
       runOnJS(onDragEnd)(snapshot);
     })
@@ -171,6 +273,7 @@ function SortableRow({
         isActive.value = false;
         translateY.value = withTiming(0, { duration: 150 });
       }
+      runOnJS(stopAutoScroll)();
     });
 
   const color = resolveColor(item.color);
