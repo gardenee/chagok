@@ -79,9 +79,7 @@ export function PaymentMethodFormScreen({
           </View>
 
           {/* 유형 선택 */}
-          <Text className='font-ibm-semibold text-base text-neutral-500 mb-2.5 ml-1'>
-            유형
-          </Text>
+          <FormLabel required>유형</FormLabel>
           <View className='flex-row flex-wrap gap-2 mb-6'>
             {PM_TYPE_OPTIONS.map(({ key, label }) => {
               const isSelected = form.type === key;
@@ -93,7 +91,7 @@ export function PaymentMethodFormScreen({
                   activeOpacity={0.7}
                 >
                   <Text
-                    className={`font-ibm-semibold text-base ${isSelected ? 'text-brown-dark' : 'text-brown-dark/60'}`}
+                    className={`font-ibm-semibold text-base ${isSelected ? 'text-neutral-800' : 'text-neutral-700'}`}
                   >
                     {label}
                   </Text>
@@ -103,7 +101,7 @@ export function PaymentMethodFormScreen({
           </View>
 
           {/* 이름 입력 */}
-          <FormLabel required className='text-neutral-500'>
+          <FormLabel required>
             이름
           </FormLabel>
           <ModalTextInput
