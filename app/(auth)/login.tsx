@@ -99,6 +99,16 @@ export default function LoginScreen() {
       </View>
 
       <View className='gap-3'>
+        {Platform.OS === 'ios' && (
+          <SocialButton
+            onPress={handleApple}
+            isLoading={loading === 'apple'}
+            icon={
+              <Apple size={20} color={Colors.brownDark} strokeWidth={2.5} />
+            }
+            label='Apple로 시작하기'
+          />
+        )}
         <SocialButton
           onPress={handleKakao}
           isLoading={loading === 'kakao'}
@@ -117,16 +127,6 @@ export default function LoginScreen() {
           icon={<Chrome size={20} color={Colors.brownDark} strokeWidth={2.5} />}
           label='구글로 시작하기'
         />
-        {Platform.OS === 'ios' && (
-          <SocialButton
-            onPress={handleApple}
-            isLoading={loading === 'apple'}
-            icon={
-              <Apple size={20} color={Colors.brownDark} strokeWidth={2.5} />
-            }
-            label='Apple로 시작하기'
-          />
-        )}
       </View>
 
       <View className='flex-1' />
