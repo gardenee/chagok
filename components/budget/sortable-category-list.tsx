@@ -165,6 +165,7 @@ function SortableRow({
   const isActive = useSharedValue(false);
   const startY = useSharedValue(index * ITEM_HEIGHT);
   const translateY = useSharedValue(0);
+  const scrollDelta = useSharedValue(0);
 
   const autoScrollDirectionRef = useRef<'up' | 'down' | null>(null);
   const autoScrollSpeedRef = useRef(0);
@@ -180,9 +181,12 @@ function SortableRow({
         const spd = autoScrollSpeedRef.current;
         if (!dir || !scrollRef?.current || !scrollOffsetRef) return;
         const delta = dir === 'up' ? -spd : spd;
-        const newY = Math.max(0, scrollOffsetRef.current + delta);
+        const prevY = scrollOffsetRef.current;
+        const newY = Math.max(0, prevY + delta);
+        const actualDelta = newY - prevY;
         scrollOffsetRef.current = newY;
         scrollRef.current.scrollTo({ y: newY, animated: false });
+        scrollDelta.value += actualDelta;
       }, 16);
     } else if (!direction && scrollIntervalRef.current) {
       clearInterval(scrollIntervalRef.current);
@@ -234,6 +238,7 @@ function SortableRow({
     .onStart(() => {
       isActive.value = true;
       startY.value = (positions.value[item.id] ?? index) * ITEM_HEIGHT;
+      scrollDelta.value = 0;
       runOnJS(triggerHaptic)();
     })
     .onUpdate(e => {
@@ -241,7 +246,7 @@ function SortableRow({
 
       runOnJS(computeAutoScroll)(e.absoluteY);
 
-      const rawY = startY.value + e.translationY;
+      const rawY = startY.value + e.translationY + scrollDelta.value;
       const targetIndex = Math.max(
         0,
         Math.min(itemCount - 1, Math.round(rawY / ITEM_HEIGHT)),
@@ -289,7 +294,7 @@ function SortableRow({
         left: 0,
         right: 0,
         height: ITEM_HEIGHT,
-        transform: [{ translateY: translateY.value }],
+        transform: [{ translateY: translateY.value + scrollDelta.value }],
         zIndex: 100,
         shadowColor: '#000',
         shadowOpacity: 0.15,

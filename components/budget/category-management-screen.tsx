@@ -45,6 +45,7 @@ export function CategoryManagementScreen({
     useState<Category[]>(categories);
 
   const scrollRef = useRef<ScrollView>(null);
+  const scrollAreaRef = useRef<View>(null);
   const scrollOffsetRef = useRef(0);
   const scrollAreaTopRef = useRef(0);
   const scrollAreaBottomRef = useRef(0);
@@ -119,38 +120,36 @@ export function CategoryManagementScreen({
       </View>
 
       {isReordering ? (
-        <ScrollView
-          ref={scrollRef}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
+        <View
+          ref={scrollAreaRef}
+          style={{ flex: 1 }}
           onLayout={() => {
-            type MeasurableView = {
-              measureInWindow: (
-                cb: (x: number, y: number, w: number, h: number) => void,
-              ) => void;
-            };
-            (
-              scrollRef.current as unknown as MeasurableView | null
-            )?.measureInWindow((_, y, __, h) => {
+            scrollAreaRef.current?.measureInWindow((_, y, __, h) => {
               scrollAreaTopRef.current = y;
               scrollAreaBottomRef.current = y + h;
             });
           }}
-          onScroll={e => {
-            scrollOffsetRef.current = e.nativeEvent.contentOffset.y;
-          }}
-          scrollEventThrottle={16}
         >
-          <SortableCategoryList
-            expenseCategories={expenseCategories}
-            incomeCategories={incomeCategories}
-            onOrderChange={setLocalCategories}
-            scrollRef={scrollRef}
-            scrollOffsetRef={scrollOffsetRef}
-            scrollAreaTopRef={scrollAreaTopRef}
-            scrollAreaBottomRef={scrollAreaBottomRef}
-          />
-        </ScrollView>
+          <ScrollView
+            ref={scrollRef}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
+            onScroll={e => {
+              scrollOffsetRef.current = e.nativeEvent.contentOffset.y;
+            }}
+            scrollEventThrottle={16}
+          >
+            <SortableCategoryList
+              expenseCategories={expenseCategories}
+              incomeCategories={incomeCategories}
+              onOrderChange={setLocalCategories}
+              scrollRef={scrollRef}
+              scrollOffsetRef={scrollOffsetRef}
+              scrollAreaTopRef={scrollAreaTopRef}
+              scrollAreaBottomRef={scrollAreaBottomRef}
+            />
+          </ScrollView>
+        </View>
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
