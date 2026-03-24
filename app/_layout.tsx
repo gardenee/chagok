@@ -262,10 +262,24 @@ function RootLayoutNav() {
 
     if (data.type === 'PARTNER_TRANSACTION') {
       router.push('/(tabs)/calendar');
+    } else if (data.type === 'PARTNER_COMMENT' && data.transactionId) {
+      router.push({
+        pathname: '/(tabs)/calendar',
+        params: { openTxId: data.transactionId },
+      });
     } else if (data.type === 'PARTNER_COMMENT') {
       router.push('/(tabs)/calendar');
     } else if (data.type === 'FIXED_EXPENSE') {
       router.push('/(tabs)/fixed');
+    } else if (data.type === 'BUDGET_EXCEEDED') {
+      router.push('/(tabs)/budget');
+    } else if (
+      data.type === 'MY_SCHEDULE' ||
+      data.type === 'TOGETHER_SCHEDULE'
+    ) {
+      router.push('/(tabs)/calendar');
+    } else if (data.type === 'ANNIVERSARY') {
+      router.push('/(tabs)/settings/anniversary-settings');
     } else if (data.type === 'COUPLE_JOINED') {
       router.push('/(tabs)/settings');
     }
