@@ -169,9 +169,10 @@ export interface Database {
           category_id: string | null;
           payment_method_id: string | null;
           asset_id: string | null;
+          target_asset_id: string | null;
           fixed_expense_id: string | null;
           amount: number;
-          type: 'expense' | 'income';
+          type: 'expense' | 'income' | 'transfer';
           tag: 'me' | 'partner' | 'together' | null;
           memo: string | null;
           date: string;
@@ -184,9 +185,10 @@ export interface Database {
           category_id?: string | null;
           payment_method_id?: string | null;
           asset_id?: string | null;
+          target_asset_id?: string | null;
           fixed_expense_id?: string | null;
           amount: number;
-          type: 'expense' | 'income';
+          type: 'expense' | 'income' | 'transfer';
           tag?: 'me' | 'partner' | 'together' | null;
           memo?: string | null;
           date: string;
@@ -196,9 +198,10 @@ export interface Database {
           category_id?: string | null;
           payment_method_id?: string | null;
           asset_id?: string | null;
+          target_asset_id?: string | null;
           fixed_expense_id?: string | null;
           amount?: number;
-          type?: 'expense' | 'income';
+          type?: 'expense' | 'income' | 'transfer';
           tag?: 'me' | 'partner' | 'together' | null;
           memo?: string | null;
           date?: string;
@@ -258,7 +261,10 @@ export interface Database {
         Row: {
           id: string;
           couple_id: string;
+          type: 'expense' | 'transfer';
           category_id: string | null;
+          from_asset_id: string | null;
+          to_asset_id: string | null;
           name: string;
           amount: number;
           due_day: number;
@@ -269,7 +275,10 @@ export interface Database {
         Insert: {
           id?: string;
           couple_id: string;
+          type?: 'expense' | 'transfer';
           category_id?: string | null;
+          from_asset_id?: string | null;
+          to_asset_id?: string | null;
           name: string;
           amount: number;
           due_day: number;
@@ -278,7 +287,10 @@ export interface Database {
           created_at?: string;
         };
         Update: {
+          type?: 'expense' | 'transfer';
           category_id?: string | null;
+          from_asset_id?: string | null;
+          to_asset_id?: string | null;
           name?: string;
           amount?: number;
           due_day?: number;
@@ -431,6 +443,22 @@ export interface Database {
         Args: Record<string, never>;
         Returns: void;
       };
+      execute_transfer: {
+        Args: {
+          p_from_asset_id: string | null;
+          p_to_asset_id: string | null;
+          p_amount: number;
+        };
+        Returns: void;
+      };
+      reverse_transfer: {
+        Args: {
+          p_from_asset_id: string | null;
+          p_to_asset_id: string | null;
+          p_amount: number;
+        };
+        Returns: void;
+      };
     };
   };
 }
@@ -454,5 +482,6 @@ export type Feedback = Database['public']['Tables']['feedback']['Row'];
 export type FeedbackType = Feedback['type'];
 
 export type TransactionType = Transaction['type'];
+export type FixedExpenseType = FixedExpense['type'];
 export type Tag = Transaction['tag'];
 export type CategoryType = 'expense' | 'income';

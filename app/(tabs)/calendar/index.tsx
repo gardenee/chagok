@@ -71,7 +71,7 @@ import { SegmentControl } from '@/components/ui/segment-control';
 import { ItemCard } from '@/components/ui/item-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { IconBox } from '@/components/ui/icon-box';
-import { ColorPill, TagPill } from '@/components/ui/color-pill';
+import { ColorPill, TagPill, Pill } from '@/components/ui/color-pill';
 import { formatAmount } from '@/utils/format';
 import type {
   Schedule,
@@ -516,7 +516,7 @@ export default function CalendarTab() {
     for (const t of transactions) {
       if (!map[t.date]) map[t.date] = { expense: 0, income: 0 };
       if (t.type === 'expense') map[t.date].expense += t.amount;
-      else map[t.date].income += t.amount;
+      else if (t.type === 'income') map[t.date].income += t.amount;
     }
     return map;
   }, [transactions]);
@@ -913,6 +913,12 @@ export default function CalendarTab() {
                                         />
                                       )}
                                     </>
+                                  )}
+                                  {t.payment_methods && (
+                                    <Pill
+                                      label={t.payment_methods.name}
+                                      color='#A3A3A3'
+                                    />
                                   )}
                                 </View>
                               </View>

@@ -101,9 +101,7 @@ export function PaymentMethodFormScreen({
           </View>
 
           {/* 이름 입력 */}
-          <FormLabel required>
-            이름
-          </FormLabel>
+          <FormLabel required>이름</FormLabel>
           <ModalTextInput
             value={form.name}
             onChangeText={v => {

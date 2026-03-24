@@ -14,9 +14,16 @@ type Props = {
   isLoading: boolean;
   onEdit: (a: Asset) => void;
   onDelete: (id: string) => void;
+  onPress?: (a: Asset) => void;
 };
 
-export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
+export function AssetGroups({
+  assets,
+  isLoading,
+  onEdit,
+  onDelete,
+  onPress,
+}: Props) {
   const regularAssets = assets.filter(
     a => a.type !== 'loan' && a.type !== 'insurance',
   );
@@ -77,7 +84,7 @@ export function AssetGroups({ assets, isLoading, onEdit, onDelete }: Props) {
                         key={a.id}
                         onDelete={() => onDelete(a.id)}
                       >
-                        <ItemCard onPress={() => onEdit(a)}>
+                        <ItemCard onPress={() => (onPress ?? onEdit)(a)}>
                           <IconBox color={group.color} size='md'>
                             <group.Icon
                               size={20}

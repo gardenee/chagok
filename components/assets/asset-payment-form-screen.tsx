@@ -240,7 +240,12 @@ export function AssetPaymentFormScreen({
             contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
           >
             {/* ── 유형 선택 ── */}
-            <FormLabel required className='text-neutral-800 font-ibm-bold text-lg'>유형</FormLabel>
+            <FormLabel
+              required
+              className='text-neutral-800 font-ibm-bold text-lg'
+            >
+              유형
+            </FormLabel>
 
             {showAssetGroups && (
               <View className='mb-6'>
@@ -429,9 +434,7 @@ export function AssetPaymentFormScreen({
             )}
 
             {/* ── 이름 ── */}
-            <FormLabel required>
-              이름
-            </FormLabel>
+            <FormLabel required>이름</FormLabel>
             <ModalTextInput
               value={form.name}
               onChangeText={v => {

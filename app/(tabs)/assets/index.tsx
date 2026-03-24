@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useState, useRef } from 'react';
 import { useScrollToTop } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import {
   useAssets,
@@ -30,6 +31,7 @@ import type { Asset, PaymentMethod } from '@/types/database';
 export default function AssetsTab() {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
+  const router = useRouter();
 
   const { data: assets = [], isLoading } = useAssets();
   const { data: paymentMethods = [], isLoading: pmLoading } =
@@ -75,6 +77,11 @@ export default function AssetsTab() {
   function openEditPm(pm: PaymentMethod) {
     setFormModal({ visible: true, editingAsset: null, editingPm: pm });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }
+
+  function handleAssetPress(a: Asset) {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/assets/${a.id}`);
   }
 
   async function handleFormSave(form: UnifiedFormData) {
@@ -208,6 +215,7 @@ export default function AssetsTab() {
         <AssetGroups
           assets={assets}
           isLoading={isLoading}
+          onPress={handleAssetPress}
           onEdit={openEditAsset}
           onDelete={handleDeleteAsset}
         />

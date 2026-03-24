@@ -6,17 +6,19 @@ export type TransactionRow = Transaction & {
   categories: { name: string; icon: string; color: string } | null;
   payment_methods: { name: string } | null;
   assets: { name: string } | null;
+  target_assets: { name: string } | null;
 };
 
 export type TransactionInput = {
   amount: number;
-  type: 'expense' | 'income';
+  type: 'expense' | 'income' | 'transfer';
   tag?: 'me' | 'partner' | 'together' | null;
   memo?: string | null;
   date: string;
   category_id?: string | null;
   payment_method_id?: string | null;
   asset_id?: string | null;
+  target_asset_id?: string | null;
   fixed_expense_id?: string | null;
 };
 
@@ -39,6 +41,7 @@ function toTransactionInsert(
     category_id: input.category_id ?? null,
     payment_method_id: input.payment_method_id ?? null,
     asset_id: input.asset_id ?? null,
+    target_asset_id: input.target_asset_id ?? null,
     fixed_expense_id: input.fixed_expense_id ?? null,
   };
 }
@@ -53,6 +56,7 @@ function toTransactionUpdate(input: TransactionInput): TransactionUpdate {
     category_id: input.category_id ?? null,
     payment_method_id: input.payment_method_id ?? null,
     asset_id: input.asset_id ?? null,
+    target_asset_id: input.target_asset_id ?? null,
     fixed_expense_id: input.fixed_expense_id ?? null,
   };
 }
@@ -68,7 +72,7 @@ export async function fetchMonthTransactions(
   const { data, error } = await supabase
     .from('transactions')
     .select(
-      '*, categories(name, icon, color), payment_methods(name), assets(name)',
+      '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)',
     )
     .eq('couple_id', coupleId)
     .gte('date', startDate)
@@ -84,7 +88,7 @@ export async function fetchTransactionById(
   const { data, error } = await supabase
     .from('transactions')
     .select(
-      '*, categories(name, icon, color), payment_methods(name), assets(name)',
+      '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)',
     )
     .eq('id', id)
     .single();
@@ -101,7 +105,7 @@ export async function createTransaction(
     .from('transactions')
     .insert(toTransactionInsert(coupleId, userId, input))
     .select(
-      '*, categories(name, icon, color), payment_methods(name), assets(name)',
+      '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)',
     )
     .single();
   if (error) throw error;
@@ -117,11 +121,52 @@ export async function updateTransaction(
     .update(toTransactionUpdate(input))
     .eq('id', id)
     .select(
-      '*, categories(name, icon, color), payment_methods(name), assets(name)',
+      '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)',
     )
     .single();
   if (error) throw error;
   return data as unknown as TransactionRow;
+}
+
+export async function fetchAssetTransfers(
+  assetId: string,
+  year: number,
+  month: number,
+): Promise<TransactionRow[]> {
+  const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  const selectStr =
+    '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)';
+
+  const [fromResult, toResult] = await Promise.all([
+    supabase
+      .from('transactions')
+      .select(selectStr)
+      .eq('asset_id', assetId)
+      .eq('type', 'transfer')
+      .gte('date', startDate)
+      .lte('date', endDate),
+    supabase
+      .from('transactions')
+      .select(selectStr)
+      .eq('target_asset_id', assetId)
+      .eq('type', 'transfer')
+      .gte('date', startDate)
+      .lte('date', endDate),
+  ]);
+
+  if (fromResult.error) throw fromResult.error;
+  if (toResult.error) throw toResult.error;
+
+  const merged = [
+    ...(fromResult.data ?? []),
+    ...(toResult.data ?? []),
+  ] as unknown as TransactionRow[];
+
+  return merged.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
 }
 
 export async function deleteTransaction(id: string): Promise<void> {

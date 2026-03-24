@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Plus,
   Wallet,
+  ArrowLeftRight,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
@@ -52,6 +53,7 @@ interface TransactionFormSheetProps {
   categories: Category[];
   paymentMethods: PaymentMethod[];
   bankCashAssets: Asset[];
+  allAssets: Asset[];
   transactions: TransactionRow[];
   tagOptions: TagOption[];
   isTxSaving: boolean;
@@ -75,6 +77,7 @@ export function TransactionFormSheet({
   categories,
   paymentMethods,
   bankCashAssets,
+  allAssets,
   transactions,
   tagOptions,
   isTxSaving,
@@ -100,6 +103,7 @@ export function TransactionFormSheet({
   // 동일 메모의 최근 항목이 있으면 카테고리 자동 선택 (신규 입력 시에만)
   useEffect(() => {
     if (txModal.editingId) return;
+    if (txModal.form.type === 'transfer') return;
     const trimmed = txModal.form.memo.trim();
     if (!trimmed) return;
     const match = [...transactions]
@@ -167,6 +171,7 @@ export function TransactionFormSheet({
                 options={[
                   { value: 'expense' as const, label: '지출' },
                   { value: 'income' as const, label: '수입' },
+                  { value: 'transfer' as const, label: '이체' },
                 ]}
                 value={txModal.form.type}
                 onChange={type =>
@@ -176,9 +181,9 @@ export function TransactionFormSheet({
                       ...s.form,
                       type,
                       category_id: null,
-                      ...(type === 'income'
-                        ? { payment_method_id: null, asset_id: null }
-                        : {}),
+                      payment_method_id: null,
+                      asset_id: null,
+                      target_asset_id: null,
                     },
                   }))
                 }
@@ -223,7 +228,9 @@ export function TransactionFormSheet({
               placeholder={
                 txModal.form.type === 'expense'
                   ? '예: 장보기, 넷플릭스'
-                  : '예: 월급, 용돈'
+                  : txModal.form.type === 'income'
+                    ? '예: 월급, 용돈'
+                    : '예: 청약 저축, 비상금 적금'
               }
               maxLength={50}
               className='mb-4'
@@ -239,19 +246,154 @@ export function TransactionFormSheet({
               className='mb-4'
             />
 
-            {/* 카테고리 선택 */}
-            <CategoryIconPicker
-              categories={categories.filter(c => c.type === txModal.form.type)}
-              selectedId={txModal.form.category_id}
-              onSelect={id =>
-                setTxModal(s => ({
-                  ...s,
-                  form: { ...s.form, category_id: id },
-                }))
-              }
-              onAdd={onCatCreate}
-              onManage={() => setTxModal(s => ({ ...s, view: 'catMgmt' }))}
-            />
+            {/* 카테고리 선택 (지출/수입일 때) */}
+            {txModal.form.type !== 'transfer' && (
+              <CategoryIconPicker
+                categories={categories.filter(
+                  c => c.type === txModal.form.type,
+                )}
+                selectedId={txModal.form.category_id}
+                onSelect={id =>
+                  setTxModal(s => ({
+                    ...s,
+                    form: { ...s.form, category_id: id },
+                  }))
+                }
+                onAdd={onCatCreate}
+                onManage={() => setTxModal(s => ({ ...s, view: 'catMgmt' }))}
+              />
+            )}
+
+            {/* 이체 자산 선택 */}
+            {txModal.form.type === 'transfer' && (
+              <View className='mb-4'>
+                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
+                  출처 계좌
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyboardShouldPersistTaps='handled'
+                  className='mb-4'
+                >
+                  <View className='flex-row gap-2 pr-2'>
+                    {allAssets.map(asset => {
+                      const isSelected = txModal.form.asset_id === asset.id;
+                      const { Icon: AssetIcon, color: assetColor } =
+                        getAssetTypeOption(asset.type);
+                      return (
+                        <TouchableOpacity
+                          key={asset.id}
+                          onPress={() => {
+                            setTxModal(s => ({
+                              ...s,
+                              form: {
+                                ...s.form,
+                                asset_id: isSelected ? null : asset.id,
+                                target_asset_id:
+                                  s.form.target_asset_id === asset.id
+                                    ? null
+                                    : s.form.target_asset_id,
+                              },
+                            }));
+                            Haptics.impactAsync(
+                              Haptics.ImpactFeedbackStyle.Light,
+                            );
+                          }}
+                          className='items-center gap-1'
+                          activeOpacity={0.7}
+                        >
+                          <View
+                            className='w-12 h-12 rounded-2xl items-center justify-center'
+                            style={{
+                              backgroundColor: assetColor + '30',
+                              borderWidth: isSelected ? 2 : 0,
+                              borderColor: isSelected
+                                ? assetColor
+                                : 'transparent',
+                            }}
+                          >
+                            <AssetIcon
+                              size={20}
+                              color={assetColor}
+                              strokeWidth={2.5}
+                            />
+                          </View>
+                          <Text
+                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                            numberOfLines={1}
+                          >
+                            {asset.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+
+                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
+                  목적지 계좌
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyboardShouldPersistTaps='handled'
+                >
+                  <View className='flex-row gap-2 pr-2'>
+                    {allAssets
+                      .filter(a => a.id !== txModal.form.asset_id)
+                      .map(asset => {
+                        const isSelected =
+                          txModal.form.target_asset_id === asset.id;
+                        const { Icon: AssetIcon, color: assetColor } =
+                          getAssetTypeOption(asset.type);
+                        return (
+                          <TouchableOpacity
+                            key={asset.id}
+                            onPress={() => {
+                              setTxModal(s => ({
+                                ...s,
+                                form: {
+                                  ...s.form,
+                                  target_asset_id: isSelected ? null : asset.id,
+                                },
+                              }));
+                              Haptics.impactAsync(
+                                Haptics.ImpactFeedbackStyle.Light,
+                              );
+                            }}
+                            className='items-center gap-1'
+                            activeOpacity={0.7}
+                          >
+                            <View
+                              className='w-12 h-12 rounded-2xl items-center justify-center'
+                              style={{
+                                backgroundColor: assetColor + '30',
+                                borderWidth: isSelected ? 2 : 0,
+                                borderColor: isSelected
+                                  ? assetColor
+                                  : 'transparent',
+                              }}
+                            >
+                              <AssetIcon
+                                size={20}
+                                color={assetColor}
+                                strokeWidth={2.5}
+                              />
+                            </View>
+                            <Text
+                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                              numberOfLines={1}
+                            >
+                              {asset.name}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                  </View>
+                </ScrollView>
+              </View>
+            )}
 
             {/* 결제수단 선택 (지출일 때) */}
             {txModal.form.type === 'expense' && (

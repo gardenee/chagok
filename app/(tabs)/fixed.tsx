@@ -1,7 +1,14 @@
-import { View, ScrollView, SafeAreaView, Alert, Modal } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  Alert,
+  Modal,
+} from 'react-native';
 import { useState, useRef, useEffect } from 'react';
 import { useScrollToTop } from '@react-navigation/native';
-import { Repeat } from 'lucide-react-native';
+import { Repeat, ArrowLeftRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
   useFixedExpenses,
@@ -15,6 +22,7 @@ import {
   useUpdateCategory,
   useDeleteCategory,
 } from '@/hooks/use-categories';
+import { useAssets } from '@/hooks/use-assets';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SummaryCard } from '@/components/ui/summary-card';
@@ -83,6 +91,7 @@ export default function FixedScreen() {
 
   const { data: fixedExpenses = [], isLoading } = useFixedExpenses();
   const { data: categories = [] } = useExpenseCategories();
+  const { data: assets = [] } = useAssets();
   const create = useCreateFixedExpense();
   const update = useUpdateFixedExpense();
   const remove = useDeleteFixedExpense();
@@ -92,7 +101,10 @@ export default function FixedScreen() {
 
   const isSaving = create.isPending || update.isPending;
   const isCatSaving = createCategory.isPending || updateCategory.isPending;
-  const totalAmount = fixedExpenses.reduce((sum, f) => sum + f.amount, 0);
+
+  const fixedExpenseItems = fixedExpenses.filter(f => f.type !== 'transfer');
+  const fixedTransferItems = fixedExpenses.filter(f => f.type === 'transfer');
+  const totalAmount = fixedExpenseItems.reduce((sum, f) => sum + f.amount, 0);
 
   function openCreate() {
     setState({ ...INITIAL_STATE, visible: true });
@@ -101,12 +113,15 @@ export default function FixedScreen() {
 
   function openEdit(item: FixedExpense) {
     const form: FormData = {
+      type: item.type ?? 'expense',
       name: item.name,
       amount: String(item.amount),
       due_day: item.due_day,
       due_day_mode: item.due_day_mode ?? 'day',
       business_day_adjust: item.business_day_adjust ?? 'none',
       category_id: item.category_id ?? null,
+      from_asset_id: item.from_asset_id ?? null,
+      to_asset_id: item.to_asset_id ?? null,
     };
     setState({
       ...INITIAL_STATE,
@@ -142,13 +157,17 @@ export default function FixedScreen() {
       }
     }
 
+    const isTransfer = state.form.type === 'transfer';
     const payload = {
+      type: state.form.type,
       name,
       amount,
       due_day: state.form.due_day,
       due_day_mode: state.form.due_day_mode,
       business_day_adjust: state.form.business_day_adjust,
-      category_id: state.form.category_id,
+      category_id: isTransfer ? null : state.form.category_id,
+      from_asset_id: isTransfer ? state.form.from_asset_id : null,
+      to_asset_id: isTransfer ? state.form.to_asset_id : null,
     };
     try {
       if (state.editingId) {
@@ -254,22 +273,30 @@ export default function FixedScreen() {
   }
 
   function handleDelete(id: string, name: string) {
-    Alert.alert('고정지출 삭제', `"${name}"을(를) 삭제할까요?`, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await remove.mutateAsync(id);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            closeAll();
-          } catch {
-            Alert.alert('오류', '삭제 중 문제가 발생했어요');
-          }
+    const isTransfer =
+      fixedExpenses.find(f => f.id === id)?.type === 'transfer';
+    Alert.alert(
+      isTransfer ? '고정이체 삭제' : '고정지출 삭제',
+      `"${name}"을(를) 삭제할까요?`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await remove.mutateAsync(id);
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              closeAll();
+            } catch {
+              Alert.alert('오류', '삭제 중 문제가 발생했어요');
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   }
 
   return (
@@ -284,14 +311,17 @@ export default function FixedScreen() {
         <SummaryCard
           label='매월 고정지출'
           amount={totalAmount}
-          subtext={`총 ${fixedExpenses.length}개 항목`}
+          subtext={`총 ${fixedExpenseItems.length}개 항목`}
         />
 
-        {/* 목록 */}
+        {/* 고정지출 목록 */}
         <View className='mx-4 mt-5'>
+          <Text className='font-ibm-bold text-xl text-neutral-800 mb-3'>
+            고정지출
+          </Text>
           {isLoading ? (
             <FixedExpenseSkeleton />
-          ) : fixedExpenses.length === 0 ? (
+          ) : fixedExpenseItems.length === 0 ? (
             <EmptyState
               icon={Repeat}
               title='등록된 고정지출이 없어요'
@@ -299,13 +329,46 @@ export default function FixedScreen() {
             />
           ) : (
             <View className='gap-3'>
-              {fixedExpenses.map(item => {
+              {fixedExpenseItems.map(item => {
                 const cat = categories.find(c => c.id === item.category_id);
                 return (
                   <FixedExpenseItem
                     key={item.id}
                     item={item}
                     category={cat}
+                    onEdit={openEdit}
+                    onDelete={handleDelete}
+                  />
+                );
+              })}
+            </View>
+          )}
+        </View>
+
+        {/* 고정이체 목록 */}
+        <View className='mx-4 mt-8 mb-4'>
+          <Text className='font-ibm-bold text-xl text-neutral-800 mb-3'>
+            고정이체
+          </Text>
+          {isLoading ? (
+            <FixedExpenseSkeleton />
+          ) : fixedTransferItems.length === 0 ? (
+            <EmptyState
+              icon={ArrowLeftRight}
+              title='등록된 고정이체가 없어요'
+              description='적금, 비상금 이체 등을 등록해보세요'
+            />
+          ) : (
+            <View className='gap-3'>
+              {fixedTransferItems.map(item => {
+                const fromAsset = assets.find(a => a.id === item.from_asset_id);
+                const toAsset = assets.find(a => a.id === item.to_asset_id);
+                return (
+                  <FixedExpenseItem
+                    key={item.id}
+                    item={item}
+                    fromAsset={fromAsset}
+                    toAsset={toAsset}
                     onEdit={openEdit}
                     onDelete={handleDelete}
                   />
@@ -327,6 +390,7 @@ export default function FixedScreen() {
           form={state.form}
           isSaving={isSaving}
           categories={categories}
+          assets={assets}
           onChange={form => setState(s => ({ ...s, form }))}
           onClose={closeAll}
           onSave={handleSave}

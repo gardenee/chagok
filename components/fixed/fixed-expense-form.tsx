@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { X } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { DeleteButton } from '@/components/ui/delete-button';
 import { SaveButton } from '@/components/ui/save-button';
@@ -16,24 +17,32 @@ import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { FormLabel } from '@/components/ui/form-label';
 import { CategoryIconPicker } from '@/components/ui/category-icon-picker';
 import { DayGrid } from '@/components/ui/day-grid';
-import type { Category } from '@/types/database';
+import { SegmentControl } from '@/components/ui/segment-control';
+import { getAssetTypeOption } from '@/constants/asset-type';
+import type { Category, Asset } from '@/types/database';
 
 export type FormData = {
+  type: 'expense' | 'transfer';
   name: string;
   amount: string;
   due_day: number;
   due_day_mode: 'day' | 'eom';
   business_day_adjust: 'none' | 'prev' | 'next';
   category_id: string | null;
+  from_asset_id: string | null;
+  to_asset_id: string | null;
 };
 
 export const INITIAL_FORM: FormData = {
+  type: 'expense',
   name: '',
   amount: '',
   due_day: 1,
   due_day_mode: 'day',
   business_day_adjust: 'none',
   category_id: null,
+  from_asset_id: null,
+  to_asset_id: null,
 };
 
 type Props = {
@@ -41,6 +50,7 @@ type Props = {
   form: FormData;
   isSaving: boolean;
   categories: Category[];
+  assets: Asset[];
   onChange: (form: FormData) => void;
   onClose: () => void;
   onSave: () => void;
@@ -54,6 +64,7 @@ export function FixedExpenseForm({
   form,
   isSaving,
   categories,
+  assets,
   onChange,
   onClose,
   onSave,
@@ -90,7 +101,13 @@ export function FixedExpenseForm({
         <View className='flex-row items-center justify-between px-6 pt-5 mb-6'>
           <View style={{ width: 22 }} />
           <Text className='font-ibm-bold text-xl text-neutral-800'>
-            {editingId ? '고정지출 수정' : '고정지출 추가'}
+            {editingId
+              ? form.type === 'transfer'
+                ? '고정이체 수정'
+                : '고정지출 수정'
+              : form.type === 'transfer'
+                ? '고정이체 추가'
+                : '고정지출 추가'}
           </Text>
           <TouchableOpacity
             onPress={onClose}
@@ -105,6 +122,29 @@ export function FixedExpenseForm({
           contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
           keyboardShouldPersistTaps='handled'
         >
+          {!editingId && (
+            <SegmentControl
+              options={[
+                { value: 'expense' as const, label: '고정지출' },
+                { value: 'transfer' as const, label: '고정이체' },
+              ]}
+              value={form.type}
+              onChange={type =>
+                onChange({
+                  ...form,
+                  type,
+                  category_id: null,
+                  from_asset_id: null,
+                  to_asset_id: null,
+                })
+              }
+              bgClassName='bg-neutral-100 rounded-2xl'
+              className='mb-5'
+              activeTextClassName='text-neutral-800'
+              inactiveTextClassName='text-neutral-500'
+            />
+          )}
+
           <FormLabel required className='text-neutral-700'>
             이름
           </FormLabel>
@@ -114,7 +154,11 @@ export function FixedExpenseForm({
               onChange({ ...form, name: v });
               if (errors.name) setErrors(e => ({ ...e, name: false }));
             }}
-            placeholder='예: 월세, 넷플릭스'
+            placeholder={
+              form.type === 'transfer'
+                ? '예: 청약 저축, 비상금 적금'
+                : '예: 월세, 넷플릭스'
+            }
             maxLength={20}
             autoFocus={!editingId}
             className='mb-4'
@@ -147,16 +191,142 @@ export function FixedExpenseForm({
             </Text>
           )}
 
-          {/* 카테고리 선택 */}
-          <CategoryIconPicker
-            categories={categories}
-            selectedId={form.category_id}
-            onSelect={id => onChange({ ...form, category_id: id })}
-            onAdd={onCatCreate}
-            onManage={onCatMgmt}
-            nameClassName='text-sm'
-            labelClassName='text-neutral-700'
-          />
+          {/* 카테고리 선택 (지출일 때) */}
+          {form.type === 'expense' && (
+            <CategoryIconPicker
+              categories={categories}
+              selectedId={form.category_id}
+              onSelect={id => onChange({ ...form, category_id: id })}
+              onAdd={onCatCreate}
+              onManage={onCatMgmt}
+              nameClassName='text-sm'
+              labelClassName='text-neutral-700'
+            />
+          )}
+
+          {/* 자산 picker (이체일 때) */}
+          {form.type === 'transfer' && (
+            <View className='mb-4'>
+              <Text className='font-ibm-semibold text-base text-neutral-700 mb-2 ml-1'>
+                출처 계좌
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyboardShouldPersistTaps='handled'
+                className='mb-4'
+              >
+                <View className='flex-row gap-2 pr-2'>
+                  {assets.map(asset => {
+                    const isSelected = form.from_asset_id === asset.id;
+                    const { Icon: AssetIcon, color: assetColor } =
+                      getAssetTypeOption(asset.type);
+                    return (
+                      <TouchableOpacity
+                        key={asset.id}
+                        onPress={() => {
+                          onChange({
+                            ...form,
+                            from_asset_id: isSelected ? null : asset.id,
+                            to_asset_id:
+                              form.to_asset_id === asset.id
+                                ? null
+                                : form.to_asset_id,
+                          });
+                          Haptics.impactAsync(
+                            Haptics.ImpactFeedbackStyle.Light,
+                          );
+                        }}
+                        className='items-center gap-1'
+                        activeOpacity={0.7}
+                      >
+                        <View
+                          className='w-12 h-12 rounded-2xl items-center justify-center'
+                          style={{
+                            backgroundColor: assetColor + '30',
+                            borderWidth: isSelected ? 2 : 0,
+                            borderColor: isSelected
+                              ? assetColor
+                              : 'transparent',
+                          }}
+                        >
+                          <AssetIcon
+                            size={20}
+                            color={assetColor}
+                            strokeWidth={2.5}
+                          />
+                        </View>
+                        <Text
+                          className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                          numberOfLines={1}
+                        >
+                          {asset.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+
+              <Text className='font-ibm-semibold text-base text-neutral-700 mb-2 ml-1'>
+                목적지 계좌
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyboardShouldPersistTaps='handled'
+              >
+                <View className='flex-row gap-2 pr-2'>
+                  {assets
+                    .filter(a => a.id !== form.from_asset_id)
+                    .map(asset => {
+                      const isSelected = form.to_asset_id === asset.id;
+                      const { Icon: AssetIcon, color: assetColor } =
+                        getAssetTypeOption(asset.type);
+                      return (
+                        <TouchableOpacity
+                          key={asset.id}
+                          onPress={() => {
+                            onChange({
+                              ...form,
+                              to_asset_id: isSelected ? null : asset.id,
+                            });
+                            Haptics.impactAsync(
+                              Haptics.ImpactFeedbackStyle.Light,
+                            );
+                          }}
+                          className='items-center gap-1'
+                          activeOpacity={0.7}
+                        >
+                          <View
+                            className='w-12 h-12 rounded-2xl items-center justify-center'
+                            style={{
+                              backgroundColor: assetColor + '30',
+                              borderWidth: isSelected ? 2 : 0,
+                              borderColor: isSelected
+                                ? assetColor
+                                : 'transparent',
+                            }}
+                          >
+                            <AssetIcon
+                              size={20}
+                              color={assetColor}
+                              strokeWidth={2.5}
+                            />
+                          </View>
+                          <Text
+                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                            numberOfLines={1}
+                          >
+                            {asset.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                </View>
+              </ScrollView>
+            </View>
+          )}
 
           {/* 납부일 */}
           <View className='mb-6'>
@@ -225,7 +395,12 @@ export function FixedExpenseForm({
           style={{ borderTopWidth: 1, borderTopColor: Colors.cream }}
         >
           {editingId && onDelete && (
-            <DeleteButton onPress={onDelete} label='고정지출 삭제' />
+            <DeleteButton
+              onPress={onDelete}
+              label={
+                form.type === 'transfer' ? '고정이체 삭제' : '고정지출 삭제'
+              }
+            />
           )}
           <SaveButton
             onPress={handleSavePress}

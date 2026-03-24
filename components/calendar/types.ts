@@ -3,13 +3,14 @@ import type { PaymentMethodFormData } from '@/constants/payment-method';
 
 export type TxFormData = {
   amount: string;
-  type: 'expense' | 'income';
+  type: 'expense' | 'income' | 'transfer';
   tag: 'me' | 'partner' | 'together' | null;
   memo: string;
   date: string;
   category_id: string | null;
   payment_method_id: string | null;
   asset_id: string | null;
+  target_asset_id: string | null;
 };
 
 export type ScheduleFormData = {
@@ -31,6 +32,7 @@ export type TxModalState = {
   pmEditingId: string | null;
   pmForm: PaymentMethodFormData;
   fixedExpenseId: string | null;
+  fixedExpenseType: 'expense' | 'transfer';
 };
 
 export type ScheduleModalState = {
@@ -74,6 +76,7 @@ export const INITIAL_TX_FORM: TxFormData = {
   category_id: null,
   payment_method_id: null,
   asset_id: null,
+  target_asset_id: null,
 };
 
 export const INITIAL_SCHEDULE_FORM: ScheduleFormData = {

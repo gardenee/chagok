@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/store/auth';
 import {
   fetchMonthTransactions,
+  fetchAssetTransfers,
   createTransaction,
   updateTransaction,
   deleteTransaction,
@@ -18,6 +19,7 @@ import { useNotificationSettingsStore } from '@/store/notification-settings';
 import type { Category, PaymentMethod, Asset } from '@/types/database';
 
 export type { TransactionRow, TransactionInput };
+export { fetchAssetTransfers };
 
 // 'YYYY-MM-DD' → [year, month(0-indexed)]
 function parseDateKey(date: string): [number, number] {
@@ -56,6 +58,18 @@ export function useMonthTransactions(year: number, month: number) {
     queryKey: ['transactions', year, month, coupleId],
     queryFn: () => fetchMonthTransactions(coupleId!, year, month),
     enabled: !!coupleId,
+  });
+}
+
+export function useAssetTransfers(
+  assetId: string,
+  year: number,
+  month: number,
+) {
+  return useQuery<TransactionRow[]>({
+    queryKey: ['asset-transfers', assetId, year, month],
+    queryFn: () => fetchAssetTransfers(assetId, year, month),
+    enabled: !!assetId,
   });
 }
 
@@ -100,6 +114,8 @@ export function useCreateTransaction() {
         paymentMethods?.find(p => p.id === input.payment_method_id) ?? null;
       const assets = queryClient.getQueryData<Asset[]>(['assets', coupleId]);
       const asset = assets?.find(a => a.id === input.asset_id) ?? null;
+      const targetAsset =
+        assets?.find(a => a.id === input.target_asset_id) ?? null;
 
       const optimistic: TransactionRow = {
         id: `__optimistic__${Date.now()}`,
@@ -113,6 +129,7 @@ export function useCreateTransaction() {
         category_id: input.category_id ?? null,
         payment_method_id: input.payment_method_id ?? null,
         asset_id: input.asset_id ?? null,
+        target_asset_id: input.target_asset_id ?? null,
         fixed_expense_id: input.fixed_expense_id ?? null,
         created_at: new Date().toISOString(),
         categories: category
@@ -120,6 +137,7 @@ export function useCreateTransaction() {
           : null,
         payment_methods: paymentMethod ? { name: paymentMethod.name } : null,
         assets: asset ? { name: asset.name } : null,
+        target_assets: targetAsset ? { name: targetAsset.name } : null,
       };
 
       queryClient.setQueryData<TransactionRow[]>(queryKey, old => [
@@ -209,6 +227,8 @@ export function useUpdateTransaction() {
         paymentMethods?.find(p => p.id === input.payment_method_id) ?? null;
       const assets = queryClient.getQueryData<Asset[]>(['assets', coupleId]);
       const asset = assets?.find(a => a.id === input.asset_id) ?? null;
+      const targetAsset =
+        assets?.find(a => a.id === input.target_asset_id) ?? null;
 
       const updatedItem: TransactionRow = {
         ...(existingItem ?? ({} as TransactionRow)),
@@ -221,12 +241,14 @@ export function useUpdateTransaction() {
         category_id: input.category_id ?? null,
         payment_method_id: input.payment_method_id ?? null,
         asset_id: input.asset_id ?? null,
+        target_asset_id: input.target_asset_id ?? null,
         fixed_expense_id: input.fixed_expense_id ?? null,
         categories: category
           ? { name: category.name, icon: category.icon, color: category.color }
           : null,
         payment_methods: paymentMethod ? { name: paymentMethod.name } : null,
         assets: asset ? { name: asset.name } : null,
+        target_assets: targetAsset ? { name: targetAsset.name } : null,
       };
 
       const [newYear, newMonth] = parseDateKey(input.date);

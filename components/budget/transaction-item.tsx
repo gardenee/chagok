@@ -38,10 +38,15 @@ export function TransactionItem({ transaction: t, tagLabel }: Props) {
       <Text
         className='font-ibm-bold text-base shrink-0'
         style={{
-          color: t.type === 'income' ? Colors.oliveDark : Colors.brownDarker,
+          color:
+            t.type === 'transfer'
+              ? Colors.lavender
+              : t.type === 'income'
+                ? Colors.oliveDark
+                : Colors.brownDarker,
         }}
       >
-        {t.type === 'income' ? '+' : '-'}
+        {t.type === 'income' ? '+' : t.type === 'transfer' ? '' : '-'}
         {formatAmount(t.amount)}원
       </Text>
     </View>

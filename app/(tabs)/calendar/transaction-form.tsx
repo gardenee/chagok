@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useCalendarStore } from '@/store/calendar';
 import { useAuthStore } from '@/store/auth';
@@ -44,6 +45,7 @@ import {
 } from '@/services/recurring-detection';
 import { useRecurringSuggestionStore } from '@/store/recurring-suggestion';
 import { useFixedExpensePrefillStore } from '@/store/fixed-expense-prefill';
+import { supabase } from '@/lib/supabase';
 import type { Asset, Category } from '@/types/database';
 
 type RecurringSuggestion = {
@@ -55,6 +57,7 @@ type RecurringSuggestion = {
 
 export default function TransactionFormScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const params = useLocalSearchParams<{
     date: string;
     editingId?: string;
@@ -66,6 +69,7 @@ export default function TransactionFormScreen() {
     category_id?: string;
     payment_method_id?: string;
     asset_id?: string;
+    target_asset_id?: string;
   }>();
 
   const { session, userProfile } = useAuthStore();
@@ -92,6 +96,7 @@ export default function TransactionFormScreen() {
   const bankCashAssets = allAssets.filter(
     (a: Asset) => a.type === 'bank' || a.type === 'cash',
   );
+  const transferableAssets = allAssets;
 
   const initialForm: TxFormData = {
     amount: params.amount ?? '',
@@ -102,6 +107,7 @@ export default function TransactionFormScreen() {
     category_id: params.category_id || null,
     payment_method_id: params.payment_method_id || null,
     asset_id: params.asset_id || null,
+    target_asset_id: params.target_asset_id || null,
   };
 
   const [txModal, setTxModal] = useState<TxModalState>({
@@ -116,6 +122,7 @@ export default function TransactionFormScreen() {
     pmEditingId: null,
     pmForm: INITIAL_PM_FORM,
     fixedExpenseId: params.fixedExpenseId ?? null,
+    fixedExpenseType: (params.type as 'expense' | 'transfer') ?? 'expense',
   });
 
   const setPendingReturnDate = useCalendarStore(s => s.setPendingReturnDate);
@@ -142,6 +149,8 @@ export default function TransactionFormScreen() {
 
   async function handleTxSave() {
     const amount = parseInt(txModal.form.amount.replace(/[^0-9]/g, ''), 10);
+    const isTransfer = txModal.form.type === 'transfer';
+
     if (params.editingId) {
       const noChange =
         txModal.form.amount === initialForm.amount &&
@@ -151,27 +160,56 @@ export default function TransactionFormScreen() {
         txModal.form.date === initialForm.date &&
         txModal.form.category_id === initialForm.category_id &&
         txModal.form.payment_method_id === initialForm.payment_method_id &&
-        txModal.form.asset_id === initialForm.asset_id;
+        txModal.form.asset_id === initialForm.asset_id &&
+        txModal.form.target_asset_id === initialForm.target_asset_id;
       if (noChange) {
         router.back();
         return;
       }
     }
+
     const payload = {
       amount,
       type: txModal.form.type,
       ...(txModal.form.tag ? { tag: txModal.form.tag } : {}),
       memo: txModal.form.memo.trim() || null,
       date: txModal.form.date || dateParam,
-      category_id: txModal.form.category_id,
-      payment_method_id: txModal.form.payment_method_id,
+      category_id: isTransfer ? null : txModal.form.category_id,
+      payment_method_id: isTransfer ? null : txModal.form.payment_method_id,
       asset_id: txModal.form.asset_id,
+      target_asset_id: isTransfer ? txModal.form.target_asset_id : null,
       fixed_expense_id: txModal.fixedExpenseId,
     };
+
     try {
-      if (params.editingId)
+      if (params.editingId) {
+        // 수정: 기존 이체 잔액 되돌리기 후 새로 적용
+        if (initialForm.type === 'transfer') {
+          await supabase.rpc('reverse_transfer', {
+            p_from_asset_id: initialForm.asset_id,
+            p_to_asset_id: initialForm.target_asset_id,
+            p_amount: parseInt(initialForm.amount.replace(/[^0-9]/g, ''), 10),
+          });
+        }
         await updateTx.mutateAsync({ id: params.editingId, ...payload });
-      else await createTx.mutateAsync(payload);
+      } else {
+        await createTx.mutateAsync(payload);
+      }
+
+      // 이체 저장 후 자산 잔액 자동 반영
+      if (isTransfer) {
+        await supabase.rpc('execute_transfer', {
+          p_from_asset_id: payload.asset_id ?? null,
+          p_to_asset_id: payload.target_asset_id ?? null,
+          p_amount: amount,
+        });
+        // 자산 캐시 무효화
+        const coupleId = userProfile?.couple_id;
+        if (coupleId) {
+          queryClient.invalidateQueries({ queryKey: ['assets', coupleId] });
+        }
+      }
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setPendingReturnDate(txModal.form.date || dateParam);
 
@@ -265,6 +303,23 @@ export default function TransactionFormScreen() {
         style: 'destructive',
         onPress: async () => {
           try {
+            // 이체 삭제 시 자산 잔액 되돌리기
+            if (initialForm.type === 'transfer') {
+              await supabase.rpc('reverse_transfer', {
+                p_from_asset_id: initialForm.asset_id,
+                p_to_asset_id: initialForm.target_asset_id,
+                p_amount: parseInt(
+                  initialForm.amount.replace(/[^0-9]/g, ''),
+                  10,
+                ),
+              });
+              const coupleId = userProfile?.couple_id;
+              if (coupleId) {
+                queryClient.invalidateQueries({
+                  queryKey: ['assets', coupleId],
+                });
+              }
+            }
             await deleteTx.mutateAsync(id);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             router.back();
@@ -443,6 +498,7 @@ export default function TransactionFormScreen() {
         categories={categories}
         paymentMethods={paymentMethods}
         bankCashAssets={bankCashAssets}
+        allAssets={transferableAssets}
         transactions={transactions}
         tagOptions={tagOptions}
         isTxSaving={isTxSaving}

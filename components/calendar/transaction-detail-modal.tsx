@@ -16,7 +16,7 @@ import { useRef } from 'react';
 import { Trash2, Send } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { formatAmount } from '@/utils/format';
-import { ColorPill, TagPill } from '@/components/ui/color-pill';
+import { ColorPill, TagPill, Pill } from '@/components/ui/color-pill';
 import { formatTime } from './types';
 import type { TransactionRow } from '@/hooks/use-transactions';
 import type { CommentRow } from '@/hooks/use-comments';
@@ -76,6 +76,7 @@ export function TransactionDetailModal({
   ).current;
 
   const isExpense = detailTx?.type === 'expense';
+  const isTransfer = detailTx?.type === 'transfer';
 
   return (
     <Modal
@@ -140,16 +141,32 @@ export function TransactionDetailModal({
             <View className='flex flex-row justify-start items-center gap-2'>
               {/* 금액 */}
               <Text
-                className={`font-ibm-bold text-3xl ${isExpense ? 'text-peach-darker' : 'text-olive-darker'}`}
+                className={`font-ibm-bold text-3xl ${isTransfer ? 'text-lavender-darker' : isExpense ? 'text-peach-darker' : 'text-olive-darker'}`}
               >
-                {isExpense ? '-' : '+'}
+                {isTransfer ? '' : isExpense ? '-' : '+'}
                 {formatAmount(detailTx?.amount ?? 0)}원
               </Text>
 
-              {/* 태그 영역: 고정지출/카테고리/소비주체 */}
+              {/* 태그 영역 */}
               {detailTx && (
                 <View className='flex-row items-center gap-1'>
-                  {detailTx.fixed_expense_id ? (
+                  {isTransfer ? (
+                    <>
+                      <ColorPill label='이체' color={Colors.lavender} />
+                      {detailTx.assets && (
+                        <Pill
+                          label={`${detailTx.assets.name} →`}
+                          color='#A3A3A3'
+                        />
+                      )}
+                      {detailTx.target_assets && (
+                        <Pill
+                          label={detailTx.target_assets.name}
+                          color='#A3A3A3'
+                        />
+                      )}
+                    </>
+                  ) : detailTx.fixed_expense_id ? (
                     <>
                       <ColorPill label='고정지출' color={Colors.peach} />
                       {detailTx.categories && (
@@ -181,6 +198,12 @@ export function TransactionDetailModal({
                         />
                       )}
                     </>
+                  )}
+                  {!isTransfer && detailTx.payment_methods && (
+                    <Pill
+                      label={detailTx.payment_methods.name}
+                      color='#A3A3A3'
+                    />
                   )}
                 </View>
               )}

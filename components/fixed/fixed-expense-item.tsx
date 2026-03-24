@@ -1,15 +1,17 @@
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Repeat } from 'lucide-react-native';
+import { Repeat, ArrowLeftRight } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { IconBox } from '@/components/ui/icon-box';
 import { CategoryIcon } from '@/components/budget/category-icon';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
 import { formatAmount } from '@/utils/format';
-import type { FixedExpense, Category } from '@/types/database';
+import type { FixedExpense, Category, Asset } from '@/types/database';
 
 type Props = {
   item: FixedExpense;
-  category: Category | undefined;
+  category?: Category | undefined;
+  fromAsset?: Asset | undefined;
+  toAsset?: Asset | undefined;
   onEdit: (item: FixedExpense) => void;
   onDelete: (id: string, name: string) => void;
 };
@@ -23,8 +25,18 @@ function dueLabel(item: FixedExpense): string {
   return `매월 ${dayText}`;
 }
 
-export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
-  const iconColor = category?.color ?? Colors.peach;
+export function FixedExpenseItem({
+  item,
+  category,
+  fromAsset,
+  toAsset,
+  onEdit,
+  onDelete,
+}: Props) {
+  const isTransfer = item.type === 'transfer';
+  const iconColor = isTransfer
+    ? Colors.lavender
+    : (category?.color ?? Colors.peach);
 
   return (
     <SwipeableDeleteRow onDelete={() => onDelete(item.id, item.name)}>
@@ -32,7 +44,9 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
         <View className='bg-white rounded-3xl px-4 py-4 flex-row items-center gap-3.5'>
           {/* 아이콘 */}
           <IconBox color={iconColor} size='md'>
-            {category ? (
+            {isTransfer ? (
+              <ArrowLeftRight size={19} color={iconColor} strokeWidth={2.5} />
+            ) : category ? (
               <CategoryIcon
                 iconKey={category.icon}
                 color={iconColor}
@@ -43,7 +57,7 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
             )}
           </IconBox>
 
-          {/* 이름 + 날짜 + 카테고리 */}
+          {/* 이름 + 날짜 + 카테고리/자산 */}
           <View className='flex-1'>
             <Text className='font-ibm-semibold text-base text-neutral-800'>
               {item.name}
@@ -52,7 +66,12 @@ export function FixedExpenseItem({ item, category, onEdit, onDelete }: Props) {
               <Text className='font-ibm-regular text-sm text-neutral-600'>
                 {dueLabel(item)}
               </Text>
-              {category && (
+              {isTransfer && (fromAsset || toAsset) && (
+                <Text className='font-ibm-regular text-sm text-neutral-600'>
+                  · {fromAsset?.name ?? '?'} → {toAsset?.name ?? '?'}
+                </Text>
+              )}
+              {!isTransfer && category && (
                 <Text className='font-ibm-regular text-sm text-neutral-600'>
                   · {category.name}
                 </Text>

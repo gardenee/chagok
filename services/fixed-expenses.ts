@@ -2,12 +2,15 @@ import { supabase } from '@/lib/supabase';
 import type { FixedExpense } from '@/types/database';
 
 export type FixedExpenseInput = {
+  type?: 'expense' | 'transfer';
   name: string;
   amount: number;
   due_day: number;
   due_day_mode: 'day' | 'eom';
   business_day_adjust: 'none' | 'prev' | 'next';
   category_id?: string | null;
+  from_asset_id?: string | null;
+  to_asset_id?: string | null;
 };
 
 export async function fetchFixedExpenses(
