@@ -20,8 +20,8 @@ function dueLabel(item: FixedExpense): string {
   const dayMode = item.due_day_mode ?? 'day';
   const adjust = item.business_day_adjust ?? 'none';
   const dayText = dayMode === 'eom' ? '말일' : `${item.due_day}일`;
-  if (adjust === 'prev') return `매월 ${dayText} (직전 영업일)`;
-  if (adjust === 'next') return `매월 ${dayText} (직후 영업일)`;
+  if (adjust === 'prev') return `매월 ${dayText} (전)`;
+  if (adjust === 'next') return `매월 ${dayText} (후)`;
   return `매월 ${dayText}`;
 }
 
@@ -62,21 +62,17 @@ export function FixedExpenseItem({
             <Text className='font-ibm-semibold text-base text-neutral-800'>
               {item.name}
             </Text>
-            <View className='flex-row items-center gap-1.5 mt-1'>
-              <Text className='font-ibm-regular text-sm text-neutral-600'>
-                {dueLabel(item)}
-              </Text>
-              {isTransfer && (fromAsset || toAsset) && (
-                <Text className='font-ibm-regular text-sm text-neutral-600'>
-                  · {fromAsset?.name ?? '?'} → {toAsset?.name ?? '?'}
-                </Text>
-              )}
-              {!isTransfer && category && (
-                <Text className='font-ibm-regular text-sm text-neutral-600'>
-                  · {category.name}
-                </Text>
-              )}
-            </View>
+            <Text
+              className='font-ibm-regular text-sm text-neutral-600 mt-1'
+              numberOfLines={1}
+            >
+              {dueLabel(item)}
+              {isTransfer && (fromAsset || toAsset)
+                ? ` · ${fromAsset?.name ?? '?'} → ${toAsset?.name ?? '?'}`
+                : !isTransfer && category
+                  ? ` · ${category.name}`
+                  : ''}
+            </Text>
           </View>
 
           {/* 금액 */}

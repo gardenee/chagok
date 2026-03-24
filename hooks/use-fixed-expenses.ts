@@ -61,6 +61,45 @@ export function useCreateFixedExpense() {
       if (!coupleId) throw new Error('로그인이 필요합니다');
       return createFixedExpense(coupleId, input);
     },
+    onMutate: async (input: FixedExpenseInput) => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      await queryClient.cancelQueries({
+        queryKey: ['fixed-expenses', coupleId],
+      });
+      const previous = queryClient.getQueryData<FixedExpense[]>([
+        'fixed-expenses',
+        coupleId,
+      ]);
+      const tempItem: FixedExpense = {
+        id: `temp-${Date.now()}`,
+        couple_id: coupleId,
+        type: input.type ?? 'expense',
+        name: input.name,
+        amount: input.amount,
+        due_day: input.due_day,
+        due_day_mode: input.due_day_mode,
+        business_day_adjust: input.business_day_adjust,
+        category_id: input.category_id ?? null,
+        from_asset_id: input.from_asset_id ?? null,
+        to_asset_id: input.to_asset_id ?? null,
+        created_at: new Date().toISOString(),
+      };
+      queryClient.setQueryData<FixedExpense[]>(
+        ['fixed-expenses', coupleId],
+        old => sortByDue([...(old ?? []), tempItem]),
+      );
+      return { previous };
+    },
+    onError: (_err, _input, context) => {
+      const coupleId = userProfile?.couple_id;
+      if (coupleId && context?.previous) {
+        queryClient.setQueryData(
+          ['fixed-expenses', coupleId],
+          context.previous,
+        );
+      }
+    },
     onSuccess: async newItem => {
       const coupleId = userProfile?.couple_id;
       const userId = session?.user.id;
@@ -68,7 +107,12 @@ export function useCreateFixedExpense() {
 
       queryClient.setQueryData<FixedExpense[]>(
         ['fixed-expenses', coupleId],
-        old => sortByDue([...(old ?? []), newItem]),
+        old =>
+          sortByDue(
+            (old ?? []).map(item =>
+              item.id.startsWith('temp-') ? newItem : item,
+            ),
+          ),
       );
 
       if (userId) {
@@ -95,6 +139,7 @@ export function useCreateFixedExpense() {
         ]);
       }
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['fixed-expenses', coupleId] });
     },
   });
 }
@@ -109,6 +154,36 @@ export function useUpdateFixedExpense() {
       ...input
     }: Partial<FixedExpenseInput> & { id: string }) =>
       updateFixedExpense(id, input),
+    onMutate: async ({ id, ...input }) => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
+      await queryClient.cancelQueries({
+        queryKey: ['fixed-expenses', coupleId],
+      });
+      const previous = queryClient.getQueryData<FixedExpense[]>([
+        'fixed-expenses',
+        coupleId,
+      ]);
+      queryClient.setQueryData<FixedExpense[]>(
+        ['fixed-expenses', coupleId],
+        old =>
+          sortByDue(
+            (old ?? []).map(item =>
+              item.id === id ? { ...item, ...input } : item,
+            ),
+          ),
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      const coupleId = userProfile?.couple_id;
+      if (coupleId && context?.previous) {
+        queryClient.setQueryData(
+          ['fixed-expenses', coupleId],
+          context.previous,
+        );
+      }
+    },
     onSuccess: async (updatedItem, variables) => {
       const coupleId = userProfile?.couple_id;
       const userId = session?.user.id;
@@ -129,10 +204,7 @@ export function useUpdateFixedExpense() {
       const startOfMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
 
       if (userId) {
-        // 오늘 이후 기존 트랜잭션 삭제 (날짜 변경 대응)
         await deleteFutureFixedTransactions(updatedItem.id, todayStr);
-
-        // 현재달 + 다음달 재 materialization
         const currentYear = today.getFullYear();
         const currentMonth = today.getMonth();
         const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
@@ -155,7 +227,6 @@ export function useUpdateFixedExpense() {
         ]);
       }
 
-      // 이번달 이미 지난 내역 컨텐츠 동기화 (이름/금액/카테고리)
       const { name, amount, category_id } = variables;
       await updateLinkedTransactions(
         updatedItem.id,
@@ -164,6 +235,7 @@ export function useUpdateFixedExpense() {
       );
 
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['fixed-expenses', coupleId] });
     },
   });
 }
@@ -174,14 +246,36 @@ export function useDeleteFixedExpense() {
 
   return useMutation({
     mutationFn: (id: string) => deleteFixedExpense(id),
-    onSuccess: (_, id) => {
+    onMutate: async (id: string) => {
       const coupleId = userProfile?.couple_id;
       if (!coupleId) return;
+      await queryClient.cancelQueries({
+        queryKey: ['fixed-expenses', coupleId],
+      });
+      const previous = queryClient.getQueryData<FixedExpense[]>([
+        'fixed-expenses',
+        coupleId,
+      ]);
       queryClient.setQueryData<FixedExpense[]>(
         ['fixed-expenses', coupleId],
         old => (old ?? []).filter(item => item.id !== id),
       );
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      const coupleId = userProfile?.couple_id;
+      if (coupleId && context?.previous) {
+        queryClient.setQueryData(
+          ['fixed-expenses', coupleId],
+          context.previous,
+        );
+      }
+    },
+    onSuccess: () => {
+      const coupleId = userProfile?.couple_id;
+      if (!coupleId) return;
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['fixed-expenses', coupleId] });
     },
   });
 }

@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native';
-import { CircleMinus, ShieldCheck, Landmark } from 'lucide-react-native';
+import { CircleMinus, Landmark } from 'lucide-react-native';
 import { ItemCard } from '@/components/ui/item-card';
 import { IconBox } from '@/components/ui/icon-box';
 import { SwipeableDeleteRow } from '@/components/ui/swipeable-delete-row';
@@ -24,15 +24,10 @@ export function AssetGroups({
   onDelete,
   onPress,
 }: Props) {
-  const regularAssets = assets.filter(
-    a => a.type !== 'loan' && a.type !== 'insurance',
-  );
+  const regularAssets = assets.filter(a => a.type !== 'loan');
   const loanAssets = assets.filter(a => a.type === 'loan');
-  const insuranceAssets = assets.filter(a => a.type === 'insurance');
 
-  const assetGroups = ASSET_TYPE_OPTIONS.filter(
-    t => t.key !== 'loan' && t.key !== 'insurance',
-  )
+  const assetGroups = ASSET_TYPE_OPTIONS.filter(t => t.key !== 'loan')
     .map(t => ({
       ...t,
       items: regularAssets.filter(a => a.type === t.key),
@@ -133,39 +128,6 @@ export function AssetGroups({
                   </Text>
                   <Text className='font-ibm-bold text-base text-peach-dark'>
                     {a.amount != null ? `-${formatAmount(a.amount)}원` : ''}
-                  </Text>
-                </ItemCard>
-              </SwipeableDeleteRow>
-            ))}
-          </View>
-        </View>
-      )}
-
-      {/* 보험 섹션 */}
-      {insuranceAssets.length > 0 && (
-        <View>
-          <Text className='font-ibm-bold text-xl text-neutral-800 mb-2.5'>
-            보험
-          </Text>
-          <View className='gap-2'>
-            {insuranceAssets.map(a => (
-              <SwipeableDeleteRow key={a.id} onDelete={() => onDelete(a.id)}>
-                <ItemCard onPress={() => onEdit(a)}>
-                  <IconBox
-                    color={getAssetTypeOption('insurance').color}
-                    size='md'
-                  >
-                    <ShieldCheck
-                      size={20}
-                      color={getAssetTypeOption('insurance').color}
-                      strokeWidth={2.5}
-                    />
-                  </IconBox>
-                  <Text className='flex-1 font-ibm-semibold text-base text-neutral-800'>
-                    {a.name}
-                  </Text>
-                  <Text className='font-ibm-bold text-base text-neutral-800'>
-                    {a.amount != null ? `${formatAmount(a.amount)}원` : ''}
                   </Text>
                 </ItemCard>
               </SwipeableDeleteRow>

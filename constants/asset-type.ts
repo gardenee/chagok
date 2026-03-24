@@ -6,7 +6,6 @@ import {
   Building2,
   Wallet,
   CircleMinus,
-  ShieldCheck,
   Car,
   Sprout,
   type LucideIcon,
@@ -28,7 +27,6 @@ export const ASSET_TYPE_OPTIONS: AssetTypeOption[] = [
   { key: 'vehicle', label: '차량', Icon: Car, color: '#8ECAE6' },
   { key: 'pension', label: '연금', Icon: Sprout, color: '#95D5B2' },
   { key: 'loan', label: '대출', Icon: CircleMinus, color: '#F28482' },
-  { key: 'insurance', label: '보험', Icon: ShieldCheck, color: '#8ECAE6' },
   { key: 'other', label: '기타', Icon: Wallet, color: '#FF85A1' },
 ];
 

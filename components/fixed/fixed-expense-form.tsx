@@ -72,10 +72,15 @@ export function FixedExpenseForm({
   onCatCreate,
   onCatMgmt,
 }: Props) {
-  const [errors, setErrors] = useState({ name: false, amountMsg: '' });
+  const [errors, setErrors] = useState({
+    name: false,
+    amountMsg: '',
+    fromAsset: false,
+    toAsset: false,
+  });
 
   useEffect(() => {
-    setErrors({ name: false, amountMsg: '' });
+    setErrors({ name: false, amountMsg: '', fromAsset: false, toAsset: false });
   }, [editingId]);
 
   function handleSavePress() {
@@ -84,8 +89,15 @@ export function FixedExpenseForm({
     const amountMsg =
       errors.amountMsg ||
       (!form.amount || parsed <= 0 ? '금액을 입력해주세요' : '');
-    if (nameError || amountMsg) {
-      setErrors({ name: nameError, amountMsg });
+    const fromAssetError = form.type === 'transfer' && !form.from_asset_id;
+    const toAssetError = form.type === 'transfer' && !form.to_asset_id;
+    if (nameError || amountMsg || fromAssetError || toAssetError) {
+      setErrors({
+        name: nameError,
+        amountMsg,
+        fromAsset: fromAssetError,
+        toAsset: toAssetError,
+      });
       return;
     }
     onSave();
@@ -145,9 +157,7 @@ export function FixedExpenseForm({
             />
           )}
 
-          <FormLabel required className='text-neutral-700'>
-            이름
-          </FormLabel>
+          <FormLabel required>이름</FormLabel>
           <ModalTextInput
             value={form.name}
             onChangeText={v => {
@@ -165,9 +175,7 @@ export function FixedExpenseForm({
             error={errors.name}
           />
 
-          <FormLabel required className='text-neutral-700'>
-            금액
-          </FormLabel>
+          <FormLabel required>금액</FormLabel>
           <AmountInput
             value={form.amount}
             onChangeText={v => {
@@ -207,9 +215,9 @@ export function FixedExpenseForm({
           {/* 자산 picker (이체일 때) */}
           {form.type === 'transfer' && (
             <View className='mb-4'>
-              <Text className='font-ibm-semibold text-base text-neutral-700 mb-2 ml-1'>
-                출처 계좌
-              </Text>
+              <FormLabel required error={errors.fromAsset}>
+                어디서
+              </FormLabel>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -217,60 +225,64 @@ export function FixedExpenseForm({
                 className='mb-4'
               >
                 <View className='flex-row gap-2 pr-2'>
-                  {assets.map(asset => {
-                    const isSelected = form.from_asset_id === asset.id;
-                    const { Icon: AssetIcon, color: assetColor } =
-                      getAssetTypeOption(asset.type);
-                    return (
-                      <TouchableOpacity
-                        key={asset.id}
-                        onPress={() => {
-                          onChange({
-                            ...form,
-                            from_asset_id: isSelected ? null : asset.id,
-                            to_asset_id:
-                              form.to_asset_id === asset.id
-                                ? null
-                                : form.to_asset_id,
-                          });
-                          Haptics.impactAsync(
-                            Haptics.ImpactFeedbackStyle.Light,
-                          );
-                        }}
-                        className='items-center gap-1'
-                        activeOpacity={0.7}
-                      >
-                        <View
-                          className='w-12 h-12 rounded-2xl items-center justify-center'
-                          style={{
-                            backgroundColor: assetColor + '30',
-                            borderWidth: isSelected ? 2 : 0,
-                            borderColor: isSelected
-                              ? assetColor
-                              : 'transparent',
+                  {assets
+                    .filter(a => a.type === 'bank' || a.type === 'cash')
+                    .map(asset => {
+                      const isSelected = form.from_asset_id === asset.id;
+                      const { Icon: AssetIcon, color: assetColor } =
+                        getAssetTypeOption(asset.type);
+                      return (
+                        <TouchableOpacity
+                          key={asset.id}
+                          onPress={() => {
+                            onChange({
+                              ...form,
+                              from_asset_id: isSelected ? null : asset.id,
+                              to_asset_id:
+                                form.to_asset_id === asset.id
+                                  ? null
+                                  : form.to_asset_id,
+                            });
+                            if (!isSelected)
+                              setErrors(e => ({ ...e, fromAsset: false }));
+                            Haptics.impactAsync(
+                              Haptics.ImpactFeedbackStyle.Light,
+                            );
                           }}
+                          className='items-center gap-1'
+                          activeOpacity={0.7}
                         >
-                          <AssetIcon
-                            size={20}
-                            color={assetColor}
-                            strokeWidth={2.5}
-                          />
-                        </View>
-                        <Text
-                          className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                          numberOfLines={1}
-                        >
-                          {asset.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                          <View
+                            className='w-12 h-12 rounded-2xl items-center justify-center'
+                            style={{
+                              backgroundColor: assetColor + '30',
+                              borderWidth: isSelected ? 2 : 0,
+                              borderColor: isSelected
+                                ? assetColor
+                                : 'transparent',
+                            }}
+                          >
+                            <AssetIcon
+                              size={20}
+                              color={assetColor}
+                              strokeWidth={2.5}
+                            />
+                          </View>
+                          <Text
+                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                            numberOfLines={1}
+                          >
+                            {asset.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
                 </View>
               </ScrollView>
 
-              <Text className='font-ibm-semibold text-base text-neutral-700 mb-2 ml-1'>
-                목적지 계좌
-              </Text>
+              <FormLabel required error={errors.toAsset}>
+                어디로
+              </FormLabel>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -278,7 +290,14 @@ export function FixedExpenseForm({
               >
                 <View className='flex-row gap-2 pr-2'>
                   {assets
-                    .filter(a => a.id !== form.from_asset_id)
+                    .filter(
+                      a =>
+                        (a.type === 'bank' ||
+                          a.type === 'saving' ||
+                          a.type === 'investment' ||
+                          a.type === 'loan') &&
+                        a.id !== form.from_asset_id,
+                    )
                     .map(asset => {
                       const isSelected = form.to_asset_id === asset.id;
                       const { Icon: AssetIcon, color: assetColor } =
@@ -291,6 +310,8 @@ export function FixedExpenseForm({
                               ...form,
                               to_asset_id: isSelected ? null : asset.id,
                             });
+                            if (!isSelected)
+                              setErrors(e => ({ ...e, toAsset: false }));
                             Haptics.impactAsync(
                               Haptics.ImpactFeedbackStyle.Light,
                             );

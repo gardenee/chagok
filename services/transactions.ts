@@ -212,17 +212,22 @@ export async function materializeFixedExpenses(
   );
   const toInsert = candidates
     .filter(({ item, date }) => !existingKeys.has(`${item.id}|${date}`))
-    .map(({ item, date }) => ({
-      couple_id: coupleId,
-      user_id: userId,
-      category_id: item.category_id ?? null,
-      amount: item.amount,
-      type: 'expense' as const,
-      tag: 'together' as const,
-      date,
-      fixed_expense_id: item.id,
-      memo: item.name,
-    }));
+    .map(({ item, date }) => {
+      const isTransfer = item.type === 'transfer';
+      return {
+        couple_id: coupleId,
+        user_id: userId,
+        category_id: isTransfer ? null : (item.category_id ?? null),
+        amount: item.amount,
+        type: (item.type ?? 'expense') as 'expense' | 'transfer',
+        tag: 'together' as const,
+        date,
+        fixed_expense_id: item.id,
+        memo: item.name,
+        asset_id: isTransfer ? (item.from_asset_id ?? null) : null,
+        target_asset_id: isTransfer ? (item.to_asset_id ?? null) : null,
+      };
+    });
   if (toInsert.length === 0) return;
 
   const { error } = await supabase.from('transactions').insert(toInsert);

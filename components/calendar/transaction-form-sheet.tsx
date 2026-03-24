@@ -268,7 +268,7 @@ export function TransactionFormSheet({
             {txModal.form.type === 'transfer' && (
               <View className='mb-4'>
                 <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-                  출처 계좌
+                  어디서
                 </Text>
                 <ScrollView
                   horizontal
@@ -277,62 +277,64 @@ export function TransactionFormSheet({
                   className='mb-4'
                 >
                   <View className='flex-row gap-2 pr-2'>
-                    {allAssets.map(asset => {
-                      const isSelected = txModal.form.asset_id === asset.id;
-                      const { Icon: AssetIcon, color: assetColor } =
-                        getAssetTypeOption(asset.type);
-                      return (
-                        <TouchableOpacity
-                          key={asset.id}
-                          onPress={() => {
-                            setTxModal(s => ({
-                              ...s,
-                              form: {
-                                ...s.form,
-                                asset_id: isSelected ? null : asset.id,
-                                target_asset_id:
-                                  s.form.target_asset_id === asset.id
-                                    ? null
-                                    : s.form.target_asset_id,
-                              },
-                            }));
-                            Haptics.impactAsync(
-                              Haptics.ImpactFeedbackStyle.Light,
-                            );
-                          }}
-                          className='items-center gap-1'
-                          activeOpacity={0.7}
-                        >
-                          <View
-                            className='w-12 h-12 rounded-2xl items-center justify-center'
-                            style={{
-                              backgroundColor: assetColor + '30',
-                              borderWidth: isSelected ? 2 : 0,
-                              borderColor: isSelected
-                                ? assetColor
-                                : 'transparent',
+                    {allAssets
+                      .filter(a => a.type === 'bank' || a.type === 'cash')
+                      .map(asset => {
+                        const isSelected = txModal.form.asset_id === asset.id;
+                        const { Icon: AssetIcon, color: assetColor } =
+                          getAssetTypeOption(asset.type);
+                        return (
+                          <TouchableOpacity
+                            key={asset.id}
+                            onPress={() => {
+                              setTxModal(s => ({
+                                ...s,
+                                form: {
+                                  ...s.form,
+                                  asset_id: isSelected ? null : asset.id,
+                                  target_asset_id:
+                                    s.form.target_asset_id === asset.id
+                                      ? null
+                                      : s.form.target_asset_id,
+                                },
+                              }));
+                              Haptics.impactAsync(
+                                Haptics.ImpactFeedbackStyle.Light,
+                              );
                             }}
+                            className='items-center gap-1'
+                            activeOpacity={0.7}
                           >
-                            <AssetIcon
-                              size={20}
-                              color={assetColor}
-                              strokeWidth={2.5}
-                            />
-                          </View>
-                          <Text
-                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                            numberOfLines={1}
-                          >
-                            {asset.name}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
+                            <View
+                              className='w-12 h-12 rounded-2xl items-center justify-center'
+                              style={{
+                                backgroundColor: assetColor + '30',
+                                borderWidth: isSelected ? 2 : 0,
+                                borderColor: isSelected
+                                  ? assetColor
+                                  : 'transparent',
+                              }}
+                            >
+                              <AssetIcon
+                                size={20}
+                                color={assetColor}
+                                strokeWidth={2.5}
+                              />
+                            </View>
+                            <Text
+                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                              numberOfLines={1}
+                            >
+                              {asset.name}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
                   </View>
                 </ScrollView>
 
                 <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-                  목적지 계좌
+                  어디로
                 </Text>
                 <ScrollView
                   horizontal
@@ -341,7 +343,11 @@ export function TransactionFormSheet({
                 >
                   <View className='flex-row gap-2 pr-2'>
                     {allAssets
-                      .filter(a => a.id !== txModal.form.asset_id)
+                      .filter(
+                        a =>
+                          a.type !== 'insurance' &&
+                          a.id !== txModal.form.asset_id,
+                      )
                       .map(asset => {
                         const isSelected =
                           txModal.form.target_asset_id === asset.id;
