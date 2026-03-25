@@ -4,6 +4,7 @@ import type { Schedule } from '@/types/database';
 export type ScheduleInput = {
   title: string;
   date: string;
+  end_date?: string | null;
   start_time?: string | null;
   tag: 'me' | 'partner' | 'together';
 };
@@ -20,8 +21,8 @@ export async function fetchMonthSchedules(
     .from('schedules')
     .select('*')
     .eq('couple_id', coupleId)
-    .gte('date', startDate)
     .lte('date', endDate)
+    .or(`and(end_date.is.null,date.gte.${startDate}),end_date.gte.${startDate}`)
     .order('created_at', { ascending: true });
   if (error) throw error;
   return data;

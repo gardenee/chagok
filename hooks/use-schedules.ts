@@ -84,6 +84,7 @@ export function useCreateSchedule() {
         user_id: userId,
         title: input.title,
         date: input.date,
+        end_date: input.end_date ?? null,
         start_time: input.start_time ?? null,
         tag: input.tag,
         created_at: new Date().toISOString(),
@@ -136,6 +137,7 @@ export function useUpdateSchedule() {
         id,
         title: input.title,
         date: input.date,
+        end_date: input.end_date ?? null,
         start_time: input.start_time ?? null,
         tag: input.tag,
       };

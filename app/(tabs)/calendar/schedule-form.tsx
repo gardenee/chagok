@@ -21,6 +21,7 @@ export default function ScheduleFormScreen() {
     title?: string;
     tag?: string;
     time?: string;
+    end_date?: string;
   }>();
 
   const { session, userProfile } = useAuthStore();
@@ -40,6 +41,8 @@ export default function ScheduleFormScreen() {
     title: params.title ?? '',
     tag: (params.tag as ScheduleFormData['tag']) ?? null,
     date: params.date ?? '',
+    end_date:
+      params.end_date && params.end_date !== 'none' ? params.end_date : null,
     time: params.time && params.time !== 'none' ? params.time : null,
   };
 
@@ -58,6 +61,7 @@ export default function ScheduleFormScreen() {
         form.title.trim() === initialForm.title.trim() &&
         form.tag === initialForm.tag &&
         form.date === initialForm.date &&
+        form.end_date === initialForm.end_date &&
         form.time === initialForm.time;
       if (noChange) {
         router.back();
@@ -69,6 +73,7 @@ export default function ScheduleFormScreen() {
       title: form.title.trim(),
       tag: form.tag ?? ('me' as const),
       date: form.date,
+      end_date: form.end_date ?? null,
       start_time: form.time ?? null,
     };
     try {

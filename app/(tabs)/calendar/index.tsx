@@ -537,8 +537,20 @@ export default function CalendarTab() {
   const schedulesByDate = useMemo(() => {
     const map: Record<string, Schedule[]> = {};
     for (const s of schedules) {
-      if (!map[s.date]) map[s.date] = [];
-      map[s.date].push(s);
+      if (!s.end_date) {
+        if (!map[s.date]) map[s.date] = [];
+        map[s.date].push(s);
+      } else {
+        const start = new Date(s.date);
+        const end = new Date(s.end_date);
+        const cur = new Date(start);
+        while (cur <= end) {
+          const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
+          if (!map[key]) map[key] = [];
+          map[key].push(s);
+          cur.setDate(cur.getDate() + 1);
+        }
+      }
     }
     return map;
   }, [schedules]);
@@ -563,11 +575,11 @@ export default function CalendarTab() {
   const selectedSchedules = useMemo(() => {
     const list = schedulesByDate[selectedDate] ?? [];
     return [...list].sort((a, b) => {
-      const aTime = a.start_time ?? null;
-      const bTime = b.start_time ?? null;
-      if (aTime && bTime) return aTime.localeCompare(bTime);
-      if (aTime) return -1;
-      if (bTime) return 1;
+      const aRank = a.start_time ? 0 : a.end_date ? 1 : 2;
+      const bRank = b.start_time ? 0 : b.end_date ? 1 : 2;
+      if (aRank !== bRank) return aRank - bRank;
+      if (a.start_time && b.start_time)
+        return a.start_time.localeCompare(b.start_time);
       return 0;
     });
   }, [schedulesByDate, selectedDate]);
@@ -651,6 +663,7 @@ export default function CalendarTab() {
         title: s.title,
         tag: s.tag,
         date: s.date,
+        end_date: s.end_date ?? 'none',
         time: s.start_time ?? 'none',
       },
     });
@@ -1028,7 +1041,24 @@ export default function CalendarTab() {
                       </Text>
                     </View>
 
-                    {s.start_time && (
+                    {s.end_date ? (
+                      <View className='flex-1 justify-end flex-row items-center gap-1 mt-0.5'>
+                        <Text className='font-ibm-regular text-sm text-neutral-500'>
+                          {(() => {
+                            const [sy, sm, sd] = s.date.split('-').map(Number);
+                            const [ey, em, ed] = s.end_date
+                              .split('-')
+                              .map(Number);
+                            const startLabel = `${sm}월 ${sd}일`;
+                            const endLabel =
+                              sy === ey && sm === em
+                                ? `${ed}일`
+                                : `${em}월 ${ed}일`;
+                            return `${startLabel} ~ ${endLabel}`;
+                          })()}
+                        </Text>
+                      </View>
+                    ) : s.start_time ? (
                       <View className='flex-1 justify-end flex-row items-center gap-1 mt-0.5'>
                         <Clock
                           size={12}
@@ -1039,7 +1069,7 @@ export default function CalendarTab() {
                           {s.start_time}
                         </Text>
                       </View>
-                    )}
+                    ) : null}
                   </ItemCard>
                 ))}
               </View>

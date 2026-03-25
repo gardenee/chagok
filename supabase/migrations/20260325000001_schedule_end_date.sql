@@ -1,0 +1,1 @@
+ALTER TABLE schedules ADD COLUMN IF NOT EXISTS end_date TEXT NULL;

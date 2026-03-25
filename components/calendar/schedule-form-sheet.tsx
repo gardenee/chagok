@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
 } from 'react-native';
-import { Clock, X } from 'lucide-react-native';
+import { Clock, X, CalendarDays } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { SaveButton } from '@/components/ui/save-button';
 import { DeleteButton } from '@/components/ui/delete-button';
@@ -29,6 +29,8 @@ interface ScheduleFormSheetProps {
   isSaving: boolean;
 }
 
+type DatePickerTarget = 'start' | 'end';
+
 export function ScheduleFormSheet({
   scheduleModal,
   onClose,
@@ -41,7 +43,8 @@ export function ScheduleFormSheet({
   const { form } = scheduleModal;
   const [titleError, setTitleError] = useState(false);
   const [tagError, setTagError] = useState(false);
-  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [datePickerTarget, setDatePickerTarget] =
+    useState<DatePickerTarget | null>(null);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
 
   useEffect(() => {
@@ -104,9 +107,69 @@ export function ScheduleFormSheet({
           <FormLabel>날짜</FormLabel>
           <DatePickerButton
             dateStr={form.date}
-            onPress={() => setDatePickerVisible(true)}
-            className='mb-6'
+            onPress={() => setDatePickerTarget('start')}
+            className='mb-2'
           />
+
+          {/* 종료일 */}
+          {form.end_date === null ? (
+            <TouchableOpacity
+              onPress={() => {
+                onFormChange({ ...form, end_date: form.date });
+                setDatePickerTarget('end');
+              }}
+              className='bg-neutral-100 rounded-2xl px-5 flex-row items-center h-[48px] mb-6'
+              activeOpacity={0.7}
+            >
+              <CalendarDays
+                size={16}
+                color={Colors.neutralDark}
+                strokeWidth={2}
+              />
+              <View
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  alignItems: 'center',
+                }}
+                pointerEvents='none'
+              >
+                <Text className='font-ibm-regular text-base text-neutral-600'>
+                  종료일 없음
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ) : (
+            <View className='flex-row items-center bg-neutral-100 rounded-2xl px-5 h-[48px] mb-6'>
+              <CalendarDays
+                size={16}
+                color={Colors.neutralDark}
+                strokeWidth={2}
+              />
+              <TouchableOpacity
+                onPress={() => setDatePickerTarget('end')}
+                className='flex-1 items-center'
+                activeOpacity={0.7}
+              >
+                {(() => {
+                  const [y, m, d] = form.end_date!.split('-').map(Number);
+                  return (
+                    <Text className='font-ibm-regular text-base text-neutral-800'>
+                      {y}년 {m}월 {d}일
+                    </Text>
+                  );
+                })()}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => onFormChange({ ...form, end_date: null })}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                activeOpacity={0.7}
+              >
+                <X size={18} color={Colors.neutralLight} strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* 참여자 */}
           <View className='mb-5'>
@@ -120,51 +183,63 @@ export function ScheduleFormSheet({
             />
           </View>
 
-          {/* 시간 */}
-          <View className='mb-8'>
-            {form.time === null ? (
-              <TouchableOpacity
-                onPress={() => setTimePickerVisible(true)}
-                className='bg-neutral-100 rounded-2xl px-5 flex-row items-center h-16'
-                activeOpacity={0.7}
-              >
-                <Clock size={16} color={Colors.neutralDark} strokeWidth={2} />
-                <View
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    alignItems: 'center',
-                  }}
-                  pointerEvents='none'
-                >
-                  <Text className='font-ibm-regular text-base text-neutral-600'>
-                    시작 시간 없음
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={() => setTimePickerVisible(true)}
-                className='bg-neutral-100 rounded-2xl px-5 flex-row items-center h-16'
-                activeOpacity={0.7}
-              >
-                <Clock size={16} color={Colors.neutralDark} strokeWidth={2} />
-                <View className='flex-1 items-center'>
-                  <Text className='font-ibm-bold text-xl text-neutral-800'>
-                    {form.time}
-                  </Text>
-                </View>
+          {/* 시간 (하루 일정에서만) */}
+          {!form.end_date && (
+            <View className='mb-8'>
+              <FormLabel>시작 시간</FormLabel>
+              {form.time === null ? (
                 <TouchableOpacity
-                  onPress={() => onFormChange({ ...form, time: null })}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  onPress={() => setTimePickerVisible(true)}
+                  className='bg-neutral-100 rounded-2xl px-4 flex-row items-center h-[48px]'
                   activeOpacity={0.7}
                 >
-                  <X size={18} color={Colors.neutralLight} strokeWidth={2} />
+                  <Clock size={16} color={Colors.neutralDark} strokeWidth={2} />
+                  <View
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      alignItems: 'center',
+                    }}
+                    pointerEvents='none'
+                  >
+                    <Text className='font-ibm-regular text-base text-neutral-600'>
+                      시작 시간 없음
+                    </Text>
+                  </View>
                 </TouchableOpacity>
-              </TouchableOpacity>
-            )}
-          </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => setTimePickerVisible(true)}
+                  className='bg-neutral-100 rounded-2xl px-4 flex-row items-center h-[48px]'
+                  activeOpacity={0.7}
+                >
+                  <Clock size={16} color={Colors.neutralDark} strokeWidth={2} />
+                  <View
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      alignItems: 'center',
+                    }}
+                    pointerEvents='none'
+                  >
+                    <Text className='font-ibm-regular text-base text-neutral-800'>
+                      {form.time}
+                    </Text>
+                  </View>
+                  <View className='flex-1' />
+                  <TouchableOpacity
+                    onPress={() => onFormChange({ ...form, time: null })}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    activeOpacity={0.7}
+                  >
+                    <X size={18} color={Colors.neutralLight} strokeWidth={2} />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </ScrollView>
 
         {/* 하단 버튼 */}
@@ -195,14 +270,24 @@ export function ScheduleFormSheet({
       />
 
       <DatePickerModal
-        visible={datePickerVisible}
+        visible={datePickerTarget !== null}
         mode='date'
-        dateStr={form.date}
+        dateStr={
+          datePickerTarget === 'end' ? (form.end_date ?? form.date) : form.date
+        }
         onConfirm={dateStr => {
-          onFormChange({ ...form, date: dateStr });
-          setDatePickerVisible(false);
+          if (datePickerTarget === 'end') {
+            const resolvedEnd = dateStr < form.date ? form.date : dateStr;
+            onFormChange({ ...form, end_date: resolvedEnd });
+          } else {
+            const endDate = form.end_date;
+            const resolvedEnd =
+              endDate !== null && endDate < dateStr ? dateStr : endDate;
+            onFormChange({ ...form, date: dateStr, end_date: resolvedEnd });
+          }
+          setDatePickerTarget(null);
         }}
-        onDismiss={() => setDatePickerVisible(false)}
+        onDismiss={() => setDatePickerTarget(null)}
       />
     </SafeAreaView>
   );

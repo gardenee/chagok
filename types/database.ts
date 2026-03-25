@@ -235,6 +235,7 @@ export interface Database {
           user_id: string;
           title: string;
           date: string;
+          end_date: string | null;
           start_time: string | null;
           tag: 'me' | 'partner' | 'together';
           created_at: string;
@@ -245,6 +246,7 @@ export interface Database {
           user_id: string;
           title: string;
           date: string;
+          end_date?: string | null;
           start_time?: string | null;
           tag: 'me' | 'partner' | 'together';
           created_at?: string;
@@ -252,6 +254,7 @@ export interface Database {
         Update: {
           title?: string;
           date?: string;
+          end_date?: string | null;
           start_time?: string | null;
           tag?: 'me' | 'partner' | 'together';
         };

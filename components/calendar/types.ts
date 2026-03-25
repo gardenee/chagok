@@ -17,6 +17,7 @@ export type ScheduleFormData = {
   title: string;
   tag: 'me' | 'partner' | 'together' | null;
   date: string;
+  end_date: string | null;
   time: string | null;
 };
 
@@ -83,6 +84,7 @@ export const INITIAL_SCHEDULE_FORM: ScheduleFormData = {
   title: '',
   tag: 'me',
   date: '',
+  end_date: null,
   time: null,
 };
 
