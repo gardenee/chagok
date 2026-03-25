@@ -72,7 +72,7 @@ export async function fetchMonthTransactions(
   const { data, error } = await supabase
     .from('transactions')
     .select(
-      '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)',
+      '*, categories(name, icon, color), payment_methods(name), assets:assets!asset_id(name), target_assets:assets!target_asset_id(name)',
     )
     .eq('couple_id', coupleId)
     .gte('date', startDate)
@@ -88,7 +88,7 @@ export async function fetchTransactionById(
   const { data, error } = await supabase
     .from('transactions')
     .select(
-      '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)',
+      '*, categories(name, icon, color), payment_methods(name), assets:assets!asset_id(name), target_assets:assets!target_asset_id(name)',
     )
     .eq('id', id)
     .single();
@@ -105,7 +105,7 @@ export async function createTransaction(
     .from('transactions')
     .insert(toTransactionInsert(coupleId, userId, input))
     .select(
-      '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)',
+      '*, categories(name, icon, color), payment_methods(name), assets:assets!asset_id(name), target_assets:assets!target_asset_id(name)',
     )
     .single();
   if (error) throw error;
@@ -121,7 +121,7 @@ export async function updateTransaction(
     .update(toTransactionUpdate(input))
     .eq('id', id)
     .select(
-      '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)',
+      '*, categories(name, icon, color), payment_methods(name), assets:assets!asset_id(name), target_assets:assets!target_asset_id(name)',
     )
     .single();
   if (error) throw error;
@@ -137,7 +137,7 @@ export async function fetchAssetTransfers(
   const lastDay = new Date(year, month + 1, 0).getDate();
   const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
   const selectStr =
-    '*, categories(name, icon, color), payment_methods(name), assets(name), target_assets:assets!target_asset_id(name)';
+    '*, categories(name, icon, color), payment_methods(name), assets:assets!asset_id(name), target_assets:assets!target_asset_id(name)';
 
   const [fromResult, toResult] = await Promise.all([
     supabase
