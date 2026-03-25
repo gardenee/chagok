@@ -6,7 +6,7 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, ArrowLeftRight, Pencil } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -23,7 +23,6 @@ import {
   AssetPaymentFormScreen,
   type UnifiedFormData,
 } from '@/components/assets/asset-payment-form-screen';
-import { getPmColor } from '@/constants/payment-method';
 import type { TransactionRow } from '@/hooks/use-transactions';
 
 export default function AssetDetailScreen() {
@@ -47,22 +46,6 @@ export default function AssetDetailScreen() {
   const deleteAsset = useDeleteAsset();
 
   const [editVisible, setEditVisible] = useState(false);
-
-  const totalIn = useMemo(
-    () =>
-      transfers
-        .filter(t => t.target_asset_id === id)
-        .reduce((s, t) => s + t.amount, 0),
-    [transfers, id],
-  );
-
-  const totalOut = useMemo(
-    () =>
-      transfers
-        .filter(t => t.asset_id === id)
-        .reduce((s, t) => s + t.amount, 0),
-    [transfers, id],
-  );
 
   function prevMonth() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -180,27 +163,9 @@ export default function AssetDetailScreen() {
           <Text className='font-ibm-semibold text-base text-neutral-700 mb-0.5'>
             현재 잔액
           </Text>
-          <Text className='font-ibm-bold text-4xl leading-[44px] mb-4 text-brown-darker'>
+          <Text className='font-ibm-bold text-4xl leading-[44px] text-brown-darker'>
             {asset.amount != null ? `${formatAmount(asset.amount)}원` : '—'}
           </Text>
-          <View className='flex-row gap-6'>
-            <View>
-              <Text className='font-ibm-regular text-sm text-neutral-500 mb-1'>
-                이번 달 입금
-              </Text>
-              <Text className='font-ibm-bold text-xl text-olive-darker'>
-                +{formatAmount(totalIn)}원
-              </Text>
-            </View>
-            <View>
-              <Text className='font-ibm-regular text-sm text-neutral-500 mb-1'>
-                이번 달 출금
-              </Text>
-              <Text className='font-ibm-bold text-xl text-peach-darker'>
-                -{formatAmount(totalOut)}원
-              </Text>
-            </View>
-          </View>
         </View>
 
         {/* 월 네비게이터 */}
