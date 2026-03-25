@@ -547,21 +547,23 @@ export function TransactionFormSheet({
               </View>
             )}
 
-            <View className='mb-2'>
-              <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-                누가
-              </Text>
-              <TagSelector
-                options={tagOptions}
-                value={txModal.form.tag}
-                onChange={tag =>
-                  setTxModal(s => ({
-                    ...s,
-                    form: { ...s.form, tag },
-                  }))
-                }
-              />
-            </View>
+            {txModal.form.type !== 'transfer' && (
+              <View className='mb-2'>
+                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
+                  누가
+                </Text>
+                <TagSelector
+                  options={tagOptions}
+                  value={txModal.form.tag}
+                  onChange={tag =>
+                    setTxModal(s => ({
+                      ...s,
+                      form: { ...s.form, tag },
+                    }))
+                  }
+                />
+              </View>
+            )}
           </ScrollView>
 
           {/* 하단 버튼 */}

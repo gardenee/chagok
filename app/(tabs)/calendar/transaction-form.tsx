@@ -171,7 +171,7 @@ export default function TransactionFormScreen() {
     const payload = {
       amount,
       type: txModal.form.type,
-      ...(txModal.form.tag ? { tag: txModal.form.tag } : {}),
+      ...(!isTransfer && txModal.form.tag ? { tag: txModal.form.tag } : {}),
       memo: txModal.form.memo.trim() || null,
       date: txModal.form.date || dateParam,
       category_id: isTransfer ? null : txModal.form.category_id,
