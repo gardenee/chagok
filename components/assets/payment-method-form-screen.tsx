@@ -109,7 +109,7 @@ export function PaymentMethodFormScreen({
               if (nameError) setNameError(false);
             }}
             placeholder='결제수단 이름 (예: 신한카드, T-money)'
-            maxLength={20}
+            maxLength={8}
             autoFocus
             className='mb-5'
             error={nameError}

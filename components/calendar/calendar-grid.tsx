@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { formatAmountShort } from '@/utils/format';
+import { formatAmountShortRounded } from '@/utils/format';
 import { getTagBgColor, type DayCell } from './types';
 import type { Schedule, Anniversary } from '@/types/database';
 import { Shadows } from '@/constants/shadows';
@@ -138,7 +138,7 @@ export function CalendarGrid({
                       style={{ fontSize: 12, lineHeight: 14 }}
                       numberOfLines={1}
                     >
-                      -{formatAmountShort(dayExpense)}
+                      -{formatAmountShortRounded(dayExpense)}
                     </Text>
                   )}
                   {item.isCurrentMonth && dayIncome > 0 && (
@@ -147,7 +147,7 @@ export function CalendarGrid({
                       style={{ fontSize: 12, lineHeight: 14 }}
                       numberOfLines={1}
                     >
-                      +{formatAmountShort(dayIncome)}
+                      +{formatAmountShortRounded(dayIncome)}
                     </Text>
                   )}
                 </View>

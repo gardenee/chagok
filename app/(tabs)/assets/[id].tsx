@@ -174,35 +174,29 @@ export default function AssetDetailScreen() {
 
         {/* 요약 카드 */}
         <View
-          className='mx-4 mt-3 mb-2 rounded-3xl px-5 py-4'
-          style={{
-            backgroundColor: typeOption ? typeOption.color + '15' : '#f5f5f5',
-            ...Shadows.soft,
-          }}
+          className='mx-4 mt-2 mb-4 rounded-3xl p-5 bg-cream-dark'
+          style={Shadows.card}
         >
-          <Text className='font-ibm-regular text-sm text-neutral-600 mb-1'>
+          <Text className='font-ibm-semibold text-base text-neutral-700 mb-0.5'>
             현재 잔액
           </Text>
-          <Text
-            className='font-ibm-bold text-3xl mb-4'
-            style={{ color: typeOption?.color ?? Colors.brownDarker }}
-          >
+          <Text className='font-ibm-bold text-4xl leading-[44px] mb-4 text-brown-darker'>
             {asset.amount != null ? `${formatAmount(asset.amount)}원` : '—'}
           </Text>
-          <View className='flex-row gap-4'>
+          <View className='flex-row gap-6'>
             <View>
-              <Text className='font-ibm-regular text-xs text-neutral-500 mb-0.5'>
+              <Text className='font-ibm-regular text-sm text-neutral-500 mb-1'>
                 이번 달 입금
               </Text>
-              <Text className='font-ibm-semibold text-base text-olive-darker'>
+              <Text className='font-ibm-bold text-xl text-olive-darker'>
                 +{formatAmount(totalIn)}원
               </Text>
             </View>
             <View>
-              <Text className='font-ibm-regular text-xs text-neutral-500 mb-0.5'>
+              <Text className='font-ibm-regular text-sm text-neutral-500 mb-1'>
                 이번 달 출금
               </Text>
-              <Text className='font-ibm-semibold text-base text-peach-darker'>
+              <Text className='font-ibm-bold text-xl text-peach-darker'>
                 -{formatAmount(totalOut)}원
               </Text>
             </View>
@@ -265,7 +259,7 @@ function TransferItem({
 
   return (
     <View
-      className='bg-white rounded-3xl px-4 py-4 flex-row items-center gap-3'
+      className='bg-white rounded-3xl px-4 py-5 flex-row items-center gap-3'
       style={Shadows.primary}
     >
       {/* 날짜 */}

@@ -454,7 +454,7 @@ export function AssetPaymentFormScreen({
                         ? '교통카드 이름'
                         : '결제수단 이름'
               }
-              maxLength={20}
+              maxLength={8}
               className='mb-5'
               error={nameError}
             />

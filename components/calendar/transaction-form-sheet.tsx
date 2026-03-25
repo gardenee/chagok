@@ -217,9 +217,7 @@ export function TransactionFormSheet({
               </Text>
             )}
 
-            <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-              내역명
-            </Text>
+            <FormLabel>내역명</FormLabel>
             <ModalTextInput
               value={txModal.form.memo}
               onChangeText={v =>
@@ -237,9 +235,7 @@ export function TransactionFormSheet({
             />
 
             {/* 날짜 */}
-            <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-              날짜
-            </Text>
+            <FormLabel required>날짜</FormLabel>
             <DatePickerButton
               dateStr={txModal.form.date || selectedDate}
               onPress={() => setDatePickerVisible(true)}
@@ -267,9 +263,7 @@ export function TransactionFormSheet({
             {/* 이체 자산 선택 */}
             {txModal.form.type === 'transfer' && (
               <View className='mb-4'>
-                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-                  어디서
-                </Text>
+                <FormLabel required>어디서</FormLabel>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -302,7 +296,7 @@ export function TransactionFormSheet({
                                 Haptics.ImpactFeedbackStyle.Light,
                               );
                             }}
-                            className='items-center gap-1'
+                            className='items-center gap-1 w-14'
                             activeOpacity={0.7}
                           >
                             <View
@@ -322,8 +316,9 @@ export function TransactionFormSheet({
                               />
                             </View>
                             <Text
-                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                              numberOfLines={1}
+                              className={`font-ibm-semibold text-center text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                              numberOfLines={2}
+                              style={{ lineHeight: 14 }}
                             >
                               {asset.name}
                             </Text>
@@ -333,9 +328,7 @@ export function TransactionFormSheet({
                   </View>
                 </ScrollView>
 
-                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-                  어디로
-                </Text>
+                <FormLabel required>어디로</FormLabel>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -368,7 +361,7 @@ export function TransactionFormSheet({
                                 Haptics.ImpactFeedbackStyle.Light,
                               );
                             }}
-                            className='items-center gap-1'
+                            className='items-center gap-1 w-14'
                             activeOpacity={0.7}
                           >
                             <View
@@ -388,8 +381,9 @@ export function TransactionFormSheet({
                               />
                             </View>
                             <Text
-                              className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                              numberOfLines={1}
+                              className={`font-ibm-semibold text-center text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                              numberOfLines={2}
+                              style={{ lineHeight: 14 }}
                             >
                               {asset.name}
                             </Text>
@@ -405,7 +399,7 @@ export function TransactionFormSheet({
             {txModal.form.type === 'expense' && (
               <View className='mb-4'>
                 <View className='flex-row items-center justify-between mb-2 ml-1 mr-1'>
-                  <Text className='font-ibm-semibold text-base text-neutral-600'>
+                  <Text className='font-ibm-semibold text-base text-neutral-700'>
                     결제수단
                   </Text>
                   {paymentMethods.length > 0 && (
@@ -447,7 +441,7 @@ export function TransactionFormSheet({
                               Haptics.ImpactFeedbackStyle.Light,
                             );
                           }}
-                          className='items-center gap-1'
+                          className='items-center gap-1 w-14'
                           activeOpacity={0.7}
                         >
                           <View
@@ -467,8 +461,9 @@ export function TransactionFormSheet({
                             />
                           </View>
                           <Text
-                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                            numberOfLines={1}
+                            className={`font-ibm-semibold text-center text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                            numberOfLines={2}
+                            style={{ lineHeight: 14 }}
                           >
                             {pm.name}
                           </Text>
@@ -495,7 +490,7 @@ export function TransactionFormSheet({
                               Haptics.ImpactFeedbackStyle.Light,
                             );
                           }}
-                          className='items-center gap-1'
+                          className='items-center gap-1 w-14'
                           activeOpacity={0.7}
                         >
                           <View
@@ -515,8 +510,9 @@ export function TransactionFormSheet({
                             />
                           </View>
                           <Text
-                            className={`font-ibm-semibold text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
-                            numberOfLines={1}
+                            className={`font-ibm-semibold text-center text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                            numberOfLines={2}
+                            style={{ lineHeight: 14 }}
                           >
                             {asset.name}
                           </Text>
@@ -532,13 +528,13 @@ export function TransactionFormSheet({
                           pmForm: INITIAL_PM_FORM,
                         }))
                       }
-                      className='items-center gap-1'
+                      className='items-center gap-1 w-14'
                       activeOpacity={0.7}
                     >
                       <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
                         <Plus size={18} color='#A3A3A3' strokeWidth={2} />
                       </View>
-                      <Text className='font-ibm-semibold text-[11px] text-neutral-600'>
+                      <Text className='font-ibm-semibold text-center text-[11px] text-neutral-600'>
                         추가
                       </Text>
                     </TouchableOpacity>
@@ -549,9 +545,7 @@ export function TransactionFormSheet({
 
             {txModal.form.type !== 'transfer' && (
               <View className='mb-2'>
-                <Text className='font-ibm-semibold text-base text-neutral-600 mb-2 ml-1'>
-                  누가
-                </Text>
+                <FormLabel>누가</FormLabel>
                 <TagSelector
                   options={tagOptions}
                   value={txModal.form.tag}

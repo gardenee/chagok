@@ -142,12 +142,14 @@ export default function TransactionFormScreen() {
   const updatePaymentMethod = useUpdatePaymentMethod();
   const deletePaymentMethod = useDeletePaymentMethod();
 
-  const isTxSaving = createTx.isPending || updateTx.isPending;
+  const [isSaving, setIsSaving] = useState(false);
+  const isTxSaving = createTx.isPending || updateTx.isPending || isSaving;
   const isCatSaving = createCategory.isPending || updateCategory.isPending;
   const isPmSaving =
     createPaymentMethod.isPending || updatePaymentMethod.isPending;
 
   async function handleTxSave() {
+    setIsSaving(true);
     const amount = parseInt(txModal.form.amount.replace(/[^0-9]/g, ''), 10);
     const isTransfer = txModal.form.type === 'transfer';
 
@@ -268,6 +270,7 @@ export default function TransactionFormScreen() {
 
       router.back();
     } catch {
+      setIsSaving(false);
       Alert.alert('오류', '저장 중 문제가 발생했어요');
     }
   }

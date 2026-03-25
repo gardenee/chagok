@@ -61,7 +61,7 @@ export function CategoryIconPicker({
                   onSelect(isSelected ? null : c.id);
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
-                className='items-center gap-1'
+                className='items-center gap-1 w-14'
                 activeOpacity={0.7}
               >
                 <View
@@ -75,7 +75,9 @@ export function CategoryIconPicker({
                   <Icon size={20} color={cColor} strokeWidth={2.5} />
                 </View>
                 <Text
-                  className={`font-ibm-semibold ${nameClassName} ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                  className={`font-ibm-semibold text-center ${nameClassName} ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                  numberOfLines={2}
+                  style={{ lineHeight: 14 }}
                 >
                   {c.name}
                 </Text>
@@ -84,7 +86,7 @@ export function CategoryIconPicker({
           })}
           <TouchableOpacity
             onPress={onAdd}
-            className='items-center gap-1'
+            className='items-center gap-1 w-14'
             activeOpacity={0.7}
           >
             <View className='w-12 h-12 rounded-2xl items-center justify-center bg-neutral-100 border border-dashed border-neutral-300'>
