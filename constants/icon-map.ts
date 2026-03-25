@@ -41,6 +41,7 @@ import {
   type LucideIcon,
   Beer,
   Cigarette,
+  Carrot,
 } from 'lucide-react-native';
 
 export const ICON_MAP: Record<string, LucideIcon> = {
@@ -85,4 +86,5 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   subscription: RefreshCw,
   tax: Receipt,
   fee: Percent,
+  carrot: Carrot,
 };
