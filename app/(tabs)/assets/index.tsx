@@ -1,7 +1,16 @@
-import { View, Text, ScrollView, SafeAreaView, Alert } from 'react-native';
-import { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  RefreshControl,
+  SafeAreaView,
+  Alert,
+} from 'react-native';
+import { useState, useRef, useCallback } from 'react';
 import { useScrollToTop } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { Colors } from '@/constants/colors';
 import * as Haptics from 'expo-haptics';
 import {
   useAssets,
@@ -32,6 +41,16 @@ export default function AssetsTab() {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['assets'] });
+    await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+    setRefreshing(false);
+  }, [queryClient]);
 
   const { data: assets = [], isLoading } = useAssets();
   const { data: paymentMethods = [], isLoading: pmLoading } =
@@ -202,6 +221,13 @@ export default function AssetsTab() {
         ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={Colors.brown}
+          />
+        }
       >
         <ScreenHeader title='자산' onAdd={openCreate} />
 

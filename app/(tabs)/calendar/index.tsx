@@ -2,6 +2,7 @@ import {
   View,
   Text,
   ScrollView,
+  RefreshControl,
   TouchableOpacity,
   SafeAreaView,
   Alert,
@@ -136,6 +137,18 @@ export default function CalendarTab() {
 
   const { weekStartsOnMonday } = useCalendarStore();
   const weekdays = getWeekdays(weekStartsOnMonday);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    await queryClient.invalidateQueries({ queryKey: ['schedules'] });
+    await queryClient.invalidateQueries({ queryKey: ['anniversaries'] });
+    await queryClient.invalidateQueries({ queryKey: ['fixed-expenses'] });
+    await queryClient.invalidateQueries({ queryKey: ['categories'] });
+    setRefreshing(false);
+  }, [queryClient]);
 
   const [currentYear, setCurrentYear] = useState(todayDate.getFullYear());
   const [currentMonth, setCurrentMonth] = useState(todayDate.getMonth());
@@ -686,6 +699,13 @@ export default function CalendarTab() {
         ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 32 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={Colors.brown}
+          />
+        }
       >
         {/* 월 헤더 */}
         <View className='flex-row items-center justify-between px-6 pt-6 pb-2'>

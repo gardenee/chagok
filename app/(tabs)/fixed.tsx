@@ -2,14 +2,17 @@ import {
   View,
   Text,
   ScrollView,
+  RefreshControl,
   SafeAreaView,
   Alert,
   Modal,
 } from 'react-native';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useScrollToTop } from '@react-navigation/native';
 import { Repeat, ArrowLeftRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import { useQueryClient } from '@tanstack/react-query';
+import { Colors } from '@/constants/colors';
 import {
   useFixedExpenses,
   useCreateFixedExpense,
@@ -70,6 +73,17 @@ const INITIAL_STATE: State = {
 export default function FixedScreen() {
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
+  const queryClient = useQueryClient();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['fixed-expenses'] });
+    await queryClient.invalidateQueries({ queryKey: ['categories'] });
+    await queryClient.invalidateQueries({ queryKey: ['assets'] });
+    setRefreshing(false);
+  }, [queryClient]);
 
   const [state, setState] = useState<State>(INITIAL_STATE);
 
@@ -305,6 +319,13 @@ export default function FixedScreen() {
         ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={Colors.brown}
+          />
+        }
       >
         <ScreenHeader title='고정지출' onAdd={openCreate} />
 
