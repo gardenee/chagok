@@ -2,10 +2,11 @@ import {
   View,
   Text,
   ScrollView,
+  RefreshControl,
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useScrollToTop } from '@react-navigation/native';
 import { Pencil, Wallet, TrendingUp } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -37,6 +38,16 @@ export default function BudgetIndex() {
   const [month, setMonth] = useState(today.getMonth());
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['categories'] });
+    await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    await queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+    setRefreshing(false);
+  }, [queryClient]);
 
   const [expenseView, setExpenseView] = useState<'category' | 'payment'>(
     'category',
@@ -120,6 +131,13 @@ export default function BudgetIndex() {
         ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={Colors.brown}
+          />
+        }
       >
         {/* 헤더 */}
         <View className='flex-row items-center justify-between px-6 pt-6 pb-2'>
