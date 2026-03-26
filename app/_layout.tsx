@@ -328,8 +328,8 @@ function RootLayoutNav() {
           style={{ top: 0, left: 0, right: 0, bottom: 0 }}
         >
           <Image
-            source={require('../assets/android-icon-foreground.png')}
-            style={{ width: 160, height: 160 }}
+            source={require('../assets/splash-icon.png')}
+            style={{ width: '100%', height: '100%' }}
             resizeMode='contain'
           />
         </View>
