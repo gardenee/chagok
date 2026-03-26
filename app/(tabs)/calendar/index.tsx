@@ -616,6 +616,7 @@ export default function CalendarTab() {
                 category_id: t.category_id ?? '',
                 payment_method_id: t.payment_method_id ?? '',
                 asset_id: t.asset_id ?? '',
+                target_asset_id: t.target_asset_id ?? '',
                 fixedExpenseId: t.fixed_expense_id,
               },
             });
@@ -641,6 +642,7 @@ export default function CalendarTab() {
           category_id: t.category_id ?? '',
           payment_method_id: t.payment_method_id ?? '',
           asset_id: t.asset_id ?? '',
+          target_asset_id: t.target_asset_id ?? '',
         },
       });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

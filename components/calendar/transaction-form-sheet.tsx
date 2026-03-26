@@ -395,6 +395,70 @@ export function TransactionFormSheet({
               </View>
             )}
 
+            {/* 수입 자산 선택 */}
+            {txModal.form.type === 'income' && (
+              <View className='mb-4'>
+                <FormLabel>어디로</FormLabel>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  keyboardShouldPersistTaps='handled'
+                >
+                  <View className='flex-row gap-2 pr-2'>
+                    {bankCashAssets.map((asset: Asset) => {
+                      const isSelected =
+                        txModal.form.target_asset_id === asset.id;
+                      const { Icon: AssetIcon, color: assetColor } =
+                        getAssetTypeOption(asset.type);
+                      return (
+                        <TouchableOpacity
+                          key={asset.id}
+                          onPress={() => {
+                            setTxModal(s => ({
+                              ...s,
+                              form: {
+                                ...s.form,
+                                target_asset_id: isSelected ? null : asset.id,
+                              },
+                            }));
+                            Haptics.impactAsync(
+                              Haptics.ImpactFeedbackStyle.Light,
+                            );
+                          }}
+                          className='items-center gap-1 w-14'
+                          activeOpacity={0.7}
+                        >
+                          <View
+                            className='w-12 h-12 rounded-2xl items-center justify-center'
+                            style={{
+                              backgroundColor: assetColor + '30',
+                              borderWidth: isSelected ? 2 : 0,
+                              borderColor: isSelected
+                                ? assetColor
+                                : 'transparent',
+                            }}
+                          >
+                            <AssetIcon
+                              size={20}
+                              color={assetColor}
+                              strokeWidth={2.5}
+                            />
+                          </View>
+                          <Text
+                            className={`font-ibm-semibold text-center text-[11px] ${isSelected ? 'text-neutral-800' : 'text-neutral-500'}`}
+                            numberOfLines={2}
+                            style={{ lineHeight: 14 }}
+                          >
+                            {asset.name}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+              </View>
+            )}
+
             {/* 결제수단 선택 (지출일 때) */}
             {txModal.form.type === 'expense' && (
               <View className='mb-4'>

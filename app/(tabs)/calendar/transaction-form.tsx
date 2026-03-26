@@ -179,18 +179,32 @@ export default function TransactionFormScreen() {
       category_id: isTransfer ? null : txModal.form.category_id,
       payment_method_id: isTransfer ? null : txModal.form.payment_method_id,
       asset_id: txModal.form.asset_id,
-      target_asset_id: isTransfer ? txModal.form.target_asset_id : null,
+      target_asset_id:
+        isTransfer || txModal.form.type === 'income'
+          ? txModal.form.target_asset_id
+          : null,
       fixed_expense_id: txModal.fixedExpenseId,
     };
 
+    const isIncome = txModal.form.type === 'income';
+    const prevAmount = parseInt(initialForm.amount.replace(/[^0-9]/g, ''), 10);
+
     try {
       if (params.editingId) {
-        // 수정: 기존 이체 잔액 되돌리기 후 새로 적용
+        // 수정: 기존 자산 잔액 되돌리기 후 새로 적용
         if (initialForm.type === 'transfer') {
           await supabase.rpc('reverse_transfer', {
             p_from_asset_id: initialForm.asset_id,
             p_to_asset_id: initialForm.target_asset_id,
-            p_amount: parseInt(initialForm.amount.replace(/[^0-9]/g, ''), 10),
+            p_amount: prevAmount,
+          });
+        } else if (
+          initialForm.type === 'income' &&
+          initialForm.target_asset_id
+        ) {
+          await supabase.rpc('adjust_asset_balance', {
+            p_asset_id: initialForm.target_asset_id,
+            p_delta: -prevAmount,
           });
         }
         await updateTx.mutateAsync({ id: params.editingId, ...payload });
@@ -198,14 +212,22 @@ export default function TransactionFormScreen() {
         await createTx.mutateAsync(payload);
       }
 
-      // 이체 저장 후 자산 잔액 자동 반영
+      // 이체/수입 저장 후 자산 잔액 자동 반영
       if (isTransfer) {
         await supabase.rpc('execute_transfer', {
           p_from_asset_id: payload.asset_id ?? null,
           p_to_asset_id: payload.target_asset_id ?? null,
           p_amount: amount,
         });
-        // 자산 캐시 무효화
+        const coupleId = userProfile?.couple_id;
+        if (coupleId) {
+          queryClient.invalidateQueries({ queryKey: ['assets', coupleId] });
+        }
+      } else if (isIncome && payload.target_asset_id) {
+        await supabase.rpc('adjust_asset_balance', {
+          p_asset_id: payload.target_asset_id,
+          p_delta: amount,
+        });
         const coupleId = userProfile?.couple_id;
         if (coupleId) {
           queryClient.invalidateQueries({ queryKey: ['assets', coupleId] });
@@ -306,15 +328,30 @@ export default function TransactionFormScreen() {
         style: 'destructive',
         onPress: async () => {
           try {
-            // 이체 삭제 시 자산 잔액 되돌리기
+            const delAmount = parseInt(
+              initialForm.amount.replace(/[^0-9]/g, ''),
+              10,
+            );
+            // 이체/수입 삭제 시 자산 잔액 되돌리기
             if (initialForm.type === 'transfer') {
               await supabase.rpc('reverse_transfer', {
                 p_from_asset_id: initialForm.asset_id,
                 p_to_asset_id: initialForm.target_asset_id,
-                p_amount: parseInt(
-                  initialForm.amount.replace(/[^0-9]/g, ''),
-                  10,
-                ),
+                p_amount: delAmount,
+              });
+              const coupleId = userProfile?.couple_id;
+              if (coupleId) {
+                queryClient.invalidateQueries({
+                  queryKey: ['assets', coupleId],
+                });
+              }
+            } else if (
+              initialForm.type === 'income' &&
+              initialForm.target_asset_id
+            ) {
+              await supabase.rpc('adjust_asset_balance', {
+                p_asset_id: initialForm.target_asset_id,
+                p_delta: -delAmount,
               });
               const coupleId = userProfile?.couple_id;
               if (coupleId) {
