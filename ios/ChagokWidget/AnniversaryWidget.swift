@@ -7,8 +7,8 @@ import WidgetKit
 struct AnniversaryEntry: TimelineEntry {
   let date: Date
   let name: String
-  let mmDd: String
-  let dDayValue: Int  // 양수=D-N, 0=D-Day, 음수=D+N
+  let fullDate: String  // YYYY-MM-DD (또는 레거시 MM-DD)
+  let dDayValue: Int    // 양수=D-N, 0=D-Day, 음수=D+N
   let isConfigured: Bool
 }
 
@@ -16,7 +16,7 @@ struct AnniversaryEntry: TimelineEntry {
 
 struct AnniversaryProvider: AppIntentTimelineProvider {
   func placeholder(in context: Context) -> AnniversaryEntry {
-    AnniversaryEntry(date: .now, name: "처음 만난 날", mmDd: "06-15", dDayValue: -30, isConfigured: true)
+    AnniversaryEntry(date: .now, name: "처음 만난 날", fullDate: "2022-06-15", dDayValue: -30, isConfigured: true)
   }
 
   func snapshot(for configuration: SelectAnniversaryIntent, in context: Context) async -> AnniversaryEntry {
@@ -36,25 +36,31 @@ struct AnniversaryProvider: AppIntentTimelineProvider {
 
   private func makeEntry(for configuration: SelectAnniversaryIntent) -> AnniversaryEntry {
     guard let selected = configuration.anniversary else {
-      return AnniversaryEntry(date: .now, name: "", mmDd: "", dDayValue: 0, isConfigured: false)
+      return AnniversaryEntry(date: .now, name: "", fullDate: "", dDayValue: 0, isConfigured: false)
     }
-    // 저장된 데이터에서 최신 정보 읽기
     let stored = WidgetDataStore.shared.load().anniversaries.first { $0.id == selected.id }
-    let mmDd = stored?.date ?? selected.date
+    let fullDate = stored?.date ?? selected.date
     let name = stored?.name ?? selected.name
-    return AnniversaryEntry(date: .now, name: name, mmDd: mmDd, dDayValue: dDay(from: mmDd), isConfigured: true)
+    return AnniversaryEntry(date: .now, name: name, fullDate: fullDate, dDayValue: dDay(from: fullDate), isConfigured: true)
   }
 
-  // MM-DD → 오늘 기준 D-day 값 (양수=미래, 음수=과거)
-  private func dDay(from mmDd: String) -> Int {
+  // YYYY-MM-DD 또는 MM-DD → 이번 연도 기준 D-day (양수=미래, 음수=과거)
+  private func dDay(from dateStr: String) -> Int {
     let calendar = Calendar.current
     let today = calendar.startOfDay(for: .now)
-    let parts = mmDd.split(separator: "-").compactMap { Int($0) }
-    guard parts.count == 2 else { return 0 }
+    let parts = dateStr.split(separator: "-").compactMap { Int($0) }
+
+    let mm: Int
+    let dd: Int
+    if parts.count == 3 {
+      mm = parts[1]; dd = parts[2]
+    } else if parts.count == 2 {
+      mm = parts[0]; dd = parts[1]
+    } else { return 0 }
 
     var comps = calendar.dateComponents([.year], from: today)
-    comps.month = parts[0]
-    comps.day = parts[1]
+    comps.month = mm
+    comps.day = dd
 
     guard let thisYear = calendar.date(from: comps) else { return 0 }
     return calendar.dateComponents([.day], from: today, to: thisYear).day ?? 0
@@ -74,9 +80,13 @@ struct AnniversaryWidgetView: View {
   }
 
   var formattedDate: String {
-    let parts = entry.mmDd.split(separator: "-").compactMap { Int($0) }
-    guard parts.count == 2 else { return entry.mmDd }
-    return "\(parts[0])월 \(parts[1])일"
+    let parts = entry.fullDate.split(separator: "-").compactMap { Int($0) }
+    if parts.count == 3 {
+      return "\(parts[0])년 \(parts[1])월 \(parts[2])일"
+    } else if parts.count == 2 {
+      return "\(parts[0])월 \(parts[1])일"
+    }
+    return entry.fullDate
   }
 
   var body: some View {
@@ -173,7 +183,7 @@ struct AnniversaryWidget: Widget {
 #Preview(as: .systemSmall) {
   AnniversaryWidget()
 } timeline: {
-  AnniversaryEntry(date: .now, name: "처음 만난 날", mmDd: "06-15", dDayValue: 80, isConfigured: true)
+  AnniversaryEntry(date: .now, name: "처음 만난 날", fullDate: "2022-06-15", dDayValue: 80, isConfigured: true)
 }
 
 #Preview("D+", as: .systemMedium) {

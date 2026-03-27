@@ -3,7 +3,7 @@ import type { Anniversary } from '@/types/database';
 
 export type AnniversaryInput = {
   name: string;
-  date: string; // MM-DD
+  date: string; // YYYY-MM-DD
   type: 'birthday_me' | 'birthday_partner' | 'anniversary';
 };
 

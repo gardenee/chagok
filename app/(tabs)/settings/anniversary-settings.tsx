@@ -42,21 +42,30 @@ type AnniversaryModalState = {
   date: Date;
 };
 
-function mmDdToDate(mmDd: string): Date {
-  const [mm, dd] = mmDd.split('-').map(Number);
-  // year irrelevant for display, use current year
-  return new Date(new Date().getFullYear(), mm - 1, dd);
+// YYYY-MM-DD 또는 레거시 MM-DD 모두 파싱
+function parseDateStr(dateStr: string): Date {
+  if (dateStr.length === 5) {
+    const [mm, dd] = dateStr.split('-').map(Number);
+    return new Date(new Date().getFullYear(), mm - 1, dd);
+  }
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
 }
 
-function dateToMmDd(date: Date): string {
+function toIsoDate(date: Date): string {
+  const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
-  return `${m}-${d}`;
+  return `${y}-${m}-${d}`;
 }
 
-function formatMmDd(mmDd: string): string {
-  const [mm, dd] = mmDd.split('-').map(Number);
-  return `${mm}월 ${dd}일`;
+function formatDateStr(dateStr: string): string {
+  const date = parseDateStr(dateStr);
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  if (dateStr.length === 5) return `${m}월 ${d}일`;
+  return `${y}년 ${m}월 ${d}일`;
 }
 
 export default function AnniversarySettingsScreen() {
@@ -103,13 +112,13 @@ export default function AnniversarySettingsScreen() {
     setBirthdayPicker({
       visible: true,
       type,
-      date: existing ? mmDdToDate(existing.date) : new Date(),
+      date: existing ? parseDateStr(existing.date) : new Date(),
     });
   }
 
   async function handleBirthdaySave() {
     const { type, date } = birthdayPicker;
-    const mmDd = dateToMmDd(date);
+    const mmDd = toIsoDate(date);
     const name =
       type === 'birthday_me' ? `${myNickname} 생일` : `${partnerNickname} 생일`;
     try {
@@ -137,7 +146,7 @@ export default function AnniversarySettingsScreen() {
       visible: true,
       editingId: item.id,
       name: item.name,
-      date: mmDdToDate(item.date),
+      date: parseDateStr(item.date),
     });
   }
 
@@ -147,7 +156,7 @@ export default function AnniversarySettingsScreen() {
       Alert.alert('알림', '기념일 이름을 입력해주세요');
       return;
     }
-    const mmDd = dateToMmDd(date);
+    const mmDd = toIsoDate(date);
     try {
       if (editingId) {
         await updateAnniversary.mutateAsync({
@@ -220,7 +229,7 @@ export default function AnniversarySettingsScreen() {
               <Cake size={16} color={Colors.neutralDarker} strokeWidth={2} />
             }
             label={`${myNickname} 생일`}
-            value={myBirthday ? formatMmDd(myBirthday.date) : '미설정'}
+            value={myBirthday ? formatDateStr(myBirthday.date) : '미설정'}
             onPress={() => openBirthdayPicker('birthday_me', myBirthday)}
           />
           <Divider />
@@ -230,7 +239,7 @@ export default function AnniversarySettingsScreen() {
             }
             label={`${partnerNickname} 생일`}
             value={
-              partnerBirthday ? formatMmDd(partnerBirthday.date) : '미설정'
+              partnerBirthday ? formatDateStr(partnerBirthday.date) : '미설정'
             }
             onPress={() => {
               if (!partner) {
@@ -259,7 +268,7 @@ export default function AnniversarySettingsScreen() {
                       />
                     }
                     label={item.name}
-                    value={formatMmDd(item.date)}
+                    value={formatDateStr(item.date)}
                     onPress={() => openEditModal(item)}
                   />
                 </View>

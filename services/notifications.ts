@@ -295,7 +295,9 @@ export async function scheduleAnniversaryReminders(
   const now = new Date();
 
   for (const anniversary of anniversaries) {
-    const [mm, dd] = anniversary.date.split('-').map(Number);
+    const parts = anniversary.date.split('-').map(Number);
+    const mm = parts.length === 3 ? parts[1] : parts[0];
+    const dd = parts.length === 3 ? parts[2] : parts[1];
 
     for (let yearOffset = 0; yearOffset <= 1; yearOffset++) {
       const year = now.getFullYear() + yearOffset;
