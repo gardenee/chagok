@@ -189,5 +189,5 @@ struct AnniversaryWidget: Widget {
 #Preview("D+", as: .systemMedium) {
   AnniversaryWidget()
 } timeline: {
-  AnniversaryEntry(date: .now, name: "처음 만난 날", mmDd: "03-01", dDayValue: -26, isConfigured: true)
+  AnniversaryEntry(date: .now, name: "처음 만난 날", fullDate: "03-01", dDayValue: -26, isConfigured: true)
 }
