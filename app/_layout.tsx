@@ -22,6 +22,7 @@ import { useAuthStore } from '@/store/auth';
 import { supabase } from '@/lib/supabase';
 import { registerMyPushToken } from '@/services/notifications';
 import { useNotificationSettingsStore } from '@/store/notification-settings';
+import { useWidgetSync } from '@/hooks/use-widget-sync';
 
 Notifications.setNotificationHandler({
   handleNotification: async notification => {
@@ -183,6 +184,8 @@ function RootLayoutNav() {
       console.warn('푸시 토큰 등록 실패:', error);
     });
   }, [userProfile?.id]);
+
+  useWidgetSync();
 
   // coupleId 확보 시 자주 쓰는 데이터 미리 로드 (모달 진입 시 덜컹거림 방지)
   useEffect(() => {
