@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -81,9 +82,19 @@ struct CalendarWidgetView: View {
           .font(.system(size: 15, weight: .bold))
           .foregroundColor(.chagokBrown)
         Spacer()
-        Image(systemName: "calendar")
-          .font(.system(size: 13, weight: .medium))
-          .foregroundColor(.chagokBrown.opacity(0.5))
+        HStack(spacing: 14) {
+          Button(intent: RefreshCalendarIntent()) {
+            Image(systemName: "arrow.clockwise")
+              .font(.system(size: 12, weight: .medium))
+              .foregroundColor(.chagokBrown.opacity(0.45))
+          }
+          .buttonStyle(.plain)
+          Link(destination: URL(string: "chagok://calendar/schedule-form")!) {
+            Image(systemName: "plus")
+              .font(.system(size: 12, weight: .medium))
+              .foregroundColor(.chagokBrown.opacity(0.45))
+          }
+        }
       }
 
       // 요일 라벨
@@ -124,7 +135,6 @@ struct CalendarWidgetView: View {
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 14)
-    .widgetURL(URL(string: "chagok://calendar"))
     .containerBackground(Color.chagokCream, for: .widget)
   }
 }
