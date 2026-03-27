@@ -1,3 +1,28 @@
+# Patch xcodeproj to support Xcode object version 70 (Xcode 16.x)
+require 'xcodeproj'
+module ::Xcodeproj
+  module Constants
+    remove_const(:COMPATIBILITY_VERSION_BY_OBJECT_VERSION) if const_defined?(:COMPATIBILITY_VERSION_BY_OBJECT_VERSION)
+    COMPATIBILITY_VERSION_BY_OBJECT_VERSION = {
+      77 => 'Xcode 16.0',
+      70 => 'Xcode 16.0',
+      63 => 'Xcode 15.3',
+      60 => 'Xcode 15.0',
+      56 => 'Xcode 14.0',
+      55 => 'Xcode 13.0',
+      54 => 'Xcode 12.0',
+      53 => 'Xcode 11.4',
+      52 => 'Xcode 11.0',
+      51 => 'Xcode 10.0',
+      50 => 'Xcode 9.3',
+      48 => 'Xcode 8.0',
+      47 => 'Xcode 6.3',
+      46 => 'Xcode 3.2',
+      45 => 'Xcode 3.1',
+    }.freeze
+  end
+end
+
 # Set by expo-router. This enables Fabric-only features from react-native-screens
 ENV['RNS_GAMMA_ENABLED'] ||= '1'
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
