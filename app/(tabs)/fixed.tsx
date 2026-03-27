@@ -164,7 +164,9 @@ export default function FixedScreen() {
         state.form.due_day === orig.due_day &&
         state.form.due_day_mode === orig.due_day_mode &&
         state.form.business_day_adjust === orig.business_day_adjust &&
-        state.form.category_id === orig.category_id;
+        state.form.category_id === orig.category_id &&
+        state.form.from_asset_id === orig.from_asset_id &&
+        state.form.to_asset_id === orig.to_asset_id;
       if (noChange) {
         closeAll();
         return;
