@@ -125,6 +125,10 @@ export default function BudgetIndex() {
     router.push(`/budget/${id}?year=${year}&month=${month}`);
   }
 
+  function goToPaymentDetail(id: string) {
+    router.push(`/budget/pm/${id}?year=${year}&month=${month}`);
+  }
+
   return (
     <SafeAreaView className='flex-1 bg-white'>
       <ScrollView
@@ -275,10 +279,13 @@ export default function BudgetIndex() {
                         key={pm.id}
                         pm={pm}
                         spent={spendingByPaymentMethod[pm.id] ?? 0}
+                        onPress={() => goToPaymentDetail(pm.id)}
                       />
                     ))}
                   {(spendingByPaymentMethod['__none__'] ?? 0) > 0 && (
-                    <View
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => goToPaymentDetail('__none__')}
                       className='bg-white rounded-3xl p-4'
                       style={Shadows.primary}
                     >
@@ -305,7 +312,7 @@ export default function BudgetIndex() {
                           </Text>
                         </View>
                       </View>
-                    </View>
+                    </TouchableOpacity>
                   )}
                 </View>
               )}

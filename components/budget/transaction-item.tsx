@@ -23,16 +23,16 @@ export function TransactionItem({ transaction: t, tagLabel }: Props) {
         {t.date.slice(5).replace('-', '.')}
       </Text>
 
-      {/* 메모 (거래 이름) */}
-      <Text
-        className='font-ibm-semibold text-base flex-1 text-neutral-800'
-        numberOfLines={1}
-      >
-        {hasMemo ? t.memo : '—'}
-      </Text>
-
-      {/* 태그 */}
-      {t.tag && tagLabel && <TagPill tag={t.tag} label={tagLabel} />}
+      {/* 메모 + 태그 */}
+      <View className='flex-1 flex-row items-center gap-2 overflow-hidden'>
+        <Text
+          className='font-ibm-semibold text-base text-neutral-800 shrink'
+          numberOfLines={1}
+        >
+          {hasMemo ? t.memo : '—'}
+        </Text>
+        {t.tag && tagLabel && <TagPill tag={t.tag} label={tagLabel} />}
+      </View>
 
       {/* 금액 */}
       <Text
