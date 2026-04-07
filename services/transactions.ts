@@ -77,7 +77,8 @@ export async function fetchMonthTransactions(
     .eq('couple_id', coupleId)
     .gte('date', startDate)
     .lte('date', endDate)
-    .order('created_at', { ascending: true });
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false });
   if (error) throw error;
   return data as unknown as TransactionRow[];
 }
