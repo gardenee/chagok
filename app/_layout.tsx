@@ -94,8 +94,8 @@ function RootLayoutNav() {
   const [isProfileLoading, setIsProfileLoading] = useState(true);
   // 안전망 타이머 ref (여러 effect에서 공유)
   const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingNotificationRef =
-    useRef<Notifications.NotificationResponse | null>(null);
+  const [pendingNotification, setPendingNotification] =
+    useState<Notifications.NotificationResponse | null>(null);
 
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();
@@ -239,13 +239,13 @@ function RootLayoutNav() {
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener(
       response => {
-        pendingNotificationRef.current = response;
+        setPendingNotification(response);
       },
     );
 
     // 앱이 종료된 상태에서 알림 탭으로 열린 경우 (cold start)
     Notifications.getLastNotificationResponseAsync().then(response => {
-      if (response) pendingNotificationRef.current = response;
+      if (response) setPendingNotification(response);
     });
 
     return () => sub.remove();
@@ -254,14 +254,11 @@ function RootLayoutNav() {
   // 유저가 탭에 들어온 후 pending 알림 처리
   useEffect(() => {
     if (!fontsLoaded || isProfileLoading || !userProfile?.couple_id) return;
-    const response = pendingNotificationRef.current;
-    if (!response) return;
+    if (!pendingNotification) return;
 
-    pendingNotificationRef.current = null;
-    const data = response.notification.request.content.data as Record<
-      string,
-      string
-    >;
+    setPendingNotification(null);
+    const data = pendingNotification.notification.request.content
+      .data as Record<string, string>;
 
     if (data.type === 'PARTNER_TRANSACTION') {
       router.push('/(tabs)/calendar');
@@ -286,7 +283,12 @@ function RootLayoutNav() {
     } else if (data.type === 'COUPLE_JOINED') {
       router.push('/(tabs)/settings');
     }
-  }, [fontsLoaded, isProfileLoading, userProfile?.couple_id]);
+  }, [
+    fontsLoaded,
+    isProfileLoading,
+    userProfile?.couple_id,
+    pendingNotification,
+  ]);
 
   // 3-way 라우팅 분기
   useEffect(() => {
