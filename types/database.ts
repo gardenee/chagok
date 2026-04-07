@@ -462,6 +462,13 @@ export interface Database {
         };
         Returns: void;
       };
+      adjust_asset_balance: {
+        Args: {
+          p_asset_id: string | null;
+          p_delta: number;
+        };
+        Returns: void;
+      };
     };
   };
 }

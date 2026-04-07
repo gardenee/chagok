@@ -188,6 +188,9 @@ export default function TransactionFormScreen() {
 
     const isIncome = txModal.form.type === 'income';
     const prevAmount = parseInt(initialForm.amount.replace(/[^0-9]/g, ''), 10);
+    const prevHadAssetUpdate =
+      initialForm.type === 'transfer' ||
+      (initialForm.type === 'income' && !!initialForm.target_asset_id);
 
     try {
       if (params.editingId) {
@@ -213,13 +216,13 @@ export default function TransactionFormScreen() {
       }
 
       // 이체/수입 저장 후 자산 잔액 자동 반영
+      const coupleId = userProfile?.couple_id;
       if (isTransfer) {
         await supabase.rpc('execute_transfer', {
           p_from_asset_id: payload.asset_id ?? null,
           p_to_asset_id: payload.target_asset_id ?? null,
           p_amount: amount,
         });
-        const coupleId = userProfile?.couple_id;
         if (coupleId) {
           queryClient.invalidateQueries({ queryKey: ['assets', coupleId] });
         }
@@ -228,10 +231,12 @@ export default function TransactionFormScreen() {
           p_asset_id: payload.target_asset_id,
           p_delta: amount,
         });
-        const coupleId = userProfile?.couple_id;
         if (coupleId) {
           queryClient.invalidateQueries({ queryKey: ['assets', coupleId] });
         }
+      } else if (params.editingId && prevHadAssetUpdate && coupleId) {
+        // 이체/수입(자산연결) → 지출 또는 자산 없는 수입으로 변경 시 캐시 무효화
+        queryClient.invalidateQueries({ queryKey: ['assets', coupleId] });
       }
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -375,7 +380,7 @@ export default function TransactionFormScreen() {
     setTxModal(s => ({
       ...s,
       catEditingId: null,
-      catCategoryType: s.form.type,
+      catCategoryType: s.form.type === 'transfer' ? 'expense' : s.form.type,
       catForm: INITIAL_CATEGORY_FORM,
       catFormSource: s.view as 'tx' | 'catMgmt',
     }));
