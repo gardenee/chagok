@@ -205,6 +205,11 @@ export function TransactionDetailModal({
                       color='#A3A3A3'
                     />
                   )}
+                  {!isTransfer &&
+                    !detailTx.payment_methods &&
+                    detailTx.assets && (
+                      <Pill label={detailTx.assets.name} color='#A3A3A3' />
+                    )}
                 </View>
               )}
             </View>
