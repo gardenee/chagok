@@ -55,7 +55,9 @@ export async function signInWithOAuth(provider: OAuthProvider): Promise<void> {
   if (sessionError) throw sessionError;
 }
 
-export async function signInWithApple(): Promise<void> {
+export async function signInWithApple(): Promise<{
+  displayName: string | null;
+}> {
   const credential = await AppleAuthentication.signInAsync({
     requestedScopes: [
       AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -71,4 +73,13 @@ export async function signInWithApple(): Promise<void> {
   });
 
   if (error) throw error;
+
+  // Apple은 최초 로그인 시에만 fullName을 제공
+  const givenName = credential.fullName?.givenName ?? null;
+  const familyName = credential.fullName?.familyName ?? null;
+  const displayName = givenName
+    ? [givenName, familyName].filter(Boolean).join(' ')
+    : null;
+
+  return { displayName };
 }

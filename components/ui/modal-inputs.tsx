@@ -1,4 +1,4 @@
-import { View, Text, TextInput } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import type { TextInputProps } from 'react-native';
 import { Colors } from '@/constants/colors';
 
@@ -11,6 +11,7 @@ type ModalTextInputProps = {
   keyboardType?: TextInputProps['keyboardType'];
   className?: string;
   error?: boolean;
+  onFocus?: () => void;
 };
 
 export function ModalTextInput({
@@ -22,6 +23,7 @@ export function ModalTextInput({
   keyboardType,
   className = '',
   error = false,
+  onFocus,
 }: ModalTextInputProps) {
   return (
     <View
@@ -40,6 +42,7 @@ export function ModalTextInput({
         maxLength={maxLength}
         autoFocus={autoFocus}
         keyboardType={keyboardType}
+        onFocus={onFocus}
       />
     </View>
   );
@@ -52,6 +55,9 @@ type AmountInputProps = {
   className?: string;
   error?: boolean;
   maxLength?: number;
+  // 커스텀 키패드 모드: 두 prop 모두 전달하면 디스플레이 모드로 동작
+  focused?: boolean;
+  onFocus?: () => void;
 };
 
 export function AmountInput({
@@ -61,7 +67,63 @@ export function AmountInput({
   className = '',
   error = false,
   maxLength,
+  focused,
+  onFocus,
 }: AmountInputProps) {
+  const borderColor = error ? Colors.peachDarker : 'transparent';
+
+  if (onFocus !== undefined) {
+    // 커스텀 키패드 디스플레이 모드
+    const displayValue = value
+      ? parseInt(value, 10).toLocaleString('ko-KR')
+      : '';
+
+    return (
+      <TouchableOpacity
+        onPress={onFocus}
+        className={`bg-neutral-100 rounded-2xl px-4 h-[48px] flex-row items-center ${className}`}
+        style={{ borderWidth: 1.5, borderColor }}
+        activeOpacity={0.85}
+      >
+        <Text className='font-ibm-regular text-base text-neutral-800 mr-2'>
+          ₩
+        </Text>
+        {displayValue ? (
+          <View className='flex-1 flex-row items-center'>
+            <Text className='font-ibm-regular text-base text-neutral-800'>
+              {displayValue}
+            </Text>
+            {focused && (
+              <View
+                style={{
+                  width: 2,
+                  height: 20,
+                  backgroundColor: Colors.brown,
+                  marginLeft: 2,
+                }}
+              />
+            )}
+          </View>
+        ) : focused ? (
+          <View className='flex-1 flex-row items-center'>
+            <View
+              style={{ width: 2, height: 20, backgroundColor: Colors.brown }}
+            />
+          </View>
+        ) : (
+          <Text
+            className='flex-1 font-ibm-regular text-base'
+            style={{ color: '#A3A3A3' }}
+          >
+            {placeholder}
+          </Text>
+        )}
+        <Text className='font-ibm-regular text-base text-neutral-800'>원</Text>
+      </TouchableOpacity>
+    );
+  }
+
+  // 기본 TextInput 모드 (예산 입력 등 커스텀 키패드가 필요 없는 경우)
   return (
     <View
       className={`bg-neutral-100 rounded-2xl px-4 h-[48px] flex-row items-center ${className}`}

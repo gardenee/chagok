@@ -9,8 +9,9 @@ import { FadeInButton } from '@/components/ui/fade-in-button';
 const VALID_PATTERN = /^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z]*$/;
 
 export default function NicknameScreen() {
-  const [nickname, setNickname] = useState('');
-  const { session, setUserProfile } = useAuthStore();
+  const { session, setUserProfile, appleDisplayName, setAppleDisplayName } =
+    useAuthStore();
+  const [nickname, setNickname] = useState(appleDisplayName?.slice(0, 5) ?? '');
   const { mutateAsync: createUserProfile, isPending } = useCreateUserProfile();
 
   const hasInput = nickname.trim().length > 0;
@@ -31,6 +32,7 @@ export default function NicknameScreen() {
         userId: session.user.id,
         nickname: trimmed,
       });
+      setAppleDisplayName(null);
       setUserProfile(profile);
     } catch {
       Alert.alert('오류', '별명 저장에 실패했습니다. 다시 시도해 주세요.');

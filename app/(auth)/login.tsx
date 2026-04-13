@@ -10,11 +10,13 @@ import { useState } from 'react';
 import { Chrome, MessageCircle, Apple } from 'lucide-react-native';
 import { signInWithOAuth, signInWithApple } from '@/lib/auth-helpers';
 import { Colors } from '@/constants/colors';
+import { useAuthStore } from '@/store/auth';
 
 type LoadingState = 'kakao' | 'google' | 'apple' | null;
 
 export default function LoginScreen() {
   const [loading, setLoading] = useState<LoadingState>(null);
+  const { setAppleDisplayName } = useAuthStore();
 
   async function handleKakao() {
     try {
@@ -41,7 +43,8 @@ export default function LoginScreen() {
   async function handleApple() {
     try {
       setLoading('apple');
-      await signInWithApple();
+      const { displayName } = await signInWithApple();
+      if (displayName) setAppleDisplayName(displayName);
     } catch (err: unknown) {
       if (
         err instanceof Error &&
