@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { X } from 'lucide-react-native';
+import { X, CalendarDays } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
 import { DeleteButton } from '@/components/ui/delete-button';
@@ -18,8 +18,11 @@ import { ModalTextInput, AmountInput } from '@/components/ui/modal-inputs';
 import { NumericKeypad } from '@/components/ui/numeric-keypad';
 import { FormLabel } from '@/components/ui/form-label';
 import { CategoryIconPicker } from '@/components/ui/category-icon-picker';
-import { DayGrid } from '@/components/ui/day-grid';
 import { SegmentControl } from '@/components/ui/segment-control';
+import {
+  DueDayPickerModal,
+  EOM_VALUE,
+} from '@/components/ui/due-day-picker-modal';
 import { getAssetTypeOption } from '@/constants/asset-type';
 import type { Category, Asset } from '@/types/database';
 
@@ -81,6 +84,7 @@ export function FixedExpenseForm({
     toAsset: false,
   });
   const [isAmountFocused, setIsAmountFocused] = useState(false);
+  const [dueDayPickerVisible, setDueDayPickerVisible] = useState(false);
 
   useEffect(() => {
     setErrors({ name: false, amountMsg: '', fromAsset: false, toAsset: false });
@@ -167,25 +171,6 @@ export function FixedExpenseForm({
               />
             )}
 
-            <FormLabel required>이름</FormLabel>
-            <ModalTextInput
-              value={form.name}
-              onChangeText={v => {
-                onChange({ ...form, name: v });
-                if (errors.name) setErrors(e => ({ ...e, name: false }));
-              }}
-              placeholder={
-                form.type === 'transfer'
-                  ? '예: 청약 저축, 비상금 적금'
-                  : '예: 월세, 넷플릭스'
-              }
-              maxLength={20}
-              autoFocus={!editingId}
-              className='mb-4'
-              error={errors.name}
-              onFocus={() => setIsAmountFocused(false)}
-            />
-
             <FormLabel required>금액</FormLabel>
             <AmountInput
               value={form.amount}
@@ -212,6 +197,24 @@ export function FixedExpenseForm({
                 {errors.amountMsg}
               </Text>
             )}
+
+            <FormLabel required>이름</FormLabel>
+            <ModalTextInput
+              value={form.name}
+              onChangeText={v => {
+                onChange({ ...form, name: v });
+                if (errors.name) setErrors(e => ({ ...e, name: false }));
+              }}
+              placeholder={
+                form.type === 'transfer'
+                  ? '예: 청약 저축, 비상금 적금'
+                  : '예: 월세, 넷플릭스'
+              }
+              maxLength={20}
+              className='mb-4'
+              error={errors.name}
+              onFocus={() => setIsAmountFocused(false)}
+            />
 
             {/* 카테고리 선택 (지출일 때) */}
             {form.type === 'expense' && (
@@ -364,57 +367,81 @@ export function FixedExpenseForm({
             )}
 
             {/* 납부일 */}
-            <View className='mb-6'>
-              <Text className='font-ibm-semibold text-base text-neutral-700 mb-2.5 ml-1'>
-                납부일
-              </Text>
-              <View className='flex-row gap-2 mb-2'>
+            <View className='mb-4'>
+              <FormLabel>납부일</FormLabel>
+              <View className='flex-row gap-2 mb-4'>
                 <TouchableOpacity
-                  onPress={() => onChange({ ...form, due_day_mode: 'eom' })}
-                  className={`rounded-xl px-3.5 h-10 items-center justify-center ${form.due_day_mode === 'eom' ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                  onPress={() => setDueDayPickerVisible(true)}
+                  activeOpacity={0.7}
+                  className='flex-1 bg-neutral-100 rounded-2xl px-4 flex-row items-center h-[48px]'
+                >
+                  <CalendarDays
+                    size={16}
+                    color={Colors.neutralDark}
+                    strokeWidth={2}
+                  />
+                  <View
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      alignItems: 'center',
+                    }}
+                    pointerEvents='none'
+                  >
+                    <Text className='font-ibm-regular text-base text-neutral-800'>
+                      {form.due_day_mode === 'eom'
+                        ? '매월 말일'
+                        : `매월 ${form.due_day}일`}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (form.due_day_mode === 'eom') {
+                      onChange({ ...form, due_day_mode: 'day' });
+                    } else {
+                      onChange({ ...form, due_day_mode: 'eom' });
+                    }
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                  className={`rounded-2xl px-4 h-[48px] items-center justify-center ${form.due_day_mode === 'eom' ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                   activeOpacity={0.7}
                 >
                   <Text
-                    className={`${form.due_day_mode === 'eom' ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'} text-sm`}
+                    className={`text-sm ${form.due_day_mode === 'eom' ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'}`}
                   >
                     말일
                   </Text>
                 </TouchableOpacity>
               </View>
-              <DayGrid
-                days={Array.from({ length: 31 }, (_, i) => i + 1)}
-                selected={form.due_day_mode === 'day' ? form.due_day : null}
-                onSelect={day =>
-                  onChange({ ...form, due_day: day, due_day_mode: 'day' })
-                }
-              />
-              <Text className='font-ibm-semibold text-base text-neutral-700 mt-4 mb-2.5 ml-1'>
-                영업일 보정
-              </Text>
-              <View className='flex-row gap-2'>
+
+              <FormLabel>영업일 보정</FormLabel>
+              <View className='flex-row gap-2 mb-6'>
                 {[
-                  { key: 'none', label: '없음' },
-                  { key: 'prev', label: '직전' },
-                  { key: 'next', label: '직후' },
+                  { key: 'none', label: '당일' },
+                  { key: 'prev', label: '전 영업일' },
+                  { key: 'next', label: '후 영업일' },
                 ].map(opt => {
                   const isSelected = form.business_day_adjust === opt.key;
                   return (
                     <TouchableOpacity
                       key={opt.key}
-                      onPress={() =>
+                      onPress={() => {
                         onChange({
                           ...form,
                           business_day_adjust: opt.key as
                             | 'none'
                             | 'prev'
                             | 'next',
-                        })
-                      }
-                      className={`rounded-xl px-3.5 h-10 items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                        });
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      className={`flex-1 rounded-xl h-10 items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
                       activeOpacity={0.7}
                     >
                       <Text
-                        className={`${isSelected ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'} text-sm`}
+                        className={`text-sm ${isSelected ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'}`}
                       >
                         {opt.label}
                       </Text>
@@ -462,6 +489,20 @@ export function FixedExpenseForm({
           </View>
         )}
       </KeyboardAvoidingView>
+      <DueDayPickerModal
+        visible={dueDayPickerVisible}
+        selected={form.due_day_mode === 'eom' ? EOM_VALUE : form.due_day}
+        onConfirm={value => {
+          if (value === EOM_VALUE) {
+            onChange({ ...form, due_day_mode: 'eom' });
+          } else {
+            onChange({ ...form, due_day: value, due_day_mode: 'day' });
+          }
+          setDueDayPickerVisible(false);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }}
+        onDismiss={() => setDueDayPickerVisible(false)}
+      />
     </SafeAreaView>
   );
 }

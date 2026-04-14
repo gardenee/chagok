@@ -11,6 +11,10 @@ export type TxFormData = {
   payment_method_id: string | null;
   asset_id: string | null;
   target_asset_id: string | null;
+  is_fixed: boolean;
+  fixed_due_day: number;
+  fixed_due_day_mode: 'day' | 'eom';
+  fixed_business_day_adjust: 'none' | 'prev' | 'next';
 };
 
 export type ScheduleFormData = {
@@ -45,7 +49,14 @@ export type ScheduleModalState = {
 export type FixedModalState = {
   visible: boolean;
   editingId: string | null;
-  form: { name: string; amount: string; due_day: number };
+  form: {
+    name: string;
+    amount: string;
+    due_day: number;
+    due_day_mode: 'day' | 'eom';
+    business_day_adjust: 'none' | 'prev' | 'next';
+    category_id: string | null;
+  };
 };
 
 export interface DayCell {
@@ -78,6 +89,10 @@ export const INITIAL_TX_FORM: TxFormData = {
   payment_method_id: null,
   asset_id: null,
   target_asset_id: null,
+  is_fixed: false,
+  fixed_due_day: new Date().getDate(),
+  fixed_due_day_mode: 'day',
+  fixed_business_day_adjust: 'none',
 };
 
 export const INITIAL_SCHEDULE_FORM: ScheduleFormData = {

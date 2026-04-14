@@ -17,6 +17,7 @@ import {
   Plus,
   Wallet,
   ArrowLeftRight,
+  CalendarDays,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/colors';
@@ -30,6 +31,10 @@ import { TagSelector } from '@/components/ui/tag-selector';
 import { CategoryIconPicker } from '@/components/ui/category-icon-picker';
 import { DatePickerButton } from '@/components/ui/date-picker-button';
 import { DatePickerModal } from '@/components/ui/date-picker-modal';
+import {
+  DueDayPickerModal,
+  EOM_VALUE,
+} from '@/components/ui/due-day-picker-modal';
 import { CategoryFormScreen } from '@/components/budget/category-form-screen';
 import { CategoryManagementScreen } from '@/components/budget/category-management-screen';
 import { PaymentMethodFormScreen } from '@/components/assets/payment-method-form-screen';
@@ -96,11 +101,14 @@ export function TransactionFormSheet({
   onPmDelete,
 }: TransactionFormSheetProps) {
   const [amountErrorMsg, setAmountErrorMsg] = useState('');
+  const [memoErrorMsg, setMemoErrorMsg] = useState('');
   const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [dueDayPickerVisible, setDueDayPickerVisible] = useState(false);
   const [isAmountFocused, setIsAmountFocused] = useState(false);
 
   useEffect(() => {
     setAmountErrorMsg('');
+    setMemoErrorMsg('');
     setIsAmountFocused(false);
   }, []);
 
@@ -139,6 +147,10 @@ export function TransactionFormSheet({
     const amount = parseInt(txModal.form.amount.replace(/[^0-9]/g, ''), 10);
     if (!amount || amount <= 0 || amountErrorMsg) {
       setAmountErrorMsg(prev => prev || '금액을 입력해주세요');
+      return;
+    }
+    if (txModal.form.is_fixed && !txModal.form.memo.trim()) {
+      setMemoErrorMsg('고정지출 등록 시 내역명을 입력해주세요');
       return;
     }
     onTxSave();
@@ -229,9 +241,10 @@ export function TransactionFormSheet({
               <FormLabel>내역명</FormLabel>
               <ModalTextInput
                 value={txModal.form.memo}
-                onChangeText={v =>
-                  setTxModal(s => ({ ...s, form: { ...s.form, memo: v } }))
-                }
+                onChangeText={v => {
+                  setTxModal(s => ({ ...s, form: { ...s.form, memo: v } }));
+                  if (memoErrorMsg) setMemoErrorMsg('');
+                }}
                 placeholder={
                   txModal.form.type === 'expense'
                     ? '예: 장보기, 넷플릭스'
@@ -240,9 +253,18 @@ export function TransactionFormSheet({
                       : '예: 청약 저축, 비상금 적금'
                 }
                 maxLength={50}
-                className='mb-4'
+                className={memoErrorMsg ? 'mb-1' : 'mb-4'}
+                error={!!memoErrorMsg}
                 onFocus={() => setIsAmountFocused(false)}
               />
+              {!!memoErrorMsg && (
+                <Text
+                  className='font-ibm-regular text-sm mb-3 ml-1'
+                  style={{ color: '#C8562E' }}
+                >
+                  {memoErrorMsg}
+                </Text>
+              )}
 
               {/* 날짜 */}
               <FormLabel required>날짜</FormLabel>
@@ -634,6 +656,158 @@ export function TransactionFormSheet({
                   />
                 </View>
               )}
+
+              {/* 고정지출 등록 — 지출 신규 입력 시에만 표출 */}
+              {txModal.form.type === 'expense' && !txModal.editingId && (
+                <View className='mt-5'>
+                  {/* 레이블 + 토글 */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setTxModal(s => ({
+                        ...s,
+                        form: { ...s.form, is_fixed: !s.form.is_fixed },
+                      }));
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
+                    className='flex-row items-center mb-1'
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text className='flex-1 font-ibm-semibold text-base text-neutral-700'>
+                      고정지출로 등록
+                    </Text>
+                    <View
+                      style={{
+                        width: 44,
+                        height: 26,
+                        borderRadius: 13,
+                        backgroundColor: txModal.form.is_fixed
+                          ? Colors.butter
+                          : '#E5E5E5',
+                        justifyContent: 'center',
+                        paddingHorizontal: 3,
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: 10,
+                          backgroundColor: 'white',
+                          alignSelf: txModal.form.is_fixed
+                            ? 'flex-end'
+                            : 'flex-start',
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 1 },
+                          shadowOpacity: 0.2,
+                          shadowRadius: 2,
+                          elevation: 2,
+                        }}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                  {/* 확장 필드 */}
+                  {txModal.form.is_fixed && (
+                    <>
+                      <View className='mt-4' />
+                      <FormLabel>결제일</FormLabel>
+                      <View className='flex-row gap-2 mb-4'>
+                        <TouchableOpacity
+                          onPress={() => setDueDayPickerVisible(true)}
+                          activeOpacity={0.7}
+                          className='flex-1 bg-neutral-100 rounded-2xl px-4 flex-row items-center h-[48px]'
+                        >
+                          <CalendarDays
+                            size={16}
+                            color={Colors.neutralDark}
+                            strokeWidth={2}
+                          />
+                          <View
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              right: 0,
+                              alignItems: 'center',
+                            }}
+                            pointerEvents='none'
+                          >
+                            <Text className='font-ibm-regular text-base text-neutral-800'>
+                              {txModal.form.fixed_due_day_mode === 'eom'
+                                ? '매월 말일'
+                                : `매월 ${txModal.form.fixed_due_day}일`}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setTxModal(s => ({
+                              ...s,
+                              form: {
+                                ...s.form,
+                                fixed_due_day_mode:
+                                  s.form.fixed_due_day_mode === 'eom'
+                                    ? 'day'
+                                    : 'eom',
+                              },
+                            }));
+                            Haptics.impactAsync(
+                              Haptics.ImpactFeedbackStyle.Light,
+                            );
+                          }}
+                          className={`rounded-2xl px-4 h-[48px] items-center justify-center ${txModal.form.fixed_due_day_mode === 'eom' ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                          activeOpacity={0.7}
+                        >
+                          <Text
+                            className={`text-sm ${txModal.form.fixed_due_day_mode === 'eom' ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'}`}
+                          >
+                            말일
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      <FormLabel>영업일 보정</FormLabel>
+                      <View className='flex-row gap-2 mb-2'>
+                        {[
+                          { key: 'none', label: '당일' },
+                          { key: 'prev', label: '전 영업일' },
+                          { key: 'next', label: '후 영업일' },
+                        ].map(opt => {
+                          const isSelected =
+                            txModal.form.fixed_business_day_adjust === opt.key;
+                          return (
+                            <TouchableOpacity
+                              key={opt.key}
+                              onPress={() => {
+                                setTxModal(s => ({
+                                  ...s,
+                                  form: {
+                                    ...s.form,
+                                    fixed_business_day_adjust: opt.key as
+                                      | 'none'
+                                      | 'prev'
+                                      | 'next',
+                                  },
+                                }));
+                                Haptics.impactAsync(
+                                  Haptics.ImpactFeedbackStyle.Light,
+                                );
+                              }}
+                              className={`flex-1 rounded-xl h-10 items-center justify-center ${isSelected ? 'bg-neutral-200' : 'bg-neutral-100'}`}
+                              activeOpacity={0.7}
+                            >
+                              <Text
+                                className={`text-sm ${isSelected ? 'font-ibm-bold text-neutral-700' : 'font-ibm-semibold text-neutral-500'}`}
+                              >
+                                {opt.label}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+                    </>
+                  )}
+                </View>
+              )}
             </Pressable>
           </ScrollView>
 
@@ -675,7 +849,9 @@ export function TransactionFormSheet({
       >
         <CategoryManagementScreen
           categories={categories}
-          filterType={txModal.form.type}
+          filterType={
+            txModal.form.type !== 'transfer' ? txModal.form.type : 'expense'
+          }
           onBack={() => setTxModal(s => ({ ...s, view: 'tx' }))}
           onCreate={onCatCreate}
           onEdit={onCatEdit}
@@ -844,6 +1020,35 @@ export function TransactionFormSheet({
           setDatePickerVisible(false);
         }}
         onDismiss={() => setDatePickerVisible(false)}
+      />
+
+      <DueDayPickerModal
+        visible={dueDayPickerVisible}
+        selected={
+          txModal.form.fixed_due_day_mode === 'eom'
+            ? EOM_VALUE
+            : txModal.form.fixed_due_day
+        }
+        onConfirm={value => {
+          if (value === EOM_VALUE) {
+            setTxModal(s => ({
+              ...s,
+              form: { ...s.form, fixed_due_day_mode: 'eom' },
+            }));
+          } else {
+            setTxModal(s => ({
+              ...s,
+              form: {
+                ...s.form,
+                fixed_due_day: value,
+                fixed_due_day_mode: 'day',
+              },
+            }));
+          }
+          setDueDayPickerVisible(false);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }}
+        onDismiss={() => setDueDayPickerVisible(false)}
       />
     </>
   );

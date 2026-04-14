@@ -92,12 +92,15 @@ export default function FixedScreen() {
   useEffect(() => {
     if (!prefill) return;
     const form: FormData = {
+      type: 'expense',
       name: prefill.name,
       amount: String(prefill.amount),
       due_day: prefill.due_day,
       due_day_mode: 'day',
       business_day_adjust: 'none',
       category_id: prefill.category_id,
+      from_asset_id: null,
+      to_asset_id: null,
     };
     setState({ ...INITIAL_STATE, visible: true, form });
     clearPrefill();

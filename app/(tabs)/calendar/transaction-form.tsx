@@ -45,6 +45,7 @@ import {
 } from '@/services/recurring-detection';
 import { useRecurringSuggestionStore } from '@/store/recurring-suggestion';
 import { useFixedExpensePrefillStore } from '@/store/fixed-expense-prefill';
+import { useCreateFixedExpense } from '@/hooks/use-fixed-expenses';
 import { supabase } from '@/lib/supabase';
 import type { Asset, Category } from '@/types/database';
 
@@ -108,6 +109,12 @@ export default function TransactionFormScreen() {
     payment_method_id: params.payment_method_id || null,
     asset_id: params.asset_id || null,
     target_asset_id: params.target_asset_id || null,
+    is_fixed: false,
+    fixed_due_day: dateParam
+      ? parseInt(dateParam.split('-')[2])
+      : new Date().getDate(),
+    fixed_due_day_mode: 'day',
+    fixed_business_day_adjust: 'none',
   };
 
   const [txModal, setTxModal] = useState<TxModalState>({
@@ -135,6 +142,7 @@ export default function TransactionFormScreen() {
   const createTx = useCreateTransaction();
   const updateTx = useUpdateTransaction();
   const deleteTx = useDeleteTransaction();
+  const createFixedExpense = useCreateFixedExpense();
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
@@ -241,6 +249,31 @@ export default function TransactionFormScreen() {
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setPendingReturnDate(txModal.form.date || dateParam);
+
+      // 신규 지출 + 고정지출 동시 등록
+      if (
+        !params.editingId &&
+        txModal.form.is_fixed &&
+        payload.type === 'expense'
+      ) {
+        const fixedDueDay =
+          txModal.form.fixed_due_day_mode === 'eom'
+            ? 1
+            : txModal.form.fixed_due_day;
+        await createFixedExpense.mutateAsync({
+          type: 'expense',
+          name: payload.memo || txModal.form.memo.trim() || '고정지출',
+          amount,
+          due_day: fixedDueDay,
+          due_day_mode: txModal.form.fixed_due_day_mode,
+          business_day_adjust: txModal.form.fixed_business_day_adjust,
+          category_id: payload.category_id,
+          from_asset_id: null,
+          to_asset_id: null,
+        });
+        router.back();
+        return;
+      }
 
       // 신규 지출 저장 후 고정지출 패턴 감지
       const shouldDetect =

@@ -152,7 +152,13 @@ export function useCreateTransaction() {
       const coupleId = userProfile?.couple_id;
       const nickname = userProfile?.nickname;
       const userId = session?.user.id;
-      if (notifyEnabled && coupleId && nickname && userId) {
+      if (
+        notifyEnabled &&
+        coupleId &&
+        nickname &&
+        userId &&
+        newTransaction.type !== 'transfer'
+      ) {
         sendPartnerTransactionPush({
           coupleId,
           senderId: userId,

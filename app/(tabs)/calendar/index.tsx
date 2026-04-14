@@ -62,6 +62,7 @@ import {
   useDeleteCategory,
 } from '@/hooks/use-categories';
 import { useMaterializeFixedExpenses } from '@/hooks/use-materialize-fixed-expenses';
+import { useAssets } from '@/hooks/use-assets';
 import {
   updateLinkedTransactions,
   fetchTransactionById,
@@ -229,6 +230,7 @@ export default function CalendarTab() {
   const { data: fixedExpenses = [] } = useFixedExpenses();
   const { data: categories = [] } = useCategories();
   const expenseCategories = categories.filter(c => c.type === 'expense');
+  const { data: assets = [] } = useAssets();
   const { data: comments = [], isLoading: commentsLoading } =
     useTransactionComments(detailTx?.id ?? '');
   const { data: members = [] } = useCoupleMembers();
@@ -276,12 +278,15 @@ export default function CalendarTab() {
     const fe = fixedExpenses.find((f: FixedExpense) => f.id === fixedExpenseId);
     if (!fe) return;
     const fixedForm: FixedFormData = {
+      type: fe.type ?? 'expense',
       name: fe.name,
       amount: String(fe.amount),
       due_day: fe.due_day,
       due_day_mode: fe.due_day_mode ?? 'day',
       business_day_adjust: fe.business_day_adjust ?? 'none',
       category_id: fe.category_id ?? null,
+      from_asset_id: fe.from_asset_id ?? null,
+      to_asset_id: fe.to_asset_id ?? null,
     };
     setFixedEditState({
       visible: true,
@@ -1127,6 +1132,7 @@ export default function CalendarTab() {
           form={fixedEditState.form}
           isSaving={updateFixedExpense.isPending}
           categories={expenseCategories}
+          assets={assets}
           onChange={form => setFixedEditState(s => ({ ...s, form }))}
           onClose={closeFixedEdit}
           onSave={handleFixedTemplateSave}
