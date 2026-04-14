@@ -24,17 +24,17 @@ function isExpoPushToken(token: string): boolean {
   );
 }
 
+export async function checkPermissionStatus(): Promise<Notifications.PermissionStatus> {
+  const { status } = await Notifications.getPermissionsAsync();
+  return status;
+}
+
+export async function requestPermission(): Promise<Notifications.PermissionStatus> {
+  const { status } = await Notifications.requestPermissionsAsync();
+  return status;
+}
+
 async function getExpoPushToken(): Promise<string | null> {
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-
-  if (finalStatus !== 'granted') return null;
-
   const projectId =
     Constants.expoConfig?.extra?.eas?.projectId ??
     Constants.easConfig?.projectId;
@@ -87,7 +87,15 @@ export async function registerMyPushToken(userId: string): Promise<void> {
 
   const { error } = await supabase
     .from('users')
-    .update({ expo_push_token: token })
+    .update({ expo_push_token: token, notification_enabled: true })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+export async function clearMyPushToken(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('users')
+    .update({ expo_push_token: null, notification_enabled: false })
     .eq('id', userId);
   if (error) throw error;
 }

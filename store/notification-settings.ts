@@ -3,6 +3,10 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface NotificationSettings {
+  // 마스터 토글: 사용자가 알림을 켜기/끄기로 선택했는지
+  notificationEnabled: boolean;
+  // pre-permission 모달을 한 번이라도 보여줬는지 (재설치 시 초기화됨)
+  hasShownPermissionModal: boolean;
   partnerTransaction: boolean;
   comment: boolean;
   fixedExpenseReminder: boolean;
@@ -10,6 +14,8 @@ interface NotificationSettings {
   mySchedule: boolean;
   togetherSchedule: boolean;
   anniversaryReminder: boolean;
+  setNotificationEnabled: (value: boolean) => void;
+  setHasShownPermissionModal: (value: boolean) => void;
   setPartnerTransaction: (value: boolean) => void;
   setComment: (value: boolean) => void;
   setFixedExpenseReminder: (value: boolean) => void;
@@ -22,6 +28,8 @@ interface NotificationSettings {
 export const useNotificationSettingsStore = create<NotificationSettings>()(
   persist(
     set => ({
+      notificationEnabled: true,
+      hasShownPermissionModal: false,
       partnerTransaction: true,
       comment: true,
       fixedExpenseReminder: true,
@@ -29,6 +37,9 @@ export const useNotificationSettingsStore = create<NotificationSettings>()(
       mySchedule: true,
       togetherSchedule: true,
       anniversaryReminder: true,
+      setNotificationEnabled: value => set({ notificationEnabled: value }),
+      setHasShownPermissionModal: value =>
+        set({ hasShownPermissionModal: value }),
       setPartnerTransaction: value => set({ partnerTransaction: value }),
       setComment: value => set({ comment: value }),
       setFixedExpenseReminder: value => set({ fixedExpenseReminder: value }),

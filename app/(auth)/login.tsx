@@ -7,7 +7,7 @@ import {
   Platform,
 } from 'react-native';
 import { useState } from 'react';
-import { Chrome, MessageCircle, Apple } from 'lucide-react-native';
+import { Apple, Chrome, MessageCircle } from 'lucide-react-native';
 import { signInWithOAuth, signInWithApple } from '@/lib/auth-helpers';
 import { Colors } from '@/constants/colors';
 import { useAuthStore } from '@/store/auth';
@@ -64,25 +64,29 @@ export default function LoginScreen() {
     isLoading,
     icon,
     label,
+    dark = false,
   }: {
     onPress: () => void;
     isLoading: boolean;
     icon: React.ReactNode;
     label: string;
+    dark?: boolean;
   }) {
     return (
       <TouchableOpacity
         onPress={onPress}
         disabled={loading !== null}
-        className='w-full py-[15px] flex-row items-center justify-center gap-2.5 shadow-primary-light/10 rounded-[20px] bg-cream-dark'
+        className={`w-full py-[15px] flex-row items-center justify-center gap-2.5 rounded-[20px] ${dark ? 'bg-[#000000]' : 'bg-cream-dark'}`}
         activeOpacity={0.75}
       >
         {isLoading ? (
-          <ActivityIndicator color={Colors.brown} />
+          <ActivityIndicator color={dark ? 'white' : Colors.brown} />
         ) : (
           <>
             {icon}
-            <Text className='font-ibm-semibold text-base text-brown-darker'>
+            <Text
+              className={`font-ibm-semibold text-base ${dark ? 'text-white' : 'text-brown-darker'}`}
+            >
               {label}
             </Text>
           </>
@@ -106,10 +110,9 @@ export default function LoginScreen() {
           <SocialButton
             onPress={handleApple}
             isLoading={loading === 'apple'}
-            icon={
-              <Apple size={20} color={Colors.brownDark} strokeWidth={2.5} />
-            }
+            icon={<Apple size={20} color='white' strokeWidth={2.5} />}
             label='Apple로 시작하기'
+            dark
           />
         )}
         <SocialButton

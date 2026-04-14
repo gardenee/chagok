@@ -1,6 +1,6 @@
 import '../global.css';
 import { useEffect, useRef, useState } from 'react';
-import { View, Image } from 'react-native';
+import { View, Image, Alert, Linking as RNLinking } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Slot, useRouter, useSegments, SplashScreen } from 'expo-router';
 import * as Linking from 'expo-linking';
@@ -20,9 +20,15 @@ import {
 } from '@expo-google-fonts/ibm-plex-sans-kr';
 import { useAuthStore } from '@/store/auth';
 import { supabase } from '@/lib/supabase';
-import { registerMyPushToken } from '@/services/notifications';
+import {
+  registerMyPushToken,
+  checkPermissionStatus,
+  requestPermission,
+} from '@/services/notifications';
 import { useNotificationSettingsStore } from '@/store/notification-settings';
 import { useWidgetSync } from '@/hooks/use-widget-sync';
+import { PushPermissionModal } from '@/components/ui/push-permission-modal';
+import type { UserProfile } from '@/types/database';
 
 Notifications.setNotificationHandler({
   handleNotification: async notification => {
@@ -96,6 +102,9 @@ function RootLayoutNav() {
   const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingNotification, setPendingNotification] =
     useState<Notifications.NotificationResponse | null>(null);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  // 세션당 1회만 시스템 권한 Alert 표시 (앱 재실행마다 초기화)
+  const hasShownSystemAlertThisSessionRef = useRef(false);
 
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();
@@ -179,11 +188,92 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (!userProfile?.id) return;
-
-    registerMyPushToken(userProfile.id).catch(error => {
-      console.warn('푸시 토큰 등록 실패:', error);
-    });
+    handlePushPermission(userProfile);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userProfile?.id]);
+
+  async function handlePushPermission(profile: UserProfile) {
+    const store = useNotificationSettingsStore.getState();
+    const {
+      notificationEnabled,
+      hasShownPermissionModal,
+      setNotificationEnabled,
+      setHasShownPermissionModal,
+    } = store;
+
+    // 재설치 후 AsyncStorage 초기화된 경우 — DB 값으로 opt-out 복원
+    if (!hasShownPermissionModal && profile.notification_enabled === false) {
+      setNotificationEnabled(false);
+      setHasShownPermissionModal(true);
+      return;
+    }
+
+    const status = await checkPermissionStatus();
+
+    if (!hasShownPermissionModal) {
+      if (status === 'undetermined') {
+        // 최초 설치 → pre-permission 모달 표시
+        setShowPermissionModal(true);
+      } else if (status === 'granted') {
+        // 모달 이전 버전부터 쓰던 유저 → 조용히 토큰 등록
+        setHasShownPermissionModal(true);
+        registerMyPushToken(profile.id).catch(e =>
+          console.warn('푸시 토큰 등록 실패:', e),
+        );
+      } else {
+        // 이전 버전에서 이미 iOS 팝업을 거절한 유저
+        setHasShownPermissionModal(true);
+      }
+      return;
+    }
+
+    // 모달을 이미 본 유저
+    if (notificationEnabled && status === 'granted') {
+      registerMyPushToken(profile.id).catch(e =>
+        console.warn('푸시 토큰 등록 실패:', e),
+      );
+    } else if (
+      notificationEnabled &&
+      status === 'denied' &&
+      !hasShownSystemAlertThisSessionRef.current
+    ) {
+      // 앱 설정에서 알림을 끈 경우 → 세션당 1회 안내
+      hasShownSystemAlertThisSessionRef.current = true;
+      Alert.alert(
+        '알림이 꺼져 있어요',
+        '파트너 지출, 댓글, 고정지출 알림을 받으려면\niOS 설정에서 알림을 켜주세요.',
+        [
+          { text: '괜찮아요', style: 'cancel' },
+          {
+            text: '설정 열기',
+            onPress: () => RNLinking.openSettings(),
+          },
+        ],
+      );
+    }
+  }
+
+  async function handleAllowNotification() {
+    setShowPermissionModal(false);
+    const store = useNotificationSettingsStore.getState();
+    store.setHasShownPermissionModal(true);
+
+    const status = await requestPermission();
+    if (status === 'granted' && userProfile?.id) {
+      store.setNotificationEnabled(true);
+      registerMyPushToken(userProfile.id).catch(e =>
+        console.warn('푸시 토큰 등록 실패:', e),
+      );
+    }
+  }
+
+  function handleDismissNotification() {
+    setShowPermissionModal(false);
+    const store = useNotificationSettingsStore.getState();
+    store.setHasShownPermissionModal(true);
+    store.setNotificationEnabled(false);
+    // DB는 설정 화면에서 명시적으로 끌 때 clearMyPushToken으로 처리
+  }
 
   useWidgetSync();
 
@@ -327,6 +417,11 @@ function RootLayoutNav() {
   return (
     <>
       <Slot />
+      <PushPermissionModal
+        visible={showPermissionModal}
+        onAllow={handleAllowNotification}
+        onDismiss={handleDismissNotification}
+      />
       {isLoading && (
         <View
           className='absolute bg-white items-center justify-center'

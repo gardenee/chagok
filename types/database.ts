@@ -38,6 +38,7 @@ export interface Database {
           nickname: string;
           avatar_url: string | null;
           expo_push_token: string | null;
+          notification_enabled: boolean | null;
           created_at: string;
         };
         Insert: {
@@ -46,6 +47,7 @@ export interface Database {
           nickname: string;
           avatar_url?: string | null;
           expo_push_token?: string | null;
+          notification_enabled?: boolean | null;
           created_at?: string;
         };
         Update: {
@@ -53,6 +55,7 @@ export interface Database {
           nickname?: string;
           avatar_url?: string | null;
           expo_push_token?: string | null;
+          notification_enabled?: boolean | null;
         };
         Relationships: never[];
       };
