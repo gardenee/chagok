@@ -56,6 +56,7 @@ export async function signInWithOAuth(provider: OAuthProvider): Promise<void> {
 }
 
 export async function signInWithApple(): Promise<{
+  isNewUser: boolean;
   displayName: string | null;
 }> {
   const credential = await AppleAuthentication.signInAsync({
@@ -67,19 +68,31 @@ export async function signInWithApple(): Promise<{
 
   if (!credential.identityToken) throw new Error('Apple 인증 토큰이 없습니다');
 
-  const { error } = await supabase.auth.signInWithIdToken({
+  const { data, error } = await supabase.auth.signInWithIdToken({
     provider: 'apple',
     token: credential.identityToken,
   });
 
   if (error) throw error;
 
+  const userId = data.user?.id;
+  if (!userId) return { isNewUser: false, displayName: null };
+
+  // 기존 프로필 여부 확인
+  const { data: existing } = await supabase
+    .from('users')
+    .select('id')
+    .eq('id', userId)
+    .single();
+
+  if (existing) return { isNewUser: false, displayName: null };
+
   // Apple은 최초 로그인 시에만 fullName을 제공
   const givenName = credential.fullName?.givenName ?? null;
   const familyName = credential.fullName?.familyName ?? null;
   const displayName = givenName
-    ? [givenName, familyName].filter(Boolean).join(' ')
+    ? [givenName, familyName].filter(Boolean).join('')
     : null;
 
-  return { displayName };
+  return { isNewUser: true, displayName };
 }

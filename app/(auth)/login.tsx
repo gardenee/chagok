@@ -43,8 +43,8 @@ export default function LoginScreen() {
   async function handleApple() {
     try {
       setLoading('apple');
-      const { displayName } = await signInWithApple();
-      if (displayName) setAppleDisplayName(displayName);
+      const { isNewUser, displayName } = await signInWithApple();
+      if (isNewUser) setAppleDisplayName(displayName ?? '차곡이');
     } catch (err: unknown) {
       if (
         err instanceof Error &&

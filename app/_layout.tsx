@@ -6,6 +6,7 @@ import { Slot, useRouter, useSegments, SplashScreen } from 'expo-router';
 import * as Linking from 'expo-linking';
 import * as Notifications from 'expo-notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createUserProfile } from '@/services/user';
 import { fetchCategories } from '@/services/categories';
 import { fetchPaymentMethods } from '@/services/payment-methods';
 import { fetchAssets } from '@/services/assets';
@@ -94,6 +95,8 @@ function RootLayoutNav() {
     setSession,
     setUserProfile,
     setPendingInviteCode,
+    appleDisplayName,
+    setAppleDisplayName,
   } = useAuthStore();
   const segments = useSegments() as string[];
   const router = useRouter();
@@ -185,6 +188,23 @@ function RootLayoutNav() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user.id]);
+
+  // Apple 신규 유저 자동 프로필 생성 (닉네임 화면 스킵)
+  useEffect(() => {
+    if (!session || userProfile !== null || isProfileLoading) return;
+    if (appleDisplayName === null) return;
+
+    const nickname = appleDisplayName.slice(0, 5) || '차곡유저';
+    createUserProfile(session.user.id, nickname)
+      .then(profile => {
+        setAppleDisplayName(null);
+        setUserProfile(profile);
+      })
+      .catch(() => {
+        setAppleDisplayName(null); // 실패 시 닉네임 화면으로 fallback
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user.id, userProfile, isProfileLoading, appleDisplayName]);
 
   useEffect(() => {
     if (!userProfile?.id) return;
@@ -400,6 +420,8 @@ function RootLayoutNav() {
       // 미로그인 → 인증 화면
       if (!inAuthGroup) router.replace('/(auth)');
     } else if (!userProfile) {
+      // Apple 신규 유저: 자동 생성 중 → 대기
+      if (appleDisplayName !== null) return;
       // 로그인 완료, 프로필 없음 → 닉네임 설정
       if (!inNicknameScreen) router.replace('/(onboarding)/nickname');
     } else if (!userProfile.couple_id) {
@@ -410,7 +432,14 @@ function RootLayoutNav() {
       const inTabs = segments[0] === '(tabs)';
       if (!inTabs) router.replace('/(tabs)/fixed');
     }
-  }, [fontsLoaded, isProfileLoading, session, userProfile, segments]);
+  }, [
+    fontsLoaded,
+    isProfileLoading,
+    session,
+    userProfile,
+    segments,
+    appleDisplayName,
+  ]);
 
   const isLoading = !fontsLoaded || isProfileLoading;
 
